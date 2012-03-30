@@ -1,0 +1,5 @@
+*.root
+.DS_Store
+*.so
+*.ipynb
+src/*.html

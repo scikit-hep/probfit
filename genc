@@ -1,0 +1,1 @@
+cd src; cython -a cdist_fit.pyx
