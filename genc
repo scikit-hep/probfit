@@ -1,1 +1,1 @@
-cd src; cython -a cdist_fit.pyx
+cd dist_fit; cython -a cdist_fit.pyx --fast-fail; cython -a cdist_func.pyx --fast-fail

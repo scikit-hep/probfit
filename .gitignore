@@ -3,3 +3,4 @@
 *.so
 *.ipynb
 src/*.html
+build
