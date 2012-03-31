@@ -5,6 +5,20 @@ cdef double pi=3.141592653589793238462643383279502884197169399375105820974944592
 
 #peaking stuff
 @cython.binding(True)
+def ugaussian(double x, double mean, double sigma):
+    """
+    unnormed gaussian normalized for -inf to +inf
+    """
+    cdef double ret = 0
+    if sigma < 1e-7:
+        ret = 1e-300
+    else:
+        d = (x-mean)/sigma
+        d2 = d*d
+        ret = exp(-0.5*d2)
+    return ret
+
+@cython.binding(True)
 def gaussian(double x, double mean, double sigma):
     """
     gaussian normalized for -inf to +inf
@@ -15,7 +29,7 @@ def gaussian(double x, double mean, double sigma):
     else:
         d = (x-mean)/sigma
         d2 = d*d
-        ret = 1/(sqrt(2*pi)*sigma)*exp(0.5*d2)
+        ret = 1/(sqrt(2*pi)*sigma)*exp(-0.5*d2)
     return ret
 
 @cython.binding(True)
