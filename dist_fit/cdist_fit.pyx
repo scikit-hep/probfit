@@ -2,13 +2,10 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp,pow,fabs,log
-from dist_fit.util import FakeFuncCode
-def mid(np.ndarray x):
-    return (x[:-1]+x[1:])/2.0
-def minmax(x):
-    return (min(x),max(x))
+from matplotlib import pyplot as plt
+from .common import *
 
-def compute_nll(f,np.ndarray data,w,arg,double badvalue):
+cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue):
     cdef int i=0
     cdef double lh=0
     cdef double nll=0
@@ -38,130 +35,231 @@ def compute_nll(f,np.ndarray data,w,arg,double badvalue):
                 ret+=log(lh)*w_[i]        
     return -1*ret
 
-def integrate1d(f, int nint, np.ndarray[np.double_t] midpoints, np.ndarray[np.double_t] binwidth, tuple arg=None):
-    cdef double ret = 0
-    cdef double bw = 0
-    cdef double mp =0
+cdef double compute_chi2_f(f,np.ndarray[np.double_t] x,np.ndarray[np.double_t] y ,
+                np.ndarray[np.double_t]error,np.ndarray[np.double_t]weights,tuple arg):
+    cdef int usew = 1 if weights is not None else 0
+    cdef int usee = 1 if error is not None else 0
+    cdef int i
+    cdef int datalen = len(x)
+    cdef double diff
+    cdef double fx
+    cdef double ret=0
+    cdef double err
+    for i in range(datalen):
+        fx = f(x[i],*arg)
+        diff = fx-y[i]
+        if usee==1:
+            err = error[i]
+            if err<1e-10:
+                raise ValueError('error contains value too small or negative')
+            diff = diff/error[i]
+        diff *= diff
+        if usew==1:
+            diff*=weights[i]
+        ret += diff
+    return ret
+
+cdef double compute_chi2(np.ndarray[np.double_t] actual, np.ndarray[np.double_t] expected, np.ndarray[np.double_t] err):
     cdef int i=0
-    cdef double x=0
-    cdef double mpi=0
-    if arg is None: arg = tuple()
-    #print midpoints
-    for i in range(nint-1):#mid has 1 less
-        bw = binwidth[i]
-        mp = midpoints[i]
-        x = f(mp,*arg)
-        
-        ret += x*bw
-        #print mp,bw,mpi,x,ret
+    cdef int maxi = len(actual)
+    cdef double a
+    cdef double e
+    cdef double er
+    cdef double ret
+    for i in range(maxi):
+        e = expected[i]
+        a = actual[i]
+        er = err[i]
+        if er<1e-10:
+            raise ValueError('error contains value too small or negative')
+        ea = (e-a)/er
+        ea *=ea
+        ret +=ea
     return ret
 
 cdef class UnbinnedML:
-    cdef object vf
     cdef public object f
     cdef object weights
-    cdef np.ndarray data
+
     cdef public object func_code
+    cdef np.ndarray data
     cdef int data_len
     cdef double badvalue
-    def __init__(self, f, data,weights=None,badvalue=-1000):
+    cdef tuple last_arg
+    def __init__(self, f, data ,weights=None,badvalue=-1000):
         #self.vf = np.vectorize(f)
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
         self.weights = weights
         #only make copy when type mismatch
-        if data.dtype!=np.float64:
-            self.data = data.astype(np.float64)
-        else:
-            self.data = data
+        self.data = float2double(data)
         self.data_len = len(data)
         self.badvalue = badvalue
 
     def __call__(self,*arg):
+        self.last_arg = arg
         return compute_nll(self.f,self.data,self.weights,arg,self.badvalue)
+        
+    def draw(self,minuit=None,bins=100,range=None,parmloc=(0.05,0.95)):
+        n,e,patches = plt.hist(self.data,bins=bins,weights=self.weights,
+            histtype='step',range=range,normed=True)
+        m = mid(e)
+        vf = np.vectorize(self.f)
+        v = vf(m,*self.last_arg)
+        plt.plot(m,v,color='r')
+        plt.grid(True)
+        minu = minuit
+        ax = plt.gca()
+        if minu is not None:
+            #build text
+            txt = u'';
+            for k,v  in minu.values.items():
+                err = minu.errors[k]
+                txt += u'%s = %3.2g±%3.2g\n'%(k,v,err)
+            print txt
+            plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+                
+    def show(self,*arg):
+        self.draw(*arg)
+        plt.show()
 
 
 #fit a line with given function using minimizing chi2
-class Chi2Regression:
-    #cdef object vf
-    # cdef public object f
-    # cdef object weights
-    # cdef np.ndarray data
-    # cdef public object func_code
-    # cdef int data_len
-    # cdef double badvalue
-    def __init__(self, f, data,error=None,weights=None,normed=True,badvalue=-1000):
+cdef class Chi2Regression:
+    cdef public object f
+    cdef object weights
+    cdef object error
+    cdef public object func_code
+    cdef int data_len
+    cdef double badvalue
+    cdef int ndof
+    cdef np.ndarray x
+    cdef np.ndarray y
+    cdef tuple last_arg
+    
+    def __init__(self, f, x, y,error=None,weights=None,badvalue=1000):
         #self.vf = np.vectorize(f)
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
-        self.weights = weights
-        self.data = data
-        self.data_len = len(data)
+        self.weights = float2double(weights) 
+        self.error = float2double(error)
+        self.x = float2double(x)
+        self.y = float2double(y)
+        self.data_len = len(x)
         self.badvalue = badvalue
-
+        self.ndof = self.data_len - (self.func_code.co_argcount-1)
+        
     def __call__(self,*arg):
-        #move this to ipython
-        pass
+        self.last_arg = arg
+        return compute_chi2_f(self.f,self.x,self.y,self.error,self.weights,arg)/self.ndof
 
-
-cdef class Normalize:
-    cdef f
-    cdef double norm_cache
-    cdef tuple last_arg
-    cdef int nint
-    cdef np.ndarray midpoints
-    cdef np.ndarray binwidth
-    cdef public func_code
-    cdef public func_defaults
-    cdef int ndep
-    def __init__(self,f,range,prmt=None,nint=1000,normx=None):
-        """
-        normx [optional array] adaptive step for dependent variable
-        """
-        self.f = f
-        self.norm_cache= 1.
-        self.last_arg = None
-        self.nint = normx.size() if normx is not None else nint
-        normx = normx if normx is not None else np.linspace(range[0],range[1],nint)
-        if normx.dtype!=normx.dtype:
-            normx = normx.astype(np.float64)
-        #print range
-        #print normx
-        self.midpoints = mid(normx)
-        #print self.midpoints
-        self.binwidth = np.diff(normx)
-        self.func_code = FakeFuncCode(f,prmt)
-        self.ndep = 1#TODO make the code doesn't depend on this assumption
-        self.func_defaults = None #make vectorize happy
-
-    def __call__(self,*arg):
-        #print arg
-        cdef double n 
-        cdef double x
-        n = self._compute_normalization(*arg)
-        x = self.f(*arg)
-        return x/n
-
-    def _compute_normalization(self,*arg):
-        cdef tuple targ = arg[self.ndep:]
-        if targ == self.last_arg:#cache hit
-            #yah exact match for float since this is expected to be used
-            #in vectorize which same value are passed over and over
-            pass
+    def draw(self,minuit=None,parmloc=(0.05,0.95)):
+        vf = np.vectorize(self.f)
+        x=self.x
+        y=self.y
+        err = self.error
+        expy = vf(x,*self.last_arg)
+        
+        if err is None:
+            plt.plot(x,y,',')
         else:
-            self.last_arg = targ
-            self.norm_cache = integrate1d(self.f,self.nint,self.midpoints,self.binwidth,targ)
-        return self.norm_cache
+            plt.errorbar(x,y,err,fmt='.')
+        plt.plot(x,expy,'r-')
+        ax = plt.gca()
+        minu = minuit
+        if minu is not None:
+            #build text
+            txt = u'';
+            for k,v  in minu.values.items():
+                err = minu.errors[k]
+                txt += u'%s = %3.2g±%3.2g\n'%(k,v,err)
+            print txt
+            chi2 = self(*self.last_arg)
+            txt+=u'chi2/ndof = %3.2g(%3.2g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+  
+    def show(self,*arg):
+        self.draw(*arg)
+        plt.show()
 
-
-#just a function wrapper with a fake manipulable func_code
-cdef class FakeFunc:
-    cdef f
-    cdef public func_code
-    cdef public func_defaults
-    def __init__(self,f,prmt=None):
+cdef class BinnedChi2:
+    cdef public object f
+    cdef public object vf
+    cdef public object func_code
+    cdef np.ndarray h
+    cdef np.ndarray err
+    cdef np.ndarray edges
+    cdef np.ndarray midpoints
+    cdef int bins
+    cdef double mymin
+    cdef double mymax
+    cdef double badvalue
+    cdef tuple last_arg
+    cdef int ndof
+    def __init__(self, f, data, bins=40, weights=None,range=None, sumw2=False,badvalue=-1000):
         self.f = f
-        self.func_code = FakeFuncCode(f,prmt)
-        self.func_defaults = f.func_defaults
+        self.vf = np.vectorize(f)
+        self.func_code = FakeFuncCode(f,dock=True)
+        if range is None:
+            range = minmax(data)
+        self.mymin,self.mymax = range 
+        
+        h,self.edges = np.histogram(data,bins,range=range,weights=weights)
+        self.h = float2double(h)
+        self.midpoints = mid(self.edges)
+        #sumw2 if requested
+        if weights is not None and sumw2:
+            w2 = weights*weights
+            sumw2 = np.hist(data,bins,range=range,weights=w2)
+            self.err = np.sqrt(sumw2)
+        else:
+            self.err = np.sqrt(self.h)
+        #check if error is too small
+        if np.any(self.err<1e-5):
+            raise ValueError('some bins are too small to do a chi2 fit. change your range')
+        self.bins = bins
+        self.badvalue = badvalue
+        self.ndof = self.bins-(self.func_code.co_argcount-1)
+    
+    #lazy mid point implementation
     def __call__(self,*arg):
-        return self.f(*arg)
+        self.last_arg = arg
+        return compute_chi2_f(self.f,self.midpoints,self.h,self.err,None,arg)
+    
+    # def __call__(self,*arg):
+    #        #can be optimized much better than this
+    #        cdef np.ndarray[np.double_t] edges_values
+    #        cdef np.ndarray[np.double_t] expy
+    #        self.last_arg = arg
+    #        edges_values = self.vf(self.edges,*arg)
+    #        expy = mid(edges_values)
+    #        return compute_chi2(self.h,expy,self.err)
+
+    def draw(self,minuit=None,parmloc=(0.05,0.95)):
+        m = mid(self.edges)
+        plt.errorbar(m,self.h,self.err,fmt='.')
+        
+        expy = self.vf(self.edges,*self.last_arg)
+        expy = mid(expy)
+        
+        plt.plot(m,expy,'r-')
+        
+        minu = minuit
+        plt.grid(True)
+
+        ax = plt.gca()
+        if minu is not None:
+            #build text
+            txt = u'';
+            for k,v  in minu.values.items():
+                err = minu.errors[k]
+                txt += u'%s = %3.2g±%3.2g\n'%(k,v,err)
+            chi2 = self(*self.last_arg)
+            txt+=u'chi2/ndof = %3.2g(%3.2g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            print txt
+            plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+    
+    def show(self,*arg):
+        self.draw(*arg)
+        plt.show()
+    

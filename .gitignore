@@ -5,3 +5,4 @@
 src/*.html
 build
 *.pyc
+test_*
