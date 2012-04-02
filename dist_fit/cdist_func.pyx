@@ -108,7 +108,7 @@ cdef class Extend:
         if extname in f.func_code.co_varnames[:f.func_code.co_argcount]:
             raise ValueError('%s is already taken pick something else for extname')
         self.func_code = FakeFuncCode(f,append=extname)
-        print self.func_code.__dict__
+        #print self.func_code.__dict__
         self.func_defaults=None
     def __call__(self,*arg):
         cdef double N = arg[-1]
@@ -122,8 +122,8 @@ cdef class Normalize:
     cdef int nint
     cdef np.ndarray midpoints
     cdef np.ndarray binwidth
-    cdef public func_code
-    cdef public func_defaults
+    cdef public object func_code
+    cdef public object func_defaults
     cdef int ndep
     def __init__(self,f,range,prmt=None,nint=1000,normx=None):
         """

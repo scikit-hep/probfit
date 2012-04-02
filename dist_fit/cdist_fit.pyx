@@ -4,6 +4,7 @@ cimport numpy as np
 from libc.math cimport exp,pow,fabs,log
 from matplotlib import pyplot as plt
 from .common import *
+from cython.parallel import prange, parallel, threadid
 
 cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue):
     cdef int i=0
@@ -16,6 +17,7 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue):
     cdef np.ndarray[np.double_t] w_
     if w is None:
         for i in range(data_len):
+        #for i in prange(data_len,nogil=True): #nope!!!! gilllllllll
             thisdata = data_[i]
             lh = f(thisdata,*arg)
             if lh<=0:
@@ -26,8 +28,9 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue):
     else:
         w_ = w
         for i in range(data_len):
+        #for i in prange(data_len,nogil=True): #nope!!!! gillllllll
             thisdata = data_[i]
-            lh = f(thisdata,*arg)
+            lh = f(thisdata,*arg,nogil=True)
             if lh<=0:
                 ret = badvalue
                 break
@@ -86,7 +89,7 @@ cdef class UnbinnedML:
     cdef int data_len
     cdef double badvalue
     cdef tuple last_arg
-    def __init__(self, f, data ,weights=None,badvalue=-1000):
+    def __init__(self, f, data ,weights=None,badvalue=-100000):
         #self.vf = np.vectorize(f)
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
@@ -99,15 +102,22 @@ cdef class UnbinnedML:
     def __call__(self,*arg):
         self.last_arg = arg
         return compute_nll(self.f,self.data,self.weights,arg,self.badvalue)
+    
+    @cython.binding(True)
+    def draw(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500):
+        if ax is None: ax=plt.gca()
         
-    def draw(self,minuit=None,bins=100,range=None,parmloc=(0.05,0.95)):
-        n,e,patches = plt.hist(self.data,bins=bins,weights=self.weights,
+        n,e,patches = ax.hist(self.data,bins=bins,weights=self.weights,
             histtype='step',range=range,normed=True)
         m = mid(e)
         vf = np.vectorize(self.f)
-        v = vf(m,*self.last_arg)
-        plt.plot(m,v,color='r')
-        plt.grid(True)
+        fxs = np.linspace(e[0],e[-1],nfbins)
+        # v = vf(fxs,*self.last_arg)
+        # plt.plot(fxs,v,color='r')
+        v = vf(fxs,*self.last_arg)
+        ax.plot(fxs,v,color='r')
+        
+        ax.grid(True)
         minu = minuit
         ax = plt.gca()
         if minu is not None:
@@ -115,9 +125,9 @@ cdef class UnbinnedML:
             txt = u'';
             for k,v  in minu.values.items():
                 err = minu.errors[k]
-                txt += u'%s = %3.2g±%3.2g\n'%(k,v,err)
+                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             print txt
-            plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
                 
     def show(self,*arg):
         self.draw(*arg)
@@ -172,10 +182,10 @@ cdef class Chi2Regression:
             txt = u'';
             for k,v  in minu.values.items():
                 err = minu.errors[k]
-                txt += u'%s = %3.2g±%3.2g\n'%(k,v,err)
+                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             print txt
             chi2 = self(*self.last_arg)
-            txt+=u'chi2/ndof = %3.2g(%3.2g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
             plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
   
     def show(self,*arg):
@@ -253,9 +263,9 @@ cdef class BinnedChi2:
             txt = u'';
             for k,v  in minu.values.items():
                 err = minu.errors[k]
-                txt += u'%s = %3.2g±%3.2g\n'%(k,v,err)
+                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             chi2 = self(*self.last_arg)
-            txt+=u'chi2/ndof = %3.2g(%3.2g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
             print txt
             plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
     

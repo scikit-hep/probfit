@@ -21,10 +21,12 @@ class rename_parameters:
         return FakeFunc(f,self.arg)
 
 #useful for highlight some xrange
-def vertical_highlight(x1,x2=None,color='g',alpha=0.3):
+def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
+    if(ax is None): ax=gca()
     from matplotlib import pyplot as plt
     if x2 is None:
         x1,x2=x1
     ylim = plt.gca().get_ylim()
     y = np.array(ylim)
-    plt.fill_betweenx(y,np.array(x1,x1),np.array(x2,x2),color=color,alpha=alpha)
+    ax.fill_betweenx(y,np.array(x1,x1),np.array(x2,x2),color=color,alpha=alpha)
+    ax.set_ylim(ylim) #sometime it will decide to resize the plot
