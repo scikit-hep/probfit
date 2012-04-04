@@ -110,7 +110,6 @@ def gen_toy(f,numtoys,range,accuracy=10000,quiet=True,**kwd):
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [ kwd[name] for name in vnames ]
-    print my_arg
     #random number
     #if accuracy is None: accuracy=10*numtoys
     r = npr.random_sample(numtoys)
@@ -124,7 +123,6 @@ def gen_toy(f,numtoys,range,accuracy=10000,quiet=True,**kwd):
         plt.ylim(ymin=0)
         plt.show()
     cdf = compute_cdf(pdf,x)
-    print '---',len(pdf),len(cdf)
     if cdf[-1] < 0.01:
         print 'Integral for given funcition is really low. Did you give it a reasonable range?'
     cdfnorm = cdf[-1]
