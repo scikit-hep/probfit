@@ -1,21 +1,41 @@
 cimport cython
-from libc.math cimport exp,pow,fabs,log,sqrt
+from libc.math cimport exp,pow,fabs,log,sqrt,sinh
 cdef double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062
 import numpy as np
 cimport numpy as np
 from .common import *
 
+cdef double badvalue = 1e-300
+cdef double smallestdiv = 1e-10
+cdef double smallestln = 0.
+cdef double largestpow = 200
+cdef double maxnegexp = 200
 cdef class Normalize
+
+#peaking stuff
+@cython.binding(True)
+def doublegaussian(double x, double mean, double sigmal, double sigmar):
+    """
+    unnormed gaussian normalized
+    """
+    cdef double ret = 0
+    if sigma < smallestdiv:
+        ret = badvalue
+    else:
+        d = (x-mean)/sigma
+        d2 = d*d
+        ret = exp(-0.5*d2)
+    return ret
 
 #peaking stuff
 @cython.binding(True)
 def ugaussian(double x, double mean, double sigma):
     """
-    unnormed gaussian normalized for -inf to +inf
+    unnormed gaussian normalized
     """
     cdef double ret = 0
-    if sigma < 1e-7:
-        ret = 1e-300
+    if sigma < smallestdiv:
+        ret = badvalue
     else:
         d = (x-mean)/sigma
         d2 = d*d
@@ -27,9 +47,10 @@ def gaussian(double x, double mean, double sigma):
     """
     gaussian normalized for -inf to +inf
     """
+    cdef double badvalue = 1e-300
     cdef double ret = 0
-    if sigma < 1e-7:
-        ret = 1e-300
+    if sigma < smallestdiv:
+        ret = badvalue
     else:
         d = (x-mean)/sigma
         d2 = d*d
@@ -42,18 +63,25 @@ def crystalball(double x,double alpha,double n,double mean,double sigma):
     unnormalized crystal ball function 
     see http://en.wikipedia.org/wiki/Crystal_Ball_function
     """
-    cdef double d = (x-mean)/sigma
+    cdef double d
     cdef double ret = 0
     cdef double A = 0
     cdef double B = 0
-    
-    if d > -alpha : 
-        ret = exp(-0.5*d**2)
+    if sigma < smallestdiv:
+        ret = badvalue
+    elif fabs(alpha) < smallestdiv:
+        ret = badvalue
+    elif n<0:
+        ret = badvalue
     else:
-        al = fabs(alpha)
-        A=pow(n/al,n)*exp(-al**2/2.)
-        B=n/al-al
-        ret = A*pow(B-d,-n)
+        d = (x-mean)/sigma
+        if d > -alpha : 
+            ret = exp(-0.5*d**2)
+        else:
+            al = fabs(alpha)
+            A=pow(n/al,n)*exp(-al**2/2.)
+            B=n/al-al
+            ret = A*pow(B-d,-n)
     return ret
 
 #Background stuff
@@ -63,6 +91,8 @@ def argus(double x, double c, double chi):
     unnormalized argus distribution
     see: http://en.wikipedia.org/wiki/ARGUS_distribution
     """
+    if c<smallestdiv:
+        return badvalue
     cdef double xc = x/c
     cdef double xc2 = xc*xc
     cdef double ret = 0
@@ -85,6 +115,7 @@ def poly2(double x, double a, double b, double c):
     """
     cdef double ret = a*x*x+b*x+c
     return ret
+
 @cython.binding(True)
 def poly3(double x, double a, double b, double c, double d):
     """
@@ -95,6 +126,42 @@ def poly3(double x, double a, double b, double c, double d):
     cdef double ret = a*x3+b*x2+c*x+d
     return ret
 
+@cython.binding(True)
+def novosibirsk(double x, double width, double peak, double tail):
+    #credit roofit implementation
+    cdef double qa
+    cdef double qb
+    cdef double qc
+    cdef double qx
+    cdef double qy
+    cdef double xpw
+    cdef double lqyt
+    if width < smallestdiv: return badvalue
+    xpw = (x-peak)/width
+    if fabs(tail) < 1e-7:
+        qc = 0.5*xpw*xpw
+    else:
+        qa = tail*sqrt(log(4.))
+        if qa < smallestdiv: return badvalue
+        qb = sinh(qa)/qa
+        qx = xpw*qb
+        qy = 1.+tail*qx
+        if qy > 1e-7:
+            lqyt = log(qy)/tail
+            qc =0.5*lqyt*lqyt + tail*tail
+        else:
+            qc=15.
+    return exp(-qc)
+
+# cdef class AddRaw:
+#     cdef int nf
+#     cdef object fs
+#     cdef public object func_code
+#     cdef public object func_defaults
+#     def __init__(self,fs,coeffname):
+#         pass
+# cdef class AddAndRenorm
+#     pass
 cdef class Extend:
     """
     f = lambda x,y: x+y
@@ -174,6 +241,7 @@ def integrate1d(f, int nint, np.ndarray[np.double_t] midpoints, np.ndarray[np.do
     cdef double mpi=0
     if arg is None: arg = tuple()
     #print midpoints
+    #mid point sum
     for i in range(nint-1):#mid has 1 less
         bw = binwidth[i]
         mp = midpoints[i]

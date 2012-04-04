@@ -20,6 +20,9 @@ class rename_parameters:
     def __call__(self,f):
         return FakeFunc(f,self.arg)
 
+def extended(f):
+    return Extended(f)
+
 #useful for highlight some xrange
 def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
     if(ax is None): ax=gca()
@@ -30,3 +33,4 @@ def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
     y = np.array(ylim)
     ax.fill_betweenx(y,np.array(x1,x1),np.array(x2,x2),color=color,alpha=alpha)
     ax.set_ylim(ylim) #sometime it will decide to resize the plot
+    

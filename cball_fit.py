@@ -11,21 +11,21 @@ from dist_fit import *
 
 data = root2rec('yesbkg-200MeV.root','emc')
 data = data[(data.ecal > 0.15) & (data.ecal < 0.23)]
+hist(data.ecal,bins=100);
 
 # <codecell>
 
-ncball = Extend(Normalize(crystalball,(0.15,0.25)))
+ncball = Normalize(crystalball,(-1,1))
 
 # <codecell>
 
-def z(x,y):
-    return (x-1)**2+(y-2)**2
-mz = minuit.Minuit(z)
+#try_uml(ncball,data.ecal,alpha=1,n=(1,5,20),mean=0.2,sigma=0.01)
+print ncball(1.,1.,1.,1.,1.)
+g = gen_toy(ncball,10000,(-1,2),alpha=1.,n=2.,mean=1.,sigma=1.,quiet=False)
 
 # <codecell>
 
-mz.migrad()
-mz.values
+hist(g,bins=100);
 
 # <codecell>
 
@@ -39,8 +39,8 @@ legend();
 
 import sys
 import traceback
-uml = BinnedChi2(ncball,data.ecal,range=(0.17,0.21),bins=50)
-#uml = UnBinnedML(ncball,data.ecal)
+#uml = BinnedChi2(ncball,data.ecal,range=(0.17,0.21),bins=50)
+uml = UnBinnedML(ncball,data.ecal)
 limit_alpha = (0.5,1.5)
 limit_mean = (0.19,0.21)
 limit_sigma=(0.005,0.01)
