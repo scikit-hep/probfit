@@ -25,8 +25,8 @@ def extended(f):
 
 #useful for highlight some xrange
 def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
-    if(ax is None): ax=gca()
     from matplotlib import pyplot as plt
+    if(ax is None): ax=plt.gca()
     if x2 is None:
         x1,x2=x1
     ylim = plt.gca().get_ylim()

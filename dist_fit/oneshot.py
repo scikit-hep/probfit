@@ -141,9 +141,13 @@ def gen_toy(f,numtoys,range,accuracy=10000,quiet=True,**kwd):
         plt.figure()
         plt.title('comparison')
         numbin = 100
-        h,e,_ = plt.hist(ret,bins=numbin,histtype='step',label='generated')
+        h,e,_ = plt.hist(ret,bins=numbin,histtype='step',label='generated',color='r')
         bw = e[1]-e[0]
-        plt.plot(x,pdf*len(ret)/cdfnorm*bw,label='pdf')
+        y = pdf*len(ret)/cdfnorm*bw
+        ylow = y+np.sqrt(y)
+        yhigh = y-np.sqrt(y)
+        plt.plot(x,y,label='pdf',color='b')
+        plt.fill_between(x,yhigh,ylow,color='b',alpha=0.2)
     return ret
 
     
