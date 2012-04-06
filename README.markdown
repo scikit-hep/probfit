@@ -10,8 +10,6 @@ Patched [Minuit](http://code.google.com/p/pyminuit/downloads/detail?name=Minuit-
 
 My version of [pyminuit](https://github.com/piti118/pyminuit) from my repository. Usual python setup.py install.
 
-install
-
 numpy
 
 matplotlib
