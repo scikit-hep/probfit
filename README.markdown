@@ -7,8 +7,13 @@ Requirement
 -----------
 
 Patched [Minuit](http://code.google.com/p/pyminuit/downloads/detail?name=Minuit-1_7_9-patch1.tar.gz&can=2&q=)
-A patch version of [pyminuit](https://github.com/piti118/pyminuit) from my repository. Usual python setup install
+
+My version of [pyminuit](https://github.com/piti118/pyminuit) from my repository. Usual python setup.py install.
+
+install
+
 numpy
+
 matplotlib
 
 Tutorial
