@@ -1,4 +1,4 @@
-from .cdist_fit import UnbinnedML, BinnedChi2,compute_cdf,invert_cdf
+from .cdist_fit import UnbinnedML, BinnedChi2,compute_cdf,invert_cdf,BinnedPoisson
 from minuit import Minuit, MinuitError
 from matplotlib import pyplot as plt
 import numpy as np
@@ -27,9 +27,26 @@ def fit_uml(f,data,quiet=False,*arg,**kwd):
     #m.minos()
     return (uml,m)
 
-def fit_binx2(f,data,bins=30, quiet=False,*arg,**kwd):
-    uml = BinnedChi2(f,data,bins=bins)
+def fit_binx2(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
+    uml = BinnedChi2(f,data,bins=bins,range=range)
     m = Minuit(uml,**kwd)
+    m.strategy=2
+    m.printMode=1
+    try:
+        m.migrad()
+    except MinuitError as e:
+        if not quiet:
+            plt.figure()
+            uml.show()
+            print m.values
+        raise e
+    #m.minos()
+    return (uml,m)
+
+def fit_binpoisson(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
+    uml = BinnedPoisson(f,data,bins=bins,range=range)
+    m = Minuit(uml,**kwd)
+    m.up=0.5
     m.strategy=2
     m.printMode=1
     try:

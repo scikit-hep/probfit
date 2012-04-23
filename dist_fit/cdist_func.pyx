@@ -1,5 +1,5 @@
 cimport cython
-from libc.math cimport exp,pow,fabs,log,sqrt,sinh
+from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma
 cdef double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062
 import numpy as np
 cimport numpy as np

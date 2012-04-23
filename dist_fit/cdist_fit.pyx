@@ -1,11 +1,44 @@
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport exp,pow,fabs,log
+from libc.math cimport exp,pow,fabs,log,tgamma,lgamma
 from matplotlib import pyplot as plt
 from .common import *
 from cython.parallel import prange, parallel, threadid
 import multiprocessing as mp
+
+cdef double cpoisson(double x, double lmbda):
+    cdef double ret
+    ret = pow(lmbda,k)*exp(-1*lmbda)/tgamma(x+1)
+    return ret
+    
+cdef double clogPoisson(double x, double lmbda):
+    cdef double ret
+    ret = x*log(lmbda)-lmbda-lgamma(x+1)
+    return ret
+
+cdef double cgauss(double x, double mean, double sigma):
+    return 1/sqrt(2*pi*sigma)*exp((x-mean)*(x-mean)/sigma/sigma/2.);
+    
+cdef double compute_bin_poisson_f(f,
+                np.ndarray[np.double_t] x,np.ndarray[np.double_t] y,
+                np.ndarray[np.double_t] binwidth,
+                tuple arg, double badvalue):
+    
+    cdef int i
+    cdef int datalen = len(x)
+    cdef double fx
+    cdef double ret=0
+    cdef double bw
+    
+    for i in range(datalen):
+        bw = binwidth[i]
+        fx = f(x[i],*arg)*bw
+        if fx < 0:
+            return badvalue
+        else:
+            ret -= clogPoisson(y[i],fx)
+    return ret
 
 cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue):
     cdef int i=0
@@ -459,4 +492,86 @@ cdef class BinnedChi2:
     def show(self,*arg):
         self.draw(*arg)
         plt.show()
-    
+
+cdef class BinnedPoisson:
+    cdef public object f
+    cdef public object vf
+    cdef public object func_code
+    cdef np.ndarray h
+    cdef np.ndarray err
+    cdef np.ndarray edges
+    cdef np.ndarray midpoints
+    cdef np.ndarray binwidth
+    cdef int bins
+    cdef double mymin
+    cdef double mymax
+    cdef double badvalue
+    cdef tuple last_arg
+    cdef int ndof
+
+    def __init__(self, f, data, bins=40, weights=None,range=None, sumw2=False,badvalue=1000000):
+        self.f = f
+        self.vf = np.vectorize(f)
+        self.func_code = FakeFuncCode(f,dock=True)
+        if range is None:
+            range = minmax(data)
+        self.mymin,self.mymax = range 
+
+        h,self.edges = np.histogram(data,bins,range=range,weights=weights)
+        self.h = float2double(h)
+        self.midpoints = mid(self.edges)
+        self.binwidth = np.diff(self.edges)
+        #sumw2 if requested
+        if weights is not None and sumw2:
+            w2 = weights*weights
+            sumw2 = np.hist(data,bins,range=range,weights=w2)
+            self.err = np.sqrt(sumw2)
+        else:
+            self.err = np.sqrt(self.h)
+        
+        self.bins = bins
+        self.badvalue = badvalue
+        self.ndof = self.bins-(self.func_code.co_argcount-1)
+
+    #lazy mid point implementation
+    def __call__(self,*arg):
+        self.last_arg = arg
+        return compute_bin_poisson_f(self.f,
+                        self.midpoints ,self.h ,
+                        self.binwidth,
+                        arg, self.badvalue)
+
+    def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None):
+        if ax is None: ax = plt.gca()
+        arg = self.last_arg
+        if minuit is not None: arg = minuit.args
+        m = mid(self.edges)
+        ax.errorbar(m,self.h,self.err,fmt='.')
+        #assume equal spacing
+        #self.edges[0],self.edges[-1]
+        bw = self.edges[1]-self.edges[0]
+        xs = np.linspace(self.edges[0],self.edges[-1],fbins)
+        #bw = np.diff(xs)
+        xs = mid(xs)
+        expy = self.vf(xs,*arg)*bw
+
+        ax.plot(xs,expy,'r-')
+
+        minu = minuit
+        ax.grid(True)
+
+        if minu is not None:
+            #build text
+            txt = u'';
+            for k,v  in minu.values.items():
+                err = minu.errors[k]
+                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
+            chi2 = self(*self.last_arg)
+            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            print txt
+            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+
+    def show(self,*arg):
+        self.draw(*arg)
+        plt.show()
+
