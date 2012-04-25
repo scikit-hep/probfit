@@ -43,12 +43,13 @@ def fit_binx2(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
     #m.minos()
     return (uml,m)
 
-def fit_binpoisson(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
+def fit_binpoisson(f,data,bins=30, range=None, quiet=False,maxcalls=None,*arg,**kwd):
     uml = BinnedPoisson(f,data,bins=bins,range=range)
     m = Minuit(uml,**kwd)
     m.up=0.5
     m.strategy=2
     m.printMode=1
+    m.maxcalls=maxcalls
     try:
         m.migrad()
     except MinuitError as e:
@@ -168,7 +169,7 @@ def gen_toy(f,numtoys,range,accuracy=10000,quiet=True,**kwd):
     
 def guess_initial(alg,f,data,ntry=100,guessrange=(-100,100),draw=False,*arg,**kwd):
     """
-    This is very bad at the moment don't use if it's not neccessary
+    This is very bad at the moment don't use it
     """
     fom = alg(f,data,*arg,**kwd)
     first =True

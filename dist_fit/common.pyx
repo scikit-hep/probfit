@@ -17,6 +17,11 @@ def float2double(a):
     else:
         return a.astype(np.float64)
 
+class MinimalFuncCode:
+    def __init__(self,arg):
+        self.co_varnames = arg
+        self.co_argcount = len(arg)
+
 #fake copying func_code with renaming parameters
 #and docking off parameters from the front
 class FakeFuncCode:

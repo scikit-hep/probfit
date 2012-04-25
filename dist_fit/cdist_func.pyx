@@ -3,6 +3,7 @@ from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma
 cdef double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062
 import numpy as np
 cimport numpy as np
+from math import ceil
 from .common import *
 
 cdef double badvalue = 1e-300
@@ -11,6 +12,100 @@ cdef double smallestln = 0.
 cdef double largestpow = 200
 cdef double maxnegexp = 200
 cdef class Normalize
+
+def merge_func_code(f,g):
+    nf = f.func_code.co_argcount
+    farg = f.func_code.co_varnames[:nf]
+    ng = g.func_code.co_argcount
+    garg = g.func_code.co_varnames[:ng]
+    
+    mergearg = []
+    #TODO: do something smarter
+    #first merge the list
+    for v in farg:
+        mergearg.append(v)
+    for v in garg:
+        if v not in farg:
+            mergearg.append(v)
+    
+    #now build the map
+    fpos=[]
+    gpos=[]
+    for v in farg:
+        fpos.append(mergearg.index(v))
+    for v in garg:
+        gpos.append(mergearg.index(v))
+    return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
+
+def adjusted_bound(bound,bw):
+    numbin = ceil((bound[1]-bound[0])/bw)
+    return (bound[0],bound[0]+numbin*bw),numbin
+    
+cdef class Convolve:#nocache version
+    cdef int numbins
+    cdef tuple gbound
+    cdef double bw
+    cdef int nbg
+    cdef f #original f
+    cdef g #original g
+    cdef vf #vectorized f
+    cdef vg #vectorized g
+    cdef np.ndarray fpos#position of argument in f
+    cdef np.ndarray gpos#position of argument in g
+    cdef public object func_code
+    cdef public object func_defaults
+    #g is resolution function gbound need to be set so that the end of g is zero
+    def __init__(self,f,g,gbound,bw):
+        """
+            Convolve (f,g,gbound,bw)
+        """
+        self.set_gbound(gbound,bw)
+        self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
+        self.func_defaults = None
+        self.vf = np.vectorize(f)
+        self.vg = np.vectorize(g)
+        
+    def set_gbound(self,gbound,bw):
+        self.gbound,self.nbg = adjusted_bound(gbound,bw) #prepare bound for g
+        self.bw = bw
+        
+    def __call__(self,*arg):
+        #skip the first one
+        cdef int iconv
+        cdef double ret = 0
+        cdef np.ndarray[np.double_t] gy,fy
+        
+        tmp_arg = arg[1:]
+        x=arg[0]
+        garg = list()
+        for i in self.gpos: garg.append(arg[self.gpos])
+        garg = garg[1:]#dock off the dependent variable
+        
+        farg = list()
+        for i in self.fpos: farg.append(arg[self.fpos])
+        farg = farg[1:]
+        
+        
+        xg = np.linspace(self.gbound[0],self.gbound[1],self.nbg)
+        #calculate all the g needed
+        gy = self.vg(xg,*garg)
+        
+        #now prepare f... f needs to be calculated and padded to f-gbound[1] to f+gbound[0]
+        #yep this is not a typo because we are "reverse" sliding g onto f so we need to calculate f from
+        # f-right bound of g to f+left bound of g
+        fbound = x-self.gbound[1], x-self.gbound[0] #yes again it's not a typo
+        xf = np.linspace(fbound[0],fbound[1],self.nbg)#yep nbg
+        fy = self.vf(xf,*farg)
+        #print xf[:100]
+        #print fy[:100]
+        #now do the inverse slide g and f
+        for iconv in range(self.nbg):
+            ret+=fy[iconv]*gy[self.nbg-iconv-1]
+        
+        #now normalize the integral
+        ret*=self.bw
+        
+        return ret
 
 #peaking stuff
 @cython.binding(True)
