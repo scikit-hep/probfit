@@ -78,11 +78,11 @@ cdef class Convolve:#nocache version
         tmp_arg = arg[1:]
         x=arg[0]
         garg = list()
-        for i in self.gpos: garg.append(arg[self.gpos])
+        for i in self.gpos: garg.append(arg[self.gpos[i]])
         garg = garg[1:]#dock off the dependent variable
         
         farg = list()
-        for i in self.fpos: farg.append(arg[self.fpos])
+        for i in self.fpos: farg.append(arg[self.fpos[i]])
         farg = farg[1:]
         
         
