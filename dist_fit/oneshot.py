@@ -10,7 +10,7 @@ def randfr(r):
     a = r[0]
     return np.random.ranf()*(b-a)+a
 
-def fit_uml(f,data,quiet=False,*arg,**kwd):
+def fit_uml(f,data,throw=True,quiet=False,*arg,**kwd):
     uml = UnbinnedML(f,data)
     m = Minuit(uml,**kwd)
     m.up=0.5
@@ -23,11 +23,11 @@ def fit_uml(f,data,quiet=False,*arg,**kwd):
             plt.figure()
             uml.show()
             print m.values
-        raise e
+        if throw: raise e
     #m.minos()
     return (uml,m)
 
-def fit_binx2(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
+def fit_binx2(f,data,bins=30, range=None, throw=True, quiet=False,*arg,**kwd):
     uml = BinnedChi2(f,data,bins=bins,range=range)
     m = Minuit(uml,**kwd)
     m.strategy=2
@@ -39,11 +39,11 @@ def fit_binx2(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
             plt.figure()
             uml.show()
             print m.values
-        raise e
+        if throw: raise e
     #m.minos()
     return (uml,m)
 
-def fit_binpoisson(f,data,bins=30, range=None, quiet=False,maxcalls=None,*arg,**kwd):
+def fit_binpoisson(f,data,bins=30, range=None, throw=True, quiet=False,maxcalls=None,*arg,**kwd):
     uml = BinnedPoisson(f,data,bins=bins,range=range)
     m = Minuit(uml,**kwd)
     m.up=0.5
@@ -57,7 +57,7 @@ def fit_binpoisson(f,data,bins=30, range=None, quiet=False,maxcalls=None,*arg,**
             plt.figure()
             uml.show()
             print m.values
-        raise e
+        if throw: raise e
     #m.minos()
     return (uml,m)
 

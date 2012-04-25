@@ -37,11 +37,16 @@ def merge_func_code(f,g):
         gpos.append(mergearg.index(v))
     return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
 
+def construct_arg(arg,fpos):
+    ret = list()
+    for i in fpos: ret.append(arg[i])
+    return tuple(ret)
+
 def adjusted_bound(bound,bw):
     numbin = ceil((bound[1]-bound[0])/bw)
     return (bound[0],bound[0]+numbin*bw),numbin
     
-cdef class Convolve:#nocache version
+cdef class Convolve:#with gy cache
     """
     Convolve)
     """
@@ -57,18 +62,21 @@ cdef class Convolve:#nocache version
     cdef np.ndarray gpos#position of argument in g
     cdef public object func_code
     cdef public object func_defaults
+    cdef tuple last_garg
+    cdef np.ndarray gy_cache
     #g is resolution function gbound need to be set so that the end of g is zero
     def __init__(self,f,g,gbound,nbins=1000):
+        self.vf = np.vectorize(f)
+        self.vg = np.vectorize(g)
         self.set_gbound(gbound,nbins)
         self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
         self.func_defaults = None
-        self.vf = np.vectorize(f)
-        self.vg = np.vectorize(g)
-        
+
     def set_gbound(self,gbound,nbins):
+        self.last_garg = None
         self.gbound,self.nbg = gbound,nbins
         self.bw = 1.0*(gbound[1]-gbound[0])/nbins
-        
+        self.gy_cache = None
     def __call__(self,*arg):
         #skip the first one
         cdef int iconv
@@ -78,17 +86,23 @@ cdef class Convolve:#nocache version
         tmp_arg = arg[1:]
         x=arg[0]
         garg = list()
-        for i in self.gpos: garg.append(arg[self.gpos[i]])
-        garg = garg[1:]#dock off the dependent variable
+
+        for i in self.gpos: garg.append(arg[i])
+        garg = tuple(garg[1:])#dock off the dependent variable
         
         farg = list()
-        for i in self.fpos: farg.append(arg[self.fpos[i]])
-        farg = farg[1:]
-        
+        for i in self.fpos: farg.append(arg[i])
+        farg = tuple(farg[1:])
         
         xg = np.linspace(self.gbound[0],self.gbound[1],self.nbg)
+
+        gy = None
         #calculate all the g needed
-        gy = self.vg(xg,*garg)
+        if garg==self.last_garg:
+            gy = self.gy_cache
+        else:
+            gy = self.vg(xg,*garg)
+            self.gy_cache=gy
         
         #now prepare f... f needs to be calculated and padded to f-gbound[1] to f+gbound[0]
         #yep this is not a typo because we are "reverse" sliding g onto f so we need to calculate f from
@@ -276,6 +290,27 @@ cdef class Extend:
         cdef double N = arg[-1]
         cdef double fval = self.f(*arg[:-1])
         return N*fval
+
+cdef class Add2Pdf:
+    cdef public object func_code
+    cdef public object func_defaults
+    cdef f
+    cdef g
+    cdef fpos
+    cdef gpos
+    
+    def __init__(self,f,g,facname='k_f'):
+        self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
+        self.func_code.append('fac')
+        self.func_defaults=None
+        self.f=f
+        self.g=g
+    
+    def __call__(self,*arg):
+        fac = arg[-1]
+        farg = construct_arg(arg,self.fpos)
+        garg = construct_arg(arg,self.gpos)
+        return fac*self.f(*farg)+(1.-fac)*self.g(*garg)
 
 cdef class Normalize:
     cdef f

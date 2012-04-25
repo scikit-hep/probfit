@@ -23,7 +23,7 @@ cdef double cgauss(double x, double mean, double sigma):
 cdef double compute_bin_poisson_f(f,
                 np.ndarray[np.double_t] x,np.ndarray[np.double_t] y,
                 np.ndarray[np.double_t] binwidth,
-                tuple arg, double badvalue):
+                tuple arg, double badvalue) except *:
     
     cdef int i
     cdef int datalen = len(x)
@@ -40,7 +40,7 @@ cdef double compute_bin_poisson_f(f,
             ret -= clogPoisson(y[i],fx)
     return ret
 
-cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue):
+cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
     cdef int i=0
     cdef double lh=0
     cdef double nll=0
@@ -73,7 +73,7 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue):
     return -1*ret
 
 cdef double compute_chi2_f(f,np.ndarray[np.double_t] x,np.ndarray[np.double_t] y ,
-                np.ndarray[np.double_t]error,np.ndarray[np.double_t]weights,tuple arg):
+                np.ndarray[np.double_t]error,np.ndarray[np.double_t]weights,tuple arg) except *:
     cdef int usew = 1 if weights is not None else 0
     cdef int usee = 1 if error is not None else 0
     cdef int i
@@ -99,7 +99,7 @@ cdef double compute_chi2_f(f,np.ndarray[np.double_t] x,np.ndarray[np.double_t] y
 cdef double compute_bin_chi2_f(f,
                 np.ndarray[np.double_t] x,np.ndarray[np.double_t] y,
                 np.ndarray[np.double_t]error,np.ndarray[np.double_t] binwidth,
-                np.ndarray[np.double_t]weights,tuple arg):
+                np.ndarray[np.double_t]weights,tuple arg) except *:
     cdef int usew = 1 if weights is not None else 0
     cdef int usee = 1 if error is not None else 0
     cdef int i
@@ -124,7 +124,7 @@ cdef double compute_bin_chi2_f(f,
         ret += diff
     return ret
 
-def compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x):
+def compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x) :
 
     cdef int i
     cdef int n = len(pdf)
