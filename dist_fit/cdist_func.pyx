@@ -42,6 +42,9 @@ def adjusted_bound(bound,bw):
     return (bound[0],bound[0]+numbin*bw),numbin
     
 cdef class Convolve:#nocache version
+    """
+    Convolve)
+    """
     cdef int numbins
     cdef tuple gbound
     cdef double bw
@@ -55,19 +58,16 @@ cdef class Convolve:#nocache version
     cdef public object func_code
     cdef public object func_defaults
     #g is resolution function gbound need to be set so that the end of g is zero
-    def __init__(self,f,g,gbound,bw):
-        """
-            Convolve (f,g,gbound,bw)
-        """
-        self.set_gbound(gbound,bw)
+    def __init__(self,f,g,gbound,nbins=1000):
+        self.set_gbound(gbound,nbins)
         self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
         self.func_defaults = None
         self.vf = np.vectorize(f)
         self.vg = np.vectorize(g)
         
-    def set_gbound(self,gbound,bw):
-        self.gbound,self.nbg = adjusted_bound(gbound,bw) #prepare bound for g
-        self.bw = bw
+    def set_gbound(self,gbound,nbins):
+        self.gbound,self.nbg = gbound,nbins
+        self.bw = 1.0*(gbound[1]-gbound[0])/nbins
         
     def __call__(self,*arg):
         #skip the first one
