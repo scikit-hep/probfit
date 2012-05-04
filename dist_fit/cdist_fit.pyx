@@ -566,8 +566,8 @@ cdef class BinnedPoisson:
             for k,v  in minu.values.items():
                 err = minu.errors[k]
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            chi2 = self(*self.last_arg)
-            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            #chi2 = self(*self.last_arg)
+            #txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
             if print_par: print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
 

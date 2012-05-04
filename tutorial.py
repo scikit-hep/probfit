@@ -5,6 +5,7 @@
 
 from dist_fit import *
 import numpy as np
+import minuit
 
 # <codecell>
 
@@ -131,6 +132,38 @@ print besttry
 #a nice trick is to use keyword expansion on the return argument
 uml,minu = fit_uml(tofit,twopeak,**besttry)
 uml.show(minu)
+
+# <codecell>
+
+#lets try to do chi^2 regression
+def f(x,a,b,c):
+    return a*x**2+b*x+c
+vf = vectorize(f)
+x=linspace(-3,3,100)
+y = vf(x,1,2,3)+randn(100)
+err = np.zeros(100)
+err.fill(1.)
+errorbar(x,y,err,fmt='.b')
+xlim(-3,3)
+#now we got y and x
+
+# <codecell>
+
+to_minimize = Chi2Regression(f,x,y,err)
+
+# <codecell>
+
+m=minuit.Minuit(to_minimize)
+m.migrad()
+
+# <codecell>
+
+print m.values
+print m.errors
+
+# <codecell>
+
+to_minimize.draw(m)
 
 # <codecell>
 

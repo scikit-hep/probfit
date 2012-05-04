@@ -352,6 +352,8 @@ cdef class Normalize:
         cdef double x
         n = self._compute_normalization(*arg)
         x = self.f(*arg)
+        if n < 1e-17: 
+            print 'Potential float erorr:', arg
         return x/n
 
     def _compute_normalization(self,*arg):

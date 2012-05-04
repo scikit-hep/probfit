@@ -43,12 +43,12 @@ def fit_binx2(f,data,bins=30, range=None, throw=True, quiet=False,*arg,**kwd):
     #m.minos()
     return (uml,m)
 
-def fit_binpoisson(f,data,bins=30, range=None, throw=True, quiet=False,maxcalls=None,*arg,**kwd):
+def fit_binpoisson(f,data,bins=30, range=None, throw=True, quiet=False,maxcalls=None,printmode=1,*arg,**kwd):
     uml = BinnedPoisson(f,data,bins=bins,range=range)
     m = Minuit(uml,**kwd)
     m.up=0.5
     m.strategy=2
-    m.printMode=1
+    m.printMode=printmode
     m.maxcalls=maxcalls
     try:
         m.migrad()
