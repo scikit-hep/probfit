@@ -150,9 +150,6 @@ xlim(-3,3)
 # <codecell>
 
 to_minimize = Chi2Regression(f,x,y,err)
-
-# <codecell>
-
 m=minuit.Minuit(to_minimize)
 m.migrad()
 
@@ -160,9 +157,16 @@ m.migrad()
 
 print m.values
 print m.errors
+to_minimize.draw(m)
 
 # <codecell>
 
+#fixing parameter is easy too
+to_minimize = Chi2Regression(f,x,y,err)
+m=minuit.Minuit(to_minimize,c=2,fix_c=True)#just that
+m.migrad()
+print m.values
+print m.errors
 to_minimize.draw(m)
 
 # <codecell>
