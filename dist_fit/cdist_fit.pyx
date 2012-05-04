@@ -313,7 +313,7 @@ cdef class UnbinnedML:
         return compute_nll(self.f,self.data,self.weights,arg,self.badvalue)
     
     @cython.binding(True)
-    def draw(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500):
+    def draw(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500,print_par=False):
         if ax is None: ax=plt.gca()
         arg = self.last_arg
         if minuit is not None: arg = minuit.args
@@ -336,11 +336,11 @@ cdef class UnbinnedML:
             for k,v  in minu.values.items():
                 err = minu.errors[k]
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            print txt
+            if print_par: print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
                 
-    def show(self,*arg):
-        self.draw(*arg)
+    def show(self,*arg,**kwd):
+        self.draw(*arg,**kwd)
         plt.show()
 
 
@@ -373,7 +373,7 @@ cdef class Chi2Regression:
         self.last_arg = arg
         return compute_chi2_f(self.f,self.x,self.y,self.error,self.weights,arg)/self.ndof
 
-    def draw(self,minuit=None,parmloc=(0.05,0.95)):
+    def draw(self,minuit=None,parmloc=(0.05,0.95),print_par=False):
         arg = self.last_arg
         if minuit is not None: arg = minuit.args
         vf = np.vectorize(self.f)
@@ -395,7 +395,7 @@ cdef class Chi2Regression:
             for k,v  in minu.values.items():
                 err = minu.errors[k]
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            print txt
+            if print_par: print txt
             chi2 = self(*self.last_arg)
             txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
             plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
@@ -459,7 +459,7 @@ cdef class BinnedChi2:
     #        expy = mid(edges_values)
     #        return compute_chi2(self.h,expy,self.err)
 
-    def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None):
+    def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
         if ax is None: ax = plt.gca()
         arg = self.last_arg
         if minuit is not None: arg = minuit.args
@@ -486,11 +486,11 @@ cdef class BinnedChi2:
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             chi2 = self(*self.last_arg)
             txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
-            print txt
+            if print_par: print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
     
-    def show(self,*arg):
-        self.draw(*arg)
+    def show(self,*arg,**kwd):
+        self.draw(*arg,**kwd)
         plt.show()
 
 cdef class BinnedPoisson:
@@ -541,7 +541,7 @@ cdef class BinnedPoisson:
                         self.binwidth,
                         arg, self.badvalue)
 
-    def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None):
+    def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
         if ax is None: ax = plt.gca()
         arg = self.last_arg
         if minuit is not None: arg = minuit.args
@@ -568,10 +568,10 @@ cdef class BinnedPoisson:
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             chi2 = self(*self.last_arg)
             txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
-            print txt
+            if print_par: print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
 
-    def show(self,*arg):
-        self.draw(*arg)
+    def show(self,*arg,**kwd):
+        self.draw(*arg,**kwd)
         plt.show()
 

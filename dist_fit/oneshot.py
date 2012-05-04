@@ -97,12 +97,16 @@ def try_uml(f,data,bins=40,fbins=1000,*arg,**kwd):
     ret = {k:v for k,v in zip(vnames,minarg)}
     return ret
     
-def try_chi2(f,data,bins=40,fbins=1000,*arg,**kwd):
+def try_chi2(f,data,weights=None,bins=40,fbins=1000,show='both',*arg,**kwd):
     fom = BinnedChi2(f,data)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [ tuplize(kwd[name]) for name in vnames ]
-    h,e,_ = plt.hist(data,bins=bins,histtype='step')
+    h,e=None,None
+    if show=='both':
+        h,e,_ = plt.hist(data,bins=bins,histtype='step',weights=weights)
+    else:
+        h,e = np.histogram(data,bins=bins,weights=weights)
     bw = e[1]-e[0]
     vf = np.vectorize(f)
     vx = np.linspace(e[0],e[-1],fbins)

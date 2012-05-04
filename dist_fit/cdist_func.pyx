@@ -195,17 +195,21 @@ def crystalball(double x,double alpha,double n,double mean,double sigma):
 
 #Background stuff
 @cython.binding(True)
-def argus(double x, double c, double chi):
+def argus(double x, double c, double chi, double p):
     """
     unnormalized argus distribution
     see: http://en.wikipedia.org/wiki/ARGUS_distribution
     """
     if c<smallestdiv:
         return badvalue
+    if x>c:
+        return 0.
     cdef double xc = x/c
     cdef double xc2 = xc*xc
     cdef double ret = 0
-    ret = xc/c*sqrt(1-xc2)*exp(-0.5*chi*chi*(1-xc2))
+    
+    ret = xc/c*pow(1.-xc2,p)*exp(-0.5*chi*chi*(1-xc2))
+    
     return ret
 
 #Polynomials
