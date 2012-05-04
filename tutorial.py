@@ -140,7 +140,7 @@ def f(x,a,b,c):
     return a*x**2+b*x+c
 vf = vectorize(f)
 x=linspace(-3,3,100)
-y = vf(x,1,2,3)+randn(100)
+y = vf(x,1,2,3)+randn(100)#that line + gauassian of mean 0 width 1 to give it some fluctuation
 err = np.zeros(100)
 err.fill(1.)
 errorbar(x,y,err,fmt='.b')
@@ -161,13 +161,16 @@ to_minimize.draw(m)
 
 # <codecell>
 
-#fixing parameter is easy too
+#fixing parameter is easy to through minuit
 to_minimize = Chi2Regression(f,x,y,err)
-m=minuit.Minuit(to_minimize,c=2,fix_c=True)#just that
+m=minuit.Minuit(to_minimize,c=3.,fix_c=True)#just that
 m.migrad()
 print m.values
-print m.errors
+print m.errors#yep error on c is the default one
 to_minimize.draw(m)
+
+# <codecell>
+
 
 # <codecell>
 
