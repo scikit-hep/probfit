@@ -11,7 +11,7 @@ import minuit
 
 #it defines some c function(no python call)
 #will wrap this one soon this shows the argument of the function
-print crystalball.func_code.co_varnames[:crystalball.func_code.co_argcount]
+print describe(crystalball)# this shows all the parameter name
 vc = np.vectorize(crystalball)
 x = linspace(-1,2,100)
 plot(x,vc(x,1,1,1,1))
