@@ -150,10 +150,14 @@ cdef class Polynomial:
         cdef double ret=0.
         cdef int iarg
         cdef int numarg = self.order+1 #number of coefficient
+        cdef int i
         for i in range(numarg):
             iarg = i+1
             t = arg[iarg]
-            ret += pow(x,i)*t
+            if i > 0:
+                ret+=pow(x,i)*t
+            else:#avoid 0^0
+                ret += t
         return ret
 
 #peaking stuff
