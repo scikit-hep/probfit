@@ -196,3 +196,6 @@ m=minuit.Minuit(to_minimize)
 m.migrad()
 to_minimize.draw(m)
 
+# <codecell>
+
+
