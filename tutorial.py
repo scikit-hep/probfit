@@ -6,6 +6,7 @@
 from dist_fit import *
 import numpy as np
 import minuit
+import UserDict
 
 # <codecell>
 
@@ -171,7 +172,27 @@ to_minimize.draw(m)
 
 # <codecell>
 
+#there are also nifty arbitary order polynomial functor
+p = Polynomial(2)
+print describe(p)
+print describe(Polynomial(['a','b','c','d']))#name your parameter if you feel like it
+vp = vectorize(p)
+x = linspace(-10,10,100)
+y = vp(x,3,0,2)
+plot(x,y);
 
 # <codecell>
 
+x=linspace(-3,3,100)
+y=vp(x,1,2,3)+randn(100)#that line + gauassian of mean 0 width 1 to give it some fluctuation
+err = np.zeros(100)
+err.fill(1.)
+errorbar(x,y,err,fmt='.b');
+
+# <codecell>
+
+to_minimize = Chi2Regression(p,x,y,err)
+m=minuit.Minuit(to_minimize)
+m.migrad()
+to_minimize.draw(m)
 

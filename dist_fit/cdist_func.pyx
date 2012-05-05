@@ -121,6 +121,41 @@ cdef class Convolve:#with gy cache
         
         return ret
 
+cdef class Polynomial:
+    cdef int order
+    cdef public object func_code
+    cdef public object func_defaults
+    def __init__(self,order,xname='x'):
+        """
+        User can supply order as integer in which case it uses (c_0....c_n+1) default
+        or the list of coefficient name which the first one will be the lowest order and the last one will be the highest order
+        """
+        varnames = None
+        argcount = 0
+        if isinstance(order, int):
+            if order<0 : raise ValueError('order must be >=0')
+            self.order = order
+            varnames = ['c_%d'%i for i in range(order+1)]
+        else: #use supply list of coeffnames #to do check if it's list of string
+            if len(order)<=0: raise ValueError('need at least one coefficient')
+            self.order=len(order)-1 #yep -1 think about it
+            varnames = order
+        varnames.insert(0,xname) #insert x in front
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+    
+    def __call__(self,*arg):
+        cdef double x = arg[0]
+        cdef double t
+        cdef double ret=0.
+        cdef int iarg
+        cdef int numarg = self.order+1 #number of coefficient
+        for i in range(numarg):
+            iarg = i+1
+            t = arg[iarg]
+            ret += pow(x,i)*t
+        return ret
+
 #peaking stuff
 @cython.binding(True)
 def doublegaussian(double x, double mean, double sigmal, double sigmar):
@@ -180,7 +215,7 @@ def crystalball(double x,double alpha,double n,double mean,double sigma):
         ret = badvalue
     elif fabs(alpha) < smallestdiv:
         ret = badvalue
-    elif n<0:
+    elif n<1.:
         ret = badvalue
     else:
         d = (x-mean)/sigma
@@ -352,7 +387,7 @@ cdef class Normalize:
         cdef double x
         n = self._compute_normalization(*arg)
         x = self.f(*arg)
-        if n < 1e-17: 
+        if n < 1e-100: 
             print 'Potential float erorr:', arg
         return x/n
 
