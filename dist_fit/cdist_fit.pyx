@@ -397,7 +397,7 @@ cdef class Chi2Regression:
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             if print_par: print txt
             chi2 = self(*self.last_arg)
-            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof,chi2,self.ndof)
             plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
   
     def show(self,*arg):
@@ -443,7 +443,7 @@ cdef class BinnedChi2:
             raise ValueError('some bins are too small to do a chi2 fit. change your range')
         self.bins = bins
         self.badvalue = badvalue
-        self.ndof = self.bins-(self.func_code.co_argcount-1)
+        self.ndof = self.bins-(self.func_code.co_argcount-1)#fix this taking care of fixed parameter
     
     #lazy mid point implementation
     def __call__(self,*arg):
@@ -485,7 +485,7 @@ cdef class BinnedChi2:
                 err = minu.errors[k]
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             chi2 = self(*self.last_arg)
-            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
+            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof,chi2,self.ndof)
             if print_par: print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
     
