@@ -341,10 +341,29 @@ cdef class Add2Pdf:
     cdef g
     cdef fpos
     cdef gpos
+
+    def __init__(self,f,g):
+        self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
+        self.func_defaults=None
+        self.f=f
+        self.g=g
+
+    def __call__(self,*arg):
+        farg = construct_arg(arg,self.fpos)
+        garg = construct_arg(arg,self.gpos)
+        return self.f(*farg)+self.g(*garg)
+
+cdef class Add2PdfNorm:
+    cdef public object func_code
+    cdef public object func_defaults
+    cdef f
+    cdef g
+    cdef fpos
+    cdef gpos
     
     def __init__(self,f,g,facname='k_f'):
         self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
-        self.func_code.append('fac')
+        self.func_code.append(facname)
         self.func_defaults=None
         self.f=f
         self.g=g
@@ -365,7 +384,9 @@ cdef class Normalize:
     cdef public object func_code
     cdef public object func_defaults
     cdef int ndep
-    def __init__(self,f,range,prmt=None,nint=1000,normx=None):
+    cdef int warnfloat
+    cdef int floatwarned
+    def __init__(self,f,range,prmt=None,nint=1000,normx=None,warnfloat=1):
         """
         normx [optional array] adaptive step for dependent variable
         """
@@ -384,15 +405,17 @@ cdef class Normalize:
         self.func_code = FakeFuncCode(f,prmt)
         self.ndep = 1#TODO make the code doesn't depend on this assumption
         self.func_defaults = None #make vectorize happy
-
+        self.warnfloat=warnfloat
+        self.floatwarned=0
     def __call__(self,*arg):
         #print arg
         cdef double n 
         cdef double x
         n = self._compute_normalization(*arg)
         x = self.f(*arg)
-        if n < 1e-100: 
+        if self.floatwarned < self.warnfloat  and n < 1e-100: 
             print 'Potential float erorr:', arg
+            self.floatwarned+=1
         return x/n
 
     def _compute_normalization(self,*arg):
