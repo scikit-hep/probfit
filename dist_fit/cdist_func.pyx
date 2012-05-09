@@ -251,6 +251,25 @@ def argus(double x, double c, double chi, double p):
     
     return ret
 
+@cython.binding(True)
+def cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L, double alpha_R):
+    """
+    unnormalized cruijff function
+    """
+    cdef double dm2 = (x-m0)*(x-m0)
+    cdef double demon=0.
+    cdef double ret=0.
+    if x<m0:
+        denom = 2*sigma_L*sigma_L+alpha_L*dm2
+        if denom<smallestdiv:
+            return 0.
+        return exp(-dm2/denom)
+    else:
+        denom = 2*sigma_R*sigma_R+alpha_R*dm2
+        if denom<smallestdiv:
+            return 0.
+        return exp(-dm2/denom)
+
 #Polynomials
 @cython.binding(True)
 def linear(double x, double m, double c):
