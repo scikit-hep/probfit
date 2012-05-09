@@ -14,7 +14,12 @@ cdef double cpoisson(double x, double lmbda):
     
 cdef double clogPoisson(double x, double lmbda):
     cdef double ret
-    ret = x*log(lmbda)-lmbda-lgamma(x+1)
+    if x<1e-6:
+        #ignore lambda to avoid log(supersmallnumber)*supersmallnumber = some random number with 0 siginificant digit
+        #this is the right limit
+        ret = -lmbda-lgamma(x+1)
+    else:
+        ret = x*log(lmbda)-lmbda-lgamma(x+1)
     return ret
 
 cdef double cgauss(double x, double mean, double sigma):
