@@ -61,14 +61,3 @@ cdef class FakeFunc:
         self.func_defaults = f.func_defaults
     def __call__(self,*arg):
         return self.f(*arg)
-
-#fcn helper
-cdef class FCN:
-    cdef f
-    def __init__(self,f):
-        self.f = f
-    def __call__(self,npar,gin,f,par,flag):
-        #FCN(Int_t&npar, Double_t*gin, Double_t&f, Double_t*par, Int_t flag)
-        p = tuple((par[i] for i in range(npar[0])))
-        ret =self.f(*p)
-        f[0] = ret
