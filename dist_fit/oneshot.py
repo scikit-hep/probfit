@@ -10,13 +10,11 @@ def randfr(r):
     a = r[0]
     return np.random.ranf()*(b-a)+a
 
-def fit_uml(f,data,quiet=False,*arg,**kwd):
+def fit_uml(f, data, quiet=False, printlevel=0, *arg, **kwd):
     uml = UnbinnedML(f,data)
-    m = Minuit(uml,**kwd)
-    m.up=0.5
-    m.strategy=2
-    m.printMode=1
-
+    m = Minuit(uml,printlevel=printlevel,**kwd)
+    m.set_strategy(2)
+    m.set_up(0.5)
     m.migrad()
     if not m.migrad_ok() or not m.matrix_accurate():
         if not quiet:
@@ -25,12 +23,11 @@ def fit_uml(f,data,quiet=False,*arg,**kwd):
             print m.values
     return (uml,m)
 
-def fit_binx2(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
+def fit_binx2(f,data,bins=30, range=None, printlevel=0, quiet=False, *arg, **kwd):
     uml = BinnedChi2(f,data,bins=bins,range=range)
-    m = Minuit(uml,**kwd)
-    m.strategy=2
-    m.printMode=1
-
+    m = Minuit(uml,printlevel=printlevel,**kwd)
+    m.set_strategy(2)
+    m.set_up(1)
     m.migrad()
     if not m.migrad_ok() or not m.matrix_accurate():
         if not quiet:
@@ -39,14 +36,11 @@ def fit_binx2(f,data,bins=30, range=None, quiet=False,*arg,**kwd):
             print m.values
     return (uml,m)
 
-def fit_binpoisson(f,data,bins=30, range=None, quiet=False,maxcalls=None,printmode=1,*arg,**kwd):
+def fit_binpoisson(f,data,bins=30, range=None, quiet=False, printlevel=0, *arg, **kwd):
     uml = BinnedPoisson(f,data,bins=bins,range=range)
-    m = Minuit(uml,**kwd)
-    m.up=0.5
-    m.strategy=2
-    m.printMode=printmode
-    m.maxcalls=maxcalls
-    
+    m = Minuit(uml,printlevel=printlevel,**kwd)
+    m.set_strategy(2)
+    m.set_up(0.5)
     m.migrad()
     if not m.migrad_ok() or not m.matrix_accurate():
         if not quiet:
