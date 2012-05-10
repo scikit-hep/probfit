@@ -83,10 +83,8 @@ uml.draw(minu)
 # <codecell>
 
 #now what if things doesn't fit
-#it will throw error and plot what it have so far
-#so give it a sensible starting point and limit
-#these error include error matrix not accurate not positive definite edm problem and etc.
 uml, minu = fit_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=3.)
+print minu.migrad_ok(),minu.matrix_accurate()
 
 # <codecell>
 

@@ -1,7 +1,7 @@
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport exp,pow,fabs,log,tgamma,lgamma
+from libc.math cimport exp,pow,fabs,log,tgamma,lgamma,log1p
 from matplotlib import pyplot as plt
 from .common import *
 from cython.parallel import prange, parallel, threadid
@@ -9,17 +9,27 @@ import multiprocessing as mp
 
 cdef double cpoisson(double x, double lmbda):
     cdef double ret
-    ret = pow(lmbda,k)*exp(-1*lmbda)/tgamma(x+1)
+    ret = pow(lmbda,x)*exp(-1*lmbda)/tgamma(x+1)
     return ret
     
 cdef double clogPoisson(double x, double lmbda):
     cdef double ret
-    if x<1e-6:
-        #ignore lambda to avoid log(supersmallnumber)*supersmallnumber = some random number with 0 siginificant digit
-        #this is the right limit
-        ret = -lmbda-lgamma(x+1)
+    cdef double dx =0
+    cdef double r = 0.01
+    if lmbda<0:
+        print 'BADDDD lambda',lmbda,x
+    if x < lmbda*r:
+        #use interpolation to avoid x/lambda precision problem
+        dx = (x-lmbda*r)
+        ret = -1*( 1./(r*lmbda)*dx*dx + log(r)*dx - lmbda*(r-r*log(r)-1) )
     else:
-        ret = x*log(lmbda)-lmbda-lgamma(x+1)
+        #note that x can't be zero here since lmbda>0 and x>lmbda/2
+        if lmbda > x:
+            dx = (x-lmbda)/lmbda #don't expand this we need precision
+            ret = -x*log1p(dx) - (lmbda-x)
+        else:
+            dx = (lmbda-x)/x #don't expand this we need precision
+            ret = x*log1p(dx) - (lmbda-x)
     return ret
 
 cdef double cgauss(double x, double mean, double sigma):
