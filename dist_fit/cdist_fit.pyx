@@ -396,7 +396,7 @@ cdef class Chi2Regression:
         
     def __call__(self,*arg):
         self.last_arg = arg
-        return compute_chi2_f(self.f,self.x,self.y,self.error,self.weights,arg)/self.ndof
+        return compute_chi2_f(self.f,self.x,self.y,self.error,self.weights,arg)
 
     def draw(self,minuit=None,parmloc=(0.05,0.95),print_par=False):
         arg = self.last_arg
