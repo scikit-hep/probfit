@@ -6,54 +6,58 @@ from matplotlib import pyplot as plt
 from .common import *
 from cython.parallel import prange, parallel, threadid
 import multiprocessing as mp
+from warnings import warn
+from cdist_func cimport *
+cdef extern from "math.h":
+    bint isnan(double x)
 
-cdef double cpoisson(double x, double lmbda):
-    cdef double ret
-    ret = pow(lmbda,x)*exp(-1*lmbda)/tgamma(x+1)
-    return ret
-    
-cdef double clogPoisson(double x, double lmbda):
-    cdef double ret
-    cdef double dx =0
-    cdef double r = 0.01
-    if lmbda<0:
-        print 'BADDDD lambda',lmbda,x
-    if x < lmbda*r:
-        #use interpolation to avoid x/lambda precision problem
-        dx = (x-lmbda*r)
-        ret = -1*( 1./(r*lmbda)*dx*dx + log(r)*dx - lmbda*(r-r*log(r)-1) )
-    else:
-        #note that x can't be zero here since lmbda>0 and x>lmbda/2
-        if lmbda > x:
-            dx = (x-lmbda)/lmbda #don't expand this we need precision
-            ret = -x*log1p(dx) - (lmbda-x)
+
+cdef double compute_bin_lh_f(f, 
+                    np.ndarray[np.double_t] edges,
+                    np.ndarray[np.double_t] h, #histogram,
+                    np.ndarray[np.double_t] w2,
+                    double N, #sum of h
+                    tuple arg, double badvalue, 
+                    bint extend,bint use_sumw2) except *:
+    cdef int n = len(edges)
+    cdef np.ndarray[np.double_t] fedges = cvectorize_f(f,edges,arg)
+    cdef np.ndarray[np.double_t] midvalues = (fedges[1:]+fedges[:-1])/2
+    cdef double ret = 0.
+    cdef double bw = 0.
+    cdef double E = cintegrate1d(f,(edges[0],edges[-1]),10000,arg)
+    for i in range(n-1):#h has length of n-1
+        #ret -= h[i]*log(midvalues[i])#non zero subtraction
+        if not extend:
+            bw = edges[i+1]-edges[i]
+            if not use_sumw2:
+                ret -= cxlogyx(h[i],midvalues[i]*N*bw)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
+            else:
+                ret -= cwlogyx(w2[i],midvalues[i]*N*bw,h[i])
         else:
-            dx = (lmbda-x)/x #don't expand this we need precision
-            ret = x*log1p(dx) - (lmbda-x)
+            #print 'h',h[i],'midvalues',midvalues[i]*bw
+            bw = edges[i+1]-edges[i]
+            if not use_sumw2:
+                ret -= cxlogyx(h[i],midvalues[i]*bw)+(h[i]-midvalues[i]*bw)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
+            else:
+                ret -= cwlogyx(w2[i],midvalues[i]*bw,h[i])
     return ret
+
 
 cdef double cgauss(double x, double mean, double sigma):
     return 1/sqrt(2*pi*sigma)*exp((x-mean)*(x-mean)/sigma/sigma/2.);
-    
-cdef double compute_bin_poisson_f(f,
-                np.ndarray[np.double_t] x,np.ndarray[np.double_t] y,
-                np.ndarray[np.double_t] binwidth,
-                tuple arg, double badvalue) except *:
-    
+
+
+cdef np.ndarray[np.double_t] midvalues(f,np.ndarray[np.double_t]edges,tuple arg):
+    cdef int n = len(edges)
     cdef int i
-    cdef int datalen = len(x)
-    cdef double fx
-    cdef double ret=0
-    cdef double bw
-    
-    for i in range(datalen):
-        bw = binwidth[i]
-        fx = f(x[i],*arg)*bw
-        if fx < 0:
-            return badvalue
-        else:
-            ret -= clogPoisson(y[i],fx)
+    cdef np.ndarray[np.double_t] ret=np.zeros(n-1)
+    cdef np.ndarray[np.double_t] tmp=np.zeros(n)
+    for i in range(n):
+        tmp[i] = f(edges[i],*arg)
+    for i in range(n-1):
+        ret[i] = (tmp[i]+tmp[i+1])/2
     return ret
+
 
 cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
     cdef int i=0
@@ -87,6 +91,7 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
                 ret+=log(lh)*w_[i]        
     return -1*ret
 
+
 cdef double compute_chi2_f(f,np.ndarray[np.double_t] x,np.ndarray[np.double_t] y ,
                 np.ndarray[np.double_t]error,np.ndarray[np.double_t]weights,tuple arg) except *:
     cdef int usew = 1 if weights is not None else 0
@@ -110,6 +115,7 @@ cdef double compute_chi2_f(f,np.ndarray[np.double_t] x,np.ndarray[np.double_t] y
             diff*=weights[i]
         ret += diff
     return ret
+
 
 cdef double compute_bin_chi2_f(f,
                 np.ndarray[np.double_t] x,np.ndarray[np.double_t] y,
@@ -139,6 +145,7 @@ cdef double compute_bin_chi2_f(f,
         ret += diff
     return ret
 
+
 def compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x) :
 
     cdef int i
@@ -155,6 +162,7 @@ def compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x) :
         bw = x[i]-x[i-1]
         ret[i] = 0.5*(lpdf+rpdf)*bw + ret[i-1]
     return ret
+
 
 #invert cdf useful for making toys
 def invert_cdf(np.ndarray[np.double_t] r, np.ndarray[np.double_t] cdf, np.ndarray[np.double_t] x):
@@ -178,8 +186,7 @@ def invert_cdf(np.ndarray[np.double_t] r, np.ndarray[np.double_t] cdf, np.ndarra
         minv = (rx-lx)/(ry-ly)
         ret[i] = minv*(r[i]-ly)+lx
     return ret
-    
-    
+
 
 cdef double compute_chi2(np.ndarray[np.double_t] actual, np.ndarray[np.double_t] expected, np.ndarray[np.double_t] err):
     cdef int i=0
@@ -199,6 +206,7 @@ cdef double compute_chi2(np.ndarray[np.double_t] actual, np.ndarray[np.double_t]
         ret +=ea
     return ret
 
+
 cdef class UnbinnedMLWorker:
     cdef np.ndarray data
     cdef public object f
@@ -211,6 +219,7 @@ cdef class UnbinnedMLWorker:
         self.badvalue=badvalue
     def __call__(self,*arg):
         return compute_nll(self.f,self.data,self.weights,arg,self.badvalue)
+
 
 cdef class UnbinnedMLP:
     """
@@ -303,16 +312,17 @@ cdef class UnbinnedMLP:
             print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)        
 
+
 cdef class UnbinnedML:
     cdef public object f
     cdef object weights
-
     cdef public object func_code
     cdef np.ndarray data
     cdef int data_len
     cdef double badvalue
     cdef tuple last_arg
     cdef object pool
+    
     def __init__(self, f, data ,weights=None,badvalue=-100000):
         #self.vf = np.vectorize(f)
         self.f = f
@@ -419,6 +429,7 @@ cdef class Chi2Regression:
         self.draw(*arg)
         plt.show()
 
+
 cdef class BinnedChi2:
     cdef public object f
     cdef public object vf
@@ -449,8 +460,8 @@ cdef class BinnedChi2:
         #sumw2 if requested
         if weights is not None and sumw2:
             w2 = weights*weights
-            sumw2 = np.hist(data,bins,range=range,weights=w2)
-            self.err = np.sqrt(sumw2)
+            sw2,_ = np.histogram(data,bins,range=range,weights=w2)
+            self.err = np.sqrt(sw2)
         else:
             self.err = np.sqrt(self.h)
         #check if error is too small
@@ -508,12 +519,15 @@ cdef class BinnedChi2:
         self.draw(*arg,**kwd)
         plt.show()
 
-cdef class BinnedPoisson:
+
+cdef class BinnedLH:
     cdef public object f
     cdef public object vf
     cdef public object func_code
     cdef np.ndarray h
-    cdef np.ndarray err
+    cdef np.ndarray w
+    cdef np.ndarray w2
+    cdef double N
     cdef np.ndarray edges
     cdef np.ndarray midpoints
     cdef np.ndarray binwidth
@@ -523,26 +537,31 @@ cdef class BinnedPoisson:
     cdef double badvalue
     cdef tuple last_arg
     cdef int ndof
-
-    def __init__(self, f, data, bins=40, weights=None,range=None, sumw2=False,badvalue=1000000):
+    cdef bint extended
+    cdef bint use_w2
+    def __init__(self, f, data, bins=40, weights=None, range=None, badvalue=1000000, 
+            extended=False, use_w2=False,use_normw=False):
         self.f = f
         self.vf = np.vectorize(f)
         self.func_code = FakeFuncCode(f,dock=True)
-        if range is None:
-            range = minmax(data)
+        self.use_w2 = use_w2
+        self.extended = extended
+        
+        if range is None: range = minmax(data)
         self.mymin,self.mymax = range 
-
+        self.w = float2double(weights)
+        if use_normw: self.w=self.w/np.sum(self.w)*len(self.w)
         h,self.edges = np.histogram(data,bins,range=range,weights=weights)
         self.h = float2double(h)
+        self.N = csum(self.h)
+
+        if weights is not None:
+            self.w2,_ = np.histogram(data,bins,range=range,weights=weights*weights)
+        else:
+            self.w2,_ = np.histogram(data,bins,range=range,weights=None)
+        self.w2 = float2double(self.w2)
         self.midpoints = mid(self.edges)
         self.binwidth = np.diff(self.edges)
-        #sumw2 if requested
-        if weights is not None and sumw2:
-            w2 = weights*weights
-            sumw2 = np.hist(data,bins,range=range,weights=w2)
-            self.err = np.sqrt(sumw2)
-        else:
-            self.err = np.sqrt(self.h)
         
         self.bins = bins
         self.badvalue = badvalue
@@ -550,18 +569,26 @@ cdef class BinnedPoisson:
 
     #lazy mid point implementation
     def __call__(self,*arg):
+        cdef double ret
         self.last_arg = arg
-        return compute_bin_poisson_f(self.f,
-                        self.midpoints ,self.h ,
-                        self.binwidth,
-                        arg, self.badvalue)
 
+        ret = compute_bin_lh_f(self.f, 
+                                self.edges,
+                                self.h, #histogram,
+                                self.w2,
+                                self.N, #sum of h
+                                arg, self.badvalue, 
+                                self.extended, self.use_w2)
+        return ret
+            
     def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
         if ax is None: ax = plt.gca()
         arg = self.last_arg
         if minuit is not None: arg = minuit.args
         m = mid(self.edges)
-        ax.errorbar(m,self.h,self.err,fmt='.')
+        #ax.errorbar(m,self.h,self.err,fmt='.')
+        ax.plot(m,self.h,'.')
+        
         #assume equal spacing
         #self.edges[0],self.edges[-1]
         bw = self.edges[1]-self.edges[0]
@@ -569,7 +596,7 @@ cdef class BinnedPoisson:
         #bw = np.diff(xs)
         xs = mid(xs)
         expy = self.vf(xs,*arg)*bw
-
+        if not self.extended: expy*=self.N
         ax.plot(xs,expy,'r-')
 
         minu = minuit

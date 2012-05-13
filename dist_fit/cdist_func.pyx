@@ -1,5 +1,5 @@
 cimport cython
-from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma
+from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma,log1p
 cdef double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062
 import numpy as np
 cimport numpy as np
@@ -398,34 +398,34 @@ cdef class Normalize:
     cdef double norm_cache
     cdef tuple last_arg
     cdef int nint
-    cdef np.ndarray midpoints
-    cdef np.ndarray binwidth
+    cdef np.ndarray edges
+    #cdef np.ndarray binwidth
+    cdef double binwidth
     cdef public object func_code
     cdef public object func_defaults
     cdef int ndep
     cdef int warnfloat
     cdef int floatwarned
-    def __init__(self,f,range,prmt=None,nint=1000,normx=None,warnfloat=1):
-        """
-        normx [optional array] adaptive step for dependent variable
-        """
+    
+    def __init__(self,f,bound,prmt=None,nint=1000,warnfloat=1):
         self.f = f
         self.norm_cache= 1.
         self.last_arg = None
-        self.nint = normx.size() if normx is not None else nint
-        normx = normx if normx is not None else np.linspace(range[0],range[1],nint)
-        if normx.dtype!=normx.dtype:
-            normx = normx.astype(np.float64)
+        self.nint = nint
+        # normx = normx if normx is not None else np.linspace(range[0],range[1],nint)
+        #         if normx.dtype!=normx.dtype:
+        #             normx = normx.astype(np.float64)
         #print range
         #print normx
-        self.midpoints = mid(normx)
+        self.edges = np.linspace(bound[0],bound[1],nint)
         #print self.midpoints
-        self.binwidth = np.diff(normx)
+        self.binwidth = self.edges[1]-self.edges[0]
         self.func_code = FakeFuncCode(f,prmt)
         self.ndep = 1#TODO make the code doesn't depend on this assumption
         self.func_defaults = None #make vectorize happy
         self.warnfloat=warnfloat
         self.floatwarned=0
+
     def __call__(self,*arg):
         #print arg
         cdef double n 
@@ -445,25 +445,82 @@ cdef class Normalize:
             pass
         else:
             self.last_arg = targ
-            self.norm_cache = integrate1d(self.f,self.nint,self.midpoints,self.binwidth,targ)
+            self.norm_cache = cintegrate1d_with_edges(self.f,self.edges,self.binwidth,targ)
         return self.norm_cache
 
-#to do runge kutta or something smarter
-def integrate1d(f, int nint, np.ndarray[np.double_t] midpoints, np.ndarray[np.double_t] binwidth, tuple arg=None):
-    cdef double ret = 0
-    cdef double bw = 0
-    cdef double mp =0
-    cdef int i=0
-    cdef double x=0
-    cdef double mpi=0
-    if arg is None: arg = tuple()
-    #print midpoints
-    #mid point sum
-    for i in range(nint-1):#mid has 1 less
-        bw = binwidth[i]
-        mp = midpoints[i]
-        x = f(mp,*arg)
 
-        ret += x*bw
-        #print mp,bw,mpi,x,ret
+def vectorize_f(f,x,arg):
+    return cvectorize_f(f,x,arg)
+
+
+cdef np.ndarray[np.double_t] cvectorize_f(f,np.ndarray[np.double_t] x,tuple arg):
+    cdef int i
+    cdef int n = len(x)
+    cdef np.ndarray[np.double_t] ret = np.empty(n)
+    for i in range(n):
+        ret[i]=f(x[i],*arg)
+    return ret
+
+
+def py_csum(x):
+    return csum(x)
+
+
+cdef double csum(np.ndarray x):
+    cdef int i
+    cdef np.ndarray[np.double_t] xd = x
+    cdef int n = len(x)
+    cdef double s=0.
+    for i in range(n):
+        s+=xd[i]
+    return s
+
+
+def integrate1d(f,tuple bound,int nint,tuple arg=None):
+    if arg is None: arg = tuple()
+    return cintegrate1d(f,bound,nint,arg)
+
+
+cdef cintegrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg):
+    cdef np.ndarray[np.double_t] y = cvectorize_f(f,edges,arg)
+    return csum(y*bw)-0.5*(y[0]+y[-1])*bw#trapezoid
+
+
+#to do runge kutta or something smarter
+cdef double cintegrate1d(f, tuple bound, int nint, tuple arg=None):
+    if arg is None: arg = tuple()
+    #vectorize_f
+    cdef double ret = 0
+    cdef np.ndarray[np.double_t] edges = np.linspace(bound[0],bound[1],nint)
+    #cdef np.ndarray[np.double_t] bw = edges[1:]-edges[:-1]
+    cdef double bw = edges[1]-edges[0]
+    return cintegrate1d_with_edges(f,edges,bw,arg)
+
+
+#compute x*log(y/x) to a good precision especially when y~x
+def xlogyx(x,y):
+    return cxlogyx(x,y)
+
+
+cdef double cxlogyx(double x,double y):
+    cdef double ret
+    if x<1e-100: return 0.
+    if x<y:
+        ret = x*log1p((y-x)/x)
+    else:
+        ret = -x*log1p((x-y)/y)
+    return ret
+
+
+def wlogyx(double w,double y, double x):
+    return cwlogyx(w,y,x)
+
+
+#compute w*log(y/x) where w < x and goes to zero faster than x
+cdef double cwlogyx(double w,double y, double x):
+    if x<1e-100: return 0.
+    if x<y:
+        ret = w*log1p((y-x)/x)
+    else:
+        ret = -w*log1p((x-y)/y)
     return ret

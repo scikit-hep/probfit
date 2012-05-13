@@ -1,1 +1,3 @@
-cd dist_fit; cython -a cdist_fit.pyx --line-directives --fast-fail; cython -a cdist_func.pyx --fast-fail --line-directives; cython -a common.pyx --fast-fail --line-directives
+cython -a --line-directives --fast-fail dist_fit/cdist_fit.pyx; 
+cython -a --line-directives --fast-fail dist_fit/cdist_func.pyx; 
+cython -a --line-directives --fast-fail dist_fit/common.pyx

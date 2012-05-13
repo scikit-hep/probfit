@@ -1,4 +1,4 @@
-from .cdist_fit import UnbinnedML, BinnedChi2,compute_cdf,invert_cdf,BinnedPoisson
+from .cdist_fit import UnbinnedML, BinnedChi2,compute_cdf,invert_cdf,BinnedLH
 from RTMinuit import Minuit
 from matplotlib import pyplot as plt
 import numpy as np
@@ -36,8 +36,11 @@ def fit_binx2(f,data,bins=30, range=None, printlevel=0, quiet=False, *arg, **kwd
             print m.values
     return (uml,m)
 
-def fit_binpoisson(f,data,bins=30, range=None, quiet=False, printlevel=0, *arg, **kwd):
-    uml = BinnedPoisson(f,data,bins=bins,range=range)
+def fit_binlh(f,data,bins=30, 
+        range=None, quiet=False, weights=None,use_w2=False,
+        printlevel=0,extended=False, 
+        *arg, **kwd):
+    uml = BinnedLH(f,data,bins=bins,range=range,weights=weights,use_w2=use_w2,extended=extended)
     m = Minuit(uml,printlevel=printlevel,**kwd)
     m.set_strategy(2)
     m.set_up(0.5)

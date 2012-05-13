@@ -17,6 +17,12 @@ def float2double(a):
     else:
         return a.astype(np.float64)
 
+def bool2int(b):
+    if b: 
+        return 1
+    else:
+        return 0
+
 class MinimalFuncCode:
     def __init__(self,arg):
         self.co_varnames = tuple(arg)

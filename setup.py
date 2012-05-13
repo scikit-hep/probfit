@@ -2,23 +2,25 @@ from distutils.core import setup, Extension
 import distutils.util
 import subprocess
 import numpy as np
-
+from Cython.Distutils import build_ext
 cdist_fit = Extension('dist_fit.cdist_fit',
-                    sources = ['dist_fit/cdist_fit.c'],
+                    sources = ['dist_fit/cdist_fit.pyx'],
                     include_dirs= [np.get_include()],
                     extra_link_args = [])
 
 cdist_func = Extension('dist_fit.cdist_func',
-        sources = ['dist_fit/cdist_func.c'],
+        sources = ['dist_fit/cdist_func.pyx'],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
 common = Extension('dist_fit.common',
-        sources = ['dist_fit/common.c'],
+        sources = ['dist_fit/common.pyx'],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
-setup (name = 'dist_fit',
+setup (
+       cmdclass={'build_ext':build_ext},
+       name = 'dist_fit',
        version = '1.00',
        description = 'Distribution Fitting/Regression Library',
        author='Piti Ongmongkolkul',
