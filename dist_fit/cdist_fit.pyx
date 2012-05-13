@@ -1,7 +1,7 @@
 cimport cython
 import numpy as np
 cimport numpy as np
-from libc.math cimport exp,pow,fabs,log,tgamma,lgamma,log1p
+from libc.math cimport exp,pow,fabs,log,tgamma,lgamma,log1p,sqrt
 from matplotlib import pyplot as plt
 from .common import *
 from cython.parallel import prange, parallel, threadid
@@ -19,27 +19,42 @@ cdef double compute_bin_lh_f(f,
                     double N, #sum of h
                     tuple arg, double badvalue, 
                     bint extend,bint use_sumw2) except *:
+    cdef int i
     cdef int n = len(edges)
+
     cdef np.ndarray[np.double_t] fedges = cvectorize_f(f,edges,arg)
     cdef np.ndarray[np.double_t] midvalues = (fedges[1:]+fedges[:-1])/2
     cdef double ret = 0.
     cdef double bw = 0.
     cdef double E = cintegrate1d(f,(edges[0],edges[-1]),10000,arg)
+    cdef double factor=0.
+    cdef double th=0.
+    cdef double tw=0.
+    cdef double tm=0.
     for i in range(n-1):#h has length of n-1
         #ret -= h[i]*log(midvalues[i])#non zero subtraction
+        bw = edges[i+1]-edges[i]
+        th = h[i]
+        tm = midvalues[i]
         if not extend:
-            bw = edges[i+1]-edges[i]
             if not use_sumw2:
-                ret -= cxlogyx(h[i],midvalues[i]*N*bw)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
+                ret -= cxlogyx(th,tm*N*bw)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
             else:
-                ret -= cwlogyx(w2[i],midvalues[i]*N*bw,h[i])
+                if w2[i]<1e-200: continue
+                tw = w2[i]
+                tw = sqrt(tw)
+                factor = th/tw
+                ret -= factor*cwlogyx(th,tm*N*bw,th)
         else:
             #print 'h',h[i],'midvalues',midvalues[i]*bw
-            bw = edges[i+1]-edges[i]
             if not use_sumw2:
-                ret -= cxlogyx(h[i],midvalues[i]*bw)+(h[i]-midvalues[i]*bw)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
+                ret -= cxlogyx(th,tm*bw)+(th-tm*bw)
             else:
-                ret -= cwlogyx(w2[i],midvalues[i]*bw,h[i])
+                if w2[i]<1e-200: continue
+                tw = w2[i]
+                tw = sqrt(tw)
+                factor = th/tw
+                ret -= factor*(cwlogyx(th,tm*bw,th)+(th-tm*bw))
     return ret
 
 
