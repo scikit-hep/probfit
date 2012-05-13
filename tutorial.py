@@ -110,8 +110,8 @@ dir(minu)
 # <codecell>
 
 #there is also binned poisson
-uml,minu = fit_binpoisson(encball,g,alpha=1.,n=2.,mean=1.,sigma=1.,N=7000.,
-    limit_n=(1.,10.),limit_sigma=(0.01,3),limit_mean=(0.7,1),quiet=False)
+uml,minu = fit_binlh(encball,g,alpha=1.,n=2.,mean=1.,sigma=1.,N=7000.,
+    limit_n=(1.,10.),limit_sigma=(0.01,3),limit_mean=(0.7,1),quiet=False,extended=True)
 uml.show(minu)
 
 # <codecell>
@@ -193,6 +193,9 @@ to_minimize = Chi2Regression(p,x,y,err)
 m=minuit.Minuit(to_minimize)
 m.migrad()
 to_minimize.draw(m)
+
+# <codecell>
+
 
 # <codecell>
 
