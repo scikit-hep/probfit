@@ -212,6 +212,8 @@ def draw_contour2d(fit,m,var1,var2,bins=50,bound1=None,bound2=None,lh=True):
     plt.clabel(CS)
     plt.xlabel(var1)
     plt.ylabel(var2)
+    plt.axhline(m.values[var2],color='k',ls='--')
+    plt.axvline(m.values[var1],color='k',ls='--')
     plt.grid(True)
     return x1s,x2s,y,CS
     
