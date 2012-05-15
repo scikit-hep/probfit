@@ -16,29 +16,52 @@ cdef double largestpow = 200
 cdef double maxnegexp = 200
 cdef class Normalize
 
-def merge_func_code(f,g):
-    nf = f.func_code.co_argcount
-    farg = f.func_code.co_varnames[:nf]
-    ng = g.func_code.co_argcount
-    garg = g.func_code.co_varnames[:ng]
+def merge_func_code(*arg):
+    all_arg = []
+    for f in arg:
+        nf = f.func_code.co_argcount
+        all_arg.append(f.func_code.co_varnames[:nf])
     
-    mergearg = []
-    #TODO: do something smarter
-    #first merge the list
-    for v in farg:
-        mergearg.append(v)
-    for v in garg:
-        if v not in farg:
-            mergearg.append(v)
+    #now merge it
+    #do something smarter
+    merge_arg = []
+    for a in all_arg:
+        for v in a:
+            if v not in merge_arg:
+                merge_arg.append(v)
     
-    #now build the map
-    fpos=[]
-    gpos=[]
-    for v in farg:
-        fpos.append(mergearg.index(v))
-    for v in garg:
-        gpos.append(mergearg.index(v))
-    return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
+    #build the map list of numpy int array
+    pos = []
+    for a in all_arg:
+        tmp = []
+        for v in a:
+            tmp.append(merge_arg.index(v))
+        pos.append(np.array(tmp,dtype=np.int))
+    return MinimalFuncCode(merge_arg), pos
+
+# def merge_func_code(f,g):
+#     nf = f.func_code.co_argcount
+#     farg = f.func_code.co_varnames[:nf]
+#     ng = g.func_code.co_argcount
+#     garg = g.func_code.co_varnames[:ng]
+#     
+#     mergearg = []
+#     #TODO: do something smarter
+#     #first merge the list
+#     for v in farg:
+#         mergearg.append(v)
+#     for v in garg:
+#         if v not in farg:
+#             mergearg.append(v)
+#     
+#     #now build the map
+#     fpos=[]
+#     gpos=[]
+#     for v in farg:
+#         fpos.append(mergearg.index(v))
+#     for v in garg:
+#         gpos.append(mergearg.index(v))
+#     return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
 
 cdef tuple cconstruct_arg(tuple arg, 
     np.ndarray fpos):
@@ -87,7 +110,7 @@ cdef class Convolve:#with gy cache
         self.vf = np.vectorize(f)
         self.vg = np.vectorize(g)
         self.set_gbound(gbound,nbins)
-        self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
+        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g)
         self.func_defaults = None
 
     def set_gbound(self,gbound,nbins):
@@ -371,32 +394,31 @@ cdef class Extend:
         cdef double fval = self.f(*arg[:-1])
         return N*fval
 
-cdef class Add2Pdf:
+cdef class AddPdf:
     cdef public object func_code
     cdef public object func_defaults
-    cdef f
-    cdef g
     cdef int arglen
-    cdef np.ndarray fpos
-    cdef np.ndarray gpos
-    cdef np.ndarray farg_buffer
-    cdef np.ndarray garg_buffer
-    
-    def __init__(self,f,g):
-        self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
+    cdef list allpos
+    cdef tuple allf
+    cdef int numf
+    def __init__(self,*arg):
+        self.func_code, self.allpos = merge_func_code(*arg)
         self.func_defaults=None
         self.arglen = self.func_code.co_argcount
-        self.f=f
-        self.g=g
-        self.farg_buffer = np.empty(len(self.fpos))
-        self.garg_buffer = np.empty(len(self.gpos))
-    
+        self.allf = arg
+        self.numf = len(self.allf)
+        
     def __call__(self,*arg):
-        cdef tuple farg = cconstruct_arg(arg,self.fpos)
-        cdef tuple garg = cconstruct_arg(arg,self.gpos)
-        cdef double fv = self.f(*farg)
-        cdef double gv = self.g(*garg)
-        cdef double ret = fv+gv
+        cdef tuple this_arg
+        cdef double ret = 0.
+        cdef double tmp
+        cdef int i
+        cdef np.ndarray thispos
+        for i in range(self.numf):
+            thispos = self.allpos[i]
+            this_arg = cconstruct_arg(arg,thispos)
+            tmp = self.allf[i](*this_arg)
+            ret+=tmp
         return ret
 
 cdef class Add2PdfNorm:
@@ -410,7 +432,7 @@ cdef class Add2PdfNorm:
     cdef np.ndarray farg_buffer
     cdef np.ndarray garg_buffer
     def __init__(self,f,g,facname='k_f'):
-        self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
+        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g)
         self.func_code.append(facname)
         self.arglen = self.func_code.co_argcount
         self.func_defaults=None

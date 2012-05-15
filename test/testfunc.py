@@ -60,7 +60,7 @@ class TestFunc(unittest.TestCase):
         pos = np.array([0,2,4],dtype=np.int)
         carg = construct_arg(arg,pos)
         expected = (1,3,5)
-        print carg
+        #print carg
         for i in range(len(carg)):
             self.assertAlmostEqual(carg[i],expected[i])
         # 
@@ -77,6 +77,31 @@ class TestFunc(unittest.TestCase):
         #         self.assertAlmostEqual(a[i],expected[i])
         #     self.assertEqual(len(a),2)
         #     
+    def test_merge_func_code(self):
+        def f(x,y,z): return x+y+z
+        def g(x,a,b): return x+a+b
+        def h(x,c,d): return x+c+d
         
+        funccode, [pf,pg,ph] = merge_func_code(f,g,h)
+        self.assertEqual(funccode.co_varnames,('x','y','z','a','b','c','d'))
+        exp_pf = [0,1,2]
+        for i in range(len(pf)): self.assertAlmostEqual(pf[i],exp_pf[i])
+        exp_pg = [0,3,4]
+        for i in range(len(pf)): self.assertAlmostEqual(pg[i],exp_pg[i])
+        exp_ph = [0,5,6]
+        for i in range(len(pf)): self.assertAlmostEqual(ph[i],exp_ph[i])
+
+    def test_add_pdf(self):
+        def f(x,y,z): return x+y+z
+        def g(x,a,b): return 2*(x+a+b)
+        def h(x,c,d): return 3*(x+c+d)
+        
+        A = AddPdf(f,g,h)
+        self.assertEqual(describe(A),('x','y','z','a','b','c','d'))
+        
+        ret = A(1,2,3,4,5,6,7)
+        expected = f(1,2,3)+g(1,4,5)+h(1,6,7)
+        self.assertAlmostEqual(ret,expected)
+
 if __name__ == '__main__':
     unittest.main()
