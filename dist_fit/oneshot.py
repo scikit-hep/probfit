@@ -203,7 +203,7 @@ def guess_initial(alg,f,data,ntry=100,guessrange=(-100,100),draw=False,*arg,**kw
         fom.draw()
     return ret
 
-def draw_contour2d(fit,m,var1,var2,bins=50,bound1=None,bound2=None,lh=True):
+def draw_contour2d(fit,m,var1,var2,bins=12,bound1=None,bound2=None,lh=True):
     x1s,x2s,y = val_contour2d(fit,m,var1,var2,bins=bins,bound1=bound1,bound2=bound2)
     y-=np.min(y)
     v = np.array([0.5,1,1.5])
@@ -217,7 +217,7 @@ def draw_contour2d(fit,m,var1,var2,bins=50,bound1=None,bound2=None,lh=True):
     plt.grid(True)
     return x1s,x2s,y,CS
     
-def val_contour2d(fit,m,var1,var2,bins=50,bound1=None,bound2=None):
+def val_contour2d(fit,m,var1,var2,bins=12,bound1=None,bound2=None):
     assert(var1 != var2)
     if bound1 is None: bound1 = (m.values[var1]-2*m.errors[var1],m.values[var1]+2*m.errors[var1])
     if bound2 is None: bound2 = (m.values[var2]-2*m.errors[var2],m.values[var2]+2*m.errors[var2])
