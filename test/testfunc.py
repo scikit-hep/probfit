@@ -60,8 +60,23 @@ class TestFunc(unittest.TestCase):
         pos = np.array([0,2,4],dtype=np.int)
         carg = construct_arg(arg,pos)
         expected = (1,3,5)
+        print carg
         for i in range(len(carg)):
             self.assertAlmostEqual(carg[i],expected[i])
-    
+        # 
+        # def test_tuple2array(self):
+        #     t = (1.,2.,3.)
+        # 
+        #     a = tuple2array(t,3,0)
+        #     for i in range(len(t)):
+        #         self.assertAlmostEqual(a[i],t[i])
+        #     
+        #     expected = [2.,3.]
+        #     a = tuple2array(t,3,1)
+        #     for i in range(len(a)):
+        #         self.assertAlmostEqual(a[i],expected[i])
+        #     self.assertEqual(len(a),2)
+        #     
+        
 if __name__ == '__main__':
     unittest.main()

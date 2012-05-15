@@ -1,4 +1,6 @@
 cimport cython
+from cpython cimport PyFloat_AsDouble,PyTuple_GetItem,PyTuple_GET_ITEM, PyObject, PyTuple_SetItem,PyTuple_SET_ITEM, PyTuple_New,Py_INCREF
+
 from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma,log1p
 cdef double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062
 import numpy as np
@@ -38,18 +40,25 @@ def merge_func_code(f,g):
         gpos.append(mergearg.index(v))
     return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
 
-cpdef tuple construct_arg(tuple arg, np.ndarray[np.int_t] fpos):
-    cdef int size = len(fpos)
-    cdef np.npy_intp *dims = [len(fpos)]
-    cdef np.ndarray[np.double_t] tmp = PyArray_SimpleNew(1,dims,np.NPY_DOUBLE)
-    cdef int i
-    cdef double tmp_arg
-    cdef int itmp
+cdef tuple cconstruct_arg(tuple arg, 
+    np.ndarray fpos):
+    cdef int size = fpos.shape[0]    
+    cdef int i,itmp
+    cdef np.int_t* fposdata = <np.int_t*>fpos.data
+    cdef tuple ret = PyTuple_New(size)
+    cdef object tmpo
     for i in range(size):
-         itmp = fpos[i]
-         tmp_arg = arg[itmp]
-         tmp[i] = tmp_arg
-    return tuple(tmp)
+        itmp = fposdata[i]
+        tmpo = <object>PyTuple_GET_ITEM(arg, itmp)
+        Py_INCREF(tmpo)
+        #Py_INCREF(tmpo) #first one for the case second one for the steal
+        PyTuple_SET_ITEM(ret, i, tmpo)
+    return ret
+
+def construct_arg(tuple arg, 
+        np.ndarray[np.int_t] fpos):
+    return cconstruct_arg(arg, fpos)
+
 
 def adjusted_bound(bound,bw):
     numbin = ceil((bound[1]-bound[0])/bw)
@@ -367,18 +376,24 @@ cdef class Add2Pdf:
     cdef public object func_defaults
     cdef f
     cdef g
-    cdef fpos
-    cdef gpos
-
+    cdef int arglen
+    cdef np.ndarray fpos
+    cdef np.ndarray gpos
+    cdef np.ndarray farg_buffer
+    cdef np.ndarray garg_buffer
+    
     def __init__(self,f,g):
         self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
         self.func_defaults=None
+        self.arglen = self.func_code.co_argcount
         self.f=f
         self.g=g
-
+        self.farg_buffer = np.empty(len(self.fpos))
+        self.garg_buffer = np.empty(len(self.gpos))
+    
     def __call__(self,*arg):
-        cdef tuple farg = construct_arg(arg,self.fpos)
-        cdef tuple garg = construct_arg(arg,self.gpos)
+        cdef tuple farg = cconstruct_arg(arg,self.fpos)
+        cdef tuple garg = cconstruct_arg(arg,self.gpos)
         cdef double fv = self.f(*farg)
         cdef double gv = self.g(*garg)
         cdef double ret = fv+gv
@@ -387,22 +402,28 @@ cdef class Add2Pdf:
 cdef class Add2PdfNorm:
     cdef public object func_code
     cdef public object func_defaults
+    cdef int arglen
     cdef f
     cdef g
-    cdef fpos
-    cdef gpos
-    
+    cdef np.ndarray fpos
+    cdef np.ndarray gpos
+    cdef np.ndarray farg_buffer
+    cdef np.ndarray garg_buffer
     def __init__(self,f,g,facname='k_f'):
         self.func_code, self.fpos, self.gpos = merge_func_code(f,g)
         self.func_code.append(facname)
+        self.arglen = self.func_code.co_argcount
         self.func_defaults=None
         self.f=f
         self.g=g
+        self.farg_buffer = np.empty(len(self.fpos))
+        self.garg_buffer = np.empty(len(self.gpos))
+        
     
     def __call__(self,*arg):
         cdef double fac = arg[-1]
-        cdef tuple farg = construct_arg(arg,self.fpos)
-        cdef tuple garg = construct_arg(arg,self.gpos)
+        cdef tuple farg = cconstruct_arg(arg,self.fpos)
+        cdef tuple garg = cconstruct_arg(arg,self.gpos)
         cdef double fv = self.f(*farg)
         cdef double gv = self.g(*garg)
         cdef double ret = fac*fv+(1.-fac)*gv
