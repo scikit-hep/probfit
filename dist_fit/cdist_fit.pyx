@@ -626,7 +626,12 @@ cdef class BinnedLH:
         if minu is not None:
             #build text
             txt = u'';
-            for k,v  in minu.values.items():
+            sortk = minu.values.keys()
+            sortk.sort()
+            #for k,v  in minu.values.items():
+            val = minu.values
+            for k in sortk:
+                v = val[k]
                 err = minu.errors[k]
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             #chi2 = self(*self.last_arg)

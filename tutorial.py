@@ -77,7 +77,7 @@ def tofit(x,m1,s1,m2,s2,a):
 # <codecell>
 
 #see all good
-uml, minu = fit_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=0.5)
+uml, minu = fit_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=.6)
 uml.draw(minu)
 
 # <codecell>
@@ -131,6 +131,12 @@ print besttry
 #a nice trick is to use keyword expansion on the return argument
 uml,minu = fit_uml(tofit,twopeak,**besttry)
 uml.show(minu)
+
+# <codecell>
+
+#showing contour is simple as well
+x,y = val_contour(uml,minu,'m1')
+plot(x,y)
 
 # <codecell>
 

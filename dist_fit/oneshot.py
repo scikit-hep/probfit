@@ -201,3 +201,19 @@ def guess_initial(alg,f,data,ntry=100,guessrange=(-100,100),draw=False,*arg,**kw
         fom(*minparam)
         fom.draw()
     return ret
+
+def val_contour(fit,m,var,bound=None, step=None):
+    arg = list(m.args)
+    pos = m.var2pos[var]
+    val = m.values[var]
+    error = m.errors[var]
+    if bound is None: bound = (val-2*error,val+2*error)
+    if step is None: step=error/100.
+    
+    xs = np.arange(bound[0],bound[1],step)
+    ys = np.zeros(len(xs))
+    for i,x in enumerate(xs):
+        arg[pos] = x
+        ys[i] = fit(*arg)
+
+    return xs,ys
