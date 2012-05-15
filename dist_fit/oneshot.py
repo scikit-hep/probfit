@@ -38,10 +38,10 @@ def fit_binx2(f,data,bins=30, range=None, printlevel=0, quiet=False, *arg, **kwd
 
 def fit_binlh(f,data,bins=30, 
         range=None, quiet=False, weights=None,use_w2=False,
-        printlevel=0,extended=False, 
+        printlevel=0,pedantic=True,extended=False, 
         *arg, **kwd):
     uml = BinnedLH(f,data,bins=bins,range=range,weights=weights,use_w2=use_w2,extended=extended)
-    m = Minuit(uml,printlevel=printlevel,**kwd)
+    m = Minuit(uml,printlevel=printlevel,pedantic=pedantic,**kwd)
     m.set_strategy(2)
     m.set_up(0.5)
     m.migrad()

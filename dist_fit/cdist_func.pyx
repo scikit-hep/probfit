@@ -37,10 +37,17 @@ def merge_func_code(f,g):
         gpos.append(mergearg.index(v))
     return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
 
-def construct_arg(arg,fpos):
-    ret = list()
-    for i in fpos: ret.append(arg[i])
-    return tuple(ret)
+cpdef tuple construct_arg(tuple arg, np.ndarray[np.int_t] fpos):
+    cdef int size = len(fpos)
+    cdef np.ndarray[np.double_t] tmp = np.empty(size)
+    cdef int i
+    cdef double tmp_arg
+    cdef int itmp
+    for i in range(size):
+         itmp = fpos[i]
+         tmp_arg = arg[itmp]
+         tmp[i] = tmp_arg
+    return tuple(tmp)
 
 def adjusted_bound(bound,bw):
     numbin = ceil((bound[1]-bound[0])/bw)
@@ -368,9 +375,12 @@ cdef class Add2Pdf:
         self.g=g
 
     def __call__(self,*arg):
-        farg = construct_arg(arg,self.fpos)
-        garg = construct_arg(arg,self.gpos)
-        return self.f(*farg)+self.g(*garg)
+        cdef tuple farg = construct_arg(arg,self.fpos)
+        cdef tuple garg = construct_arg(arg,self.gpos)
+        cdef double fv = self.f(*farg)
+        cdef double gv = self.g(*garg)
+        cdef double ret = fv+gv
+        return ret
 
 cdef class Add2PdfNorm:
     cdef public object func_code
@@ -388,10 +398,13 @@ cdef class Add2PdfNorm:
         self.g=g
     
     def __call__(self,*arg):
-        fac = arg[-1]
-        farg = construct_arg(arg,self.fpos)
-        garg = construct_arg(arg,self.gpos)
-        return fac*self.f(*farg)+(1.-fac)*self.g(*garg)
+        cdef double fac = arg[-1]
+        cdef tuple farg = construct_arg(arg,self.fpos)
+        cdef tuple garg = construct_arg(arg,self.gpos)
+        cdef double fv = self.f(*farg)
+        cdef double gv = self.g(*garg)
+        cdef double ret = fac*fv+(1.-fac)*gv
+        return ret
 
 cdef class Normalize:
     cdef f

@@ -601,8 +601,16 @@ cdef class BinnedLH:
         arg = self.last_arg
         if minuit is not None: arg = minuit.args
         m = mid(self.edges)
-        #ax.errorbar(m,self.h,self.err,fmt='.')
-        ax.plot(m,self.h,'.')
+        if self.use_w2:
+            err = np.sqrt(self.w2)
+        else:
+            err = np.sqrt(self.h)
+
+        if self.extended:
+            ax.errorbar(m,self.h,err,fmt='.')
+        else:
+            scale = sum(self.h)
+            ax.errorbar(m,self.h/scale,err/scale,fmt='.')
         
         #assume equal spacing
         #self.edges[0],self.edges[-1]
@@ -611,7 +619,7 @@ cdef class BinnedLH:
         #bw = np.diff(xs)
         xs = mid(xs)
         expy = self.vf(xs,*arg)*bw
-        if not self.extended: expy*=self.N
+        if not self.extended: expy/=sum(expy)
         ax.plot(xs,expy,'r-')
 
         minu = minuit
