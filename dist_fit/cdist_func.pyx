@@ -1,7 +1,7 @@
 cimport cython
 from cpython cimport PyFloat_AsDouble,PyTuple_GetItem,PyTuple_GET_ITEM, PyObject, PyTuple_SetItem,PyTuple_SET_ITEM, PyTuple_New,Py_INCREF
 
-from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma,log1p
+from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma,log1p,abs
 cdef double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062
 import numpy as np
 cimport numpy as np
@@ -14,13 +14,45 @@ cdef double smallestdiv = 1e-10
 cdef double smallestln = 0.
 cdef double largestpow = 200
 cdef double maxnegexp = 200
+cdef double precision = 1e-16
 cdef class Normalize
 
-def merge_func_code(*arg):
+cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
+    #t=last_arg
+    #t2=arg
+    cdef double tmp1,tmp2
+    cdef int i,ind
+    cdef int tsize = len(t2)-t2_offset
+    cdef bint ret = 0 
+
+    for i in range(tsize):
+        ind = i+t2_offset
+        tmp1 = PyFloat_AsDouble(<object>PyTuple_GetItem(t1,i))
+        tmp2 =  PyFloat_AsDouble(<object>PyTuple_GetItem(t2,ind))
+        ret = abs(tmp1-tmp2) < precision
+        if not ret: break
+        
+    return ret
+
+cdef inline np.ndarray fast_empty(int size):
+    cdef np.npy_intp tsize = size
+    cdef np.ndarray[np.double_t] ret = PyArray_SimpleNew(1, &tsize, np.NPY_DOUBLE)
+    return ret
+
+def merge_func_code(*arg,prefix=None):
+    assert(prefix is None or len(prefix)==len(arg))
     all_arg = []
-    for f in arg:
+    for i,f in enumerate(arg):
         nf = f.func_code.co_argcount
-        all_arg.append(f.func_code.co_varnames[:nf])
+        tmp = []
+        first = True
+        for vn in f.func_code.co_varnames[:nf]:
+            newv = vn
+            if not first and prefix is not None:
+                newv = prefix[i]+newv
+            first = False
+            tmp.append(newv)
+        all_arg.append(tmp)
     
     #now merge it
     #do something smarter
@@ -401,23 +433,36 @@ cdef class AddPdf:
     cdef list allpos
     cdef tuple allf
     cdef int numf
-    def __init__(self,*arg):
-        self.func_code, self.allpos = merge_func_code(*arg)
+    cdef np.ndarray cache
+    cdef list argcache
+    cdef public int hit
+    
+    def __init__(self,*arg,prefix=None):
+        self.func_code, self.allpos = merge_func_code(*arg,prefix=prefix)
         self.func_defaults=None
         self.arglen = self.func_code.co_argcount
         self.allf = arg
         self.numf = len(self.allf)
-        
+        self.argcache=[None]*self.numf
+        self.cache = np.zeros(self.numf)
+        self.hit = 0
+    
     def __call__(self,*arg):
         cdef tuple this_arg
         cdef double ret = 0.
-        cdef double tmp
+        cdef double tmp = 0.
         cdef int i
         cdef np.ndarray thispos
         for i in range(self.numf):
             thispos = self.allpos[i]
             this_arg = cconstruct_arg(arg,thispos)
-            tmp = self.allf[i](*this_arg)
+            if self.argcache[i] is not None and fast_tuple_equal(this_arg,self.argcache[i],0):
+                tmp = self.cache[i]
+                self.hit+=1
+            else:    
+                tmp = self.allf[i](*this_arg)
+                self.argcache[i]=this_arg
+                self.cache[i]=tmp
             ret+=tmp
         return ret
 
@@ -464,7 +509,7 @@ cdef class Normalize:
     cdef int ndep
     cdef int warnfloat
     cdef int floatwarned
-    
+    cdef public int hit
     def __init__(self,f,bound,prmt=None,nint=1000,warnfloat=1):
         self.f = f
         self.norm_cache= 1.
@@ -483,6 +528,7 @@ cdef class Normalize:
         self.func_defaults = None #make vectorize happy
         self.warnfloat=warnfloat
         self.floatwarned=0
+        self.hit=0
 
     def __call__(self,*arg):
         #print arg
@@ -497,9 +543,11 @@ cdef class Normalize:
 
     def _compute_normalization(self,*arg):
         cdef tuple targ = arg[self.ndep:]
-        if targ == self.last_arg:#cache hit
+        #if targ == self.last_arg:#cache hit
+        if self.last_arg is not None and fast_tuple_equal(targ,self.last_arg,0):#targ == self.last_arg:#cache hit
             #yah exact match for float since this is expected to be used
             #in vectorize which same value are passed over and over
+            self.hit+=1
             pass
         else:
             self.last_arg = targ
@@ -514,9 +562,11 @@ def vectorize_f(f,x,arg):
 cdef np.ndarray[np.double_t] cvectorize_f(f,np.ndarray[np.double_t] x,tuple arg):
     cdef int i
     cdef int n = len(x)
-    cdef np.ndarray[np.double_t] ret = np.empty(n)
+    cdef np.ndarray[np.double_t] ret = np.empty(n,dtype=np.double)#fast_empty(n)
+    cdef double tmp
     for i in range(n):
-        ret[i]=f(x[i],*arg)
+        tmp = f(x[i],*arg)
+        ret[i]=tmp
     return ret
 
 

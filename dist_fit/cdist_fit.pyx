@@ -584,9 +584,7 @@ cdef class BinnedLH:
 
     #lazy mid point implementation
     def __call__(self,*arg):
-        cdef double ret
         self.last_arg = arg
-
         ret = compute_bin_lh_f(self.f, 
                                 self.edges,
                                 self.h, #histogram,

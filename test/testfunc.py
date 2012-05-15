@@ -90,6 +90,15 @@ class TestFunc(unittest.TestCase):
         for i in range(len(pf)): self.assertAlmostEqual(pg[i],exp_pg[i])
         exp_ph = [0,5,6]
         for i in range(len(pf)): self.assertAlmostEqual(ph[i],exp_ph[i])
+        
+        funccode, [pf,pg,ph] = merge_func_code(f,g,h,prefix=['f_','g_','h_'])
+        self.assertEqual(funccode.co_varnames,('x','f_y','f_z','g_a','g_b','h_c','h_d'))
+        exp_pf = [0,1,2]
+        for i in range(len(pf)): self.assertAlmostEqual(pf[i],exp_pf[i])
+        exp_pg = [0,3,4]
+        for i in range(len(pf)): self.assertAlmostEqual(pg[i],exp_pg[i])
+        exp_ph = [0,5,6]
+        for i in range(len(pf)): self.assertAlmostEqual(ph[i],exp_ph[i])
 
     def test_add_pdf(self):
         def f(x,y,z): return x+y+z
@@ -103,5 +112,59 @@ class TestFunc(unittest.TestCase):
         expected = f(1,2,3)+g(1,4,5)+h(1,6,7)
         self.assertAlmostEqual(ret,expected)
 
+    def test_add_pdf_cache(self):
+        def f(x,y,z): return x+y+z
+        def g(x,a,b): return 2*(x+a+b)
+        def h(x,c,d): return 3*(x+c+d)
+
+        A = AddPdf(f,g,h)
+        self.assertEqual(describe(A),('x','y','z','a','b','c','d'))
+
+        ret = A(1,2,3,4,5,6,7)
+        self.assertEqual(A.hit,0)
+        expected = f(1,2,3)+g(1,4,5)+h(1,6,7)
+        self.assertAlmostEqual(ret,expected)
+
+        ret = A(1,2,3,6,7,8,9)
+        self.assertEqual(A.hit,1)
+        expected = f(1,2,3)+g(1,6,7)+h(1,8,9)        
+        self.assertAlmostEqual(ret,expected)
+        
+    def test_fast_tuple_equal(self):
+        a = (1.,2.,3.)
+        b = (1.,2.,3.)
+        ret = fast_tuple_equal(a,b,0)
+        self.assertTrue(ret)
+        
+        a = (1.,4.,3.)
+        b = (1.,2.,3.)
+        ret = fast_tuple_equal(a,b,0)
+        self.assertFalse(ret)
+
+        a = (4.,3.)
+        b = (1.,4.,3.)
+        ret = fast_tuple_equal(a,b,1)
+        self.assertTrue(ret)
+        
+        a = (4.,5.)
+        b = (1.,4.,3.)
+        ret = fast_tuple_equal(a,b,1)
+        self.assertFalse(ret)
+        
+    def test_Normalize_cache_hit(self):
+        def f(x,y,z) : return 1.*(x+y+z)
+        def g(x,y,z) : return 1.*(x+y+2*z)
+        nf = Normalize(f,(-10.,10.))
+        ng = Normalize(g,(-10.,10.))
+        self.assertEqual(nf.hit,0)
+        nf(1.,2.,3.)
+        ng(1.,2.,3.)
+        self.assertEqual(nf.hit,0)
+        nf(3.,2.,3.)
+        self.assertEqual(nf.hit,1)
+        ng(1.,2.,3.)
+        self.assertEqual(ng.hit,1)
+        
+    
 if __name__ == '__main__':
     unittest.main()
