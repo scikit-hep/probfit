@@ -39,7 +39,7 @@ cdef inline np.ndarray fast_empty(int size):
     cdef np.ndarray[np.double_t] ret = PyArray_SimpleNew(1, &tsize, np.NPY_DOUBLE)
     return ret
 
-def merge_func_code(*arg,prefix=None):
+def merge_func_code(*arg,prefix=None,skip_first=False):
     assert(prefix is None or len(prefix)==len(arg))
     all_arg = []
     for i,f in enumerate(arg):
@@ -48,7 +48,7 @@ def merge_func_code(*arg,prefix=None):
         first = True
         for vn in f.func_code.co_varnames[:nf]:
             newv = vn
-            if not first and prefix is not None:
+            if not first and skip_first and prefix is not None:
                 newv = prefix[i]+newv
             first = False
             tmp.append(newv)
@@ -142,7 +142,7 @@ cdef class Convolve:#with gy cache
         self.vf = np.vectorize(f)
         self.vg = np.vectorize(g)
         self.set_gbound(gbound,nbins)
-        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g)
+        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
         self.func_defaults = None
 
     def set_gbound(self,gbound,nbins):
@@ -438,7 +438,7 @@ cdef class AddPdf:
     cdef public int hit
     
     def __init__(self,*arg,prefix=None):
-        self.func_code, self.allpos = merge_func_code(*arg,prefix=prefix)
+        self.func_code, self.allpos = merge_func_code(*arg,prefix=prefix,skip_first=True)
         self.func_defaults=None
         self.arglen = self.func_code.co_argcount
         self.allf = arg
@@ -477,7 +477,7 @@ cdef class Add2PdfNorm:
     cdef np.ndarray farg_buffer
     cdef np.ndarray garg_buffer
     def __init__(self,f,g,facname='k_f'):
-        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g)
+        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
         self.func_code.append(facname)
         self.arglen = self.func_code.co_argcount
         self.func_defaults=None
