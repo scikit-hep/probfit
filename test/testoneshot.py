@@ -1,5 +1,6 @@
 import unittest
 from dist_fit import *
+from dist_fit.cdist_func import Extend, gaussian
 import numpy as np
 from numpy.random import randn
 from math import sqrt
@@ -66,6 +67,18 @@ class TestOneshot(unittest.TestCase):
         self.assertAlmostEqual(m.errors['mean']/sqrt(10),m2.errors['mean'],delta = m.errors['mean']/sqrt(10))
         self.assertAlmostEqual(m.errors['sigma']/sqrt(10),m2.errors['sigma'],delta = m.errors['sigma']/sqrt(10))
         self.assertAlmostEqual(m.errors['N']/sqrt(10),m2.errors['N'],delta = m.errors['N']/sqrt(10))
+
+    def test_gen_toy(self):
+        pdf = gaussian
+        toy = gen_toy(pdf,10000,(-5,5),mean=0,sigma=1)
+        binlh = BinnedLH(pdf,toy,range=(-5,5),bins=100)
+        lh = binlh(0.,1.)
+        for x in toy:
+            self.assertLessEqual(x,5)
+            self.assertGreaterEqual(x,-5)
+        self.assertEqual(len(toy),10000)
+        self.assertLess(lh/100.,1.)
+
 
     def test_uml(self):
         fit,m = fit_uml(gaussian,self.data, quiet=True, mean=4.5, sigma=1.5,printlevel=-1)

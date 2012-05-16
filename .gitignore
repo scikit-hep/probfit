@@ -6,5 +6,6 @@ src/*.html
 build
 *.pyc
 test_*
+.idea
 
 !tutorial.ipynb

@@ -28,5 +28,5 @@ setup (
        url='https://github.com/piti118/dist_fit',
        package_dir = {'dist_fit': 'dist_fit'},
        packages = ['dist_fit'],
-       ext_modules = [cdist_fit,cdist_func,common]
+       ext_modules = [cdist_fit,cdist_func,common], requires=['numpy']
        )

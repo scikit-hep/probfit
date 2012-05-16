@@ -178,7 +178,6 @@ def compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x) :
         ret[i] = 0.5*(lpdf+rpdf)*bw + ret[i-1]
     return ret
 
-
 #invert cdf useful for making toys
 def invert_cdf(np.ndarray[np.double_t] r, np.ndarray[np.double_t] cdf, np.ndarray[np.double_t] x):
     cdef np.ndarray[np.int_t] loc = np.digitize(r,cdf)

@@ -28,7 +28,7 @@ print ncball(1.,1.,1.,1.,1.)
 
 # <codecell>
 
-print ncball.func_code.co_varnames[:ncball.func_code.co_argcount]
+print describe(ncball)
 #and you can do toy generation from any distribution as well
 #and compare the result for you
 #if you are getting weird result from the fit make sure the normalization is the correct range
