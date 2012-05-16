@@ -180,7 +180,7 @@ def compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x) :
 
 #invert cdf useful for making toys
 def invert_cdf(np.ndarray[np.double_t] r, np.ndarray[np.double_t] cdf, np.ndarray[np.double_t] x):
-    cdef np.ndarray[np.int_t] loc = np.digitize(r,cdf)
+    cdef np.ndarray[np.int_t] loc = np.searchsorted(r,cdf)
     cdef int n = len(r)
     cdef np.ndarray[np.double_t] ret = np.zeros(n)
     cdef int i = 0
