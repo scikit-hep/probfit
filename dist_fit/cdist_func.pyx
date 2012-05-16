@@ -42,13 +42,14 @@ cdef inline np.ndarray fast_empty(int size):
 def merge_func_code(*arg,prefix=None,skip_first=False):
     assert(prefix is None or len(prefix)==len(arg))
     all_arg = []
+
     for i,f in enumerate(arg):
         nf = f.func_code.co_argcount
         tmp = []
-        first = True
+        first = skip_first
         for vn in f.func_code.co_varnames[:nf]:
             newv = vn
-            if not first and skip_first and prefix is not None:
+            if not first and prefix is not None:
                 newv = prefix[i]+newv
             first = False
             tmp.append(newv)

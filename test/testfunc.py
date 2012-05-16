@@ -91,7 +91,7 @@ class TestFunc(unittest.TestCase):
         exp_ph = [0,5,6]
         for i in range(len(pf)): self.assertAlmostEqual(ph[i],exp_ph[i])
         
-        funccode, [pf,pg,ph] = merge_func_code(f,g,h,prefix=['f_','g_','h_'])
+        funccode, [pf,pg,ph] = merge_func_code(f,g,h,prefix=['f_','g_','h_'],skip_first=True)
         self.assertEqual(funccode.co_varnames,('x','f_y','f_z','g_a','g_b','h_c','h_d'))
         exp_pf = [0,1,2]
         for i in range(len(pf)): self.assertAlmostEqual(pf[i],exp_pf[i])
