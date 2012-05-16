@@ -210,6 +210,8 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
     #unlike roofit which is based on accept reject
 
     vnames = better_arg_spec(f)
+    if not quiet:
+        print vnames
     my_arg = [kwd[v] for v in vnames[1:]]
     #random number
     #if accuracy is None: accuracy=10*numtoys
@@ -241,6 +243,7 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
         plt.plot(x, y, label='pdf', color='r')
         plt.fill_between(x, yhigh, ylow, color='g', alpha=0.2)
         plt.grid(True)
+        plt.xlim(bound)
     return ret
 
 
