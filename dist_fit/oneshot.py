@@ -244,6 +244,7 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
         plt.fill_between(x, yhigh, ylow, color='g', alpha=0.2)
         plt.grid(True)
         plt.xlim(bound)
+        plt.ylim(ymin=0)
     return ret
 
 
