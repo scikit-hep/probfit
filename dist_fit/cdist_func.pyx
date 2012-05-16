@@ -1,3 +1,4 @@
+#cython: embedsignature=True
 cimport cython
 from cpython cimport PyFloat_AsDouble,PyTuple_GetItem,PyTuple_GET_ITEM, PyObject, PyTuple_SetItem,PyTuple_SET_ITEM, PyTuple_New,Py_INCREF
 
