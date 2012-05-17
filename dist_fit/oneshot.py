@@ -314,10 +314,10 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False):
     total = np.sum(data)
     if normed:
         plt.errorbar(x,data/bw/total,errors/bw/total,fmt='.')
-        plt.plot(x,yf)
+        plt.plot(x,yf,'r',lw=2)
     else:
         plt.errorbar(x,data,errors,fmt='.')
-        plt.plot(x,yf*bw)
+        plt.plot(x,yf*bw,'r',lw=2)
 
     plt.grid(True)
     return x,yf,data
@@ -329,6 +329,7 @@ def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None, normed=Fa
     err = None
     if weights is not None and use_w2:
        err,_ = np.histogram(data,bins=bins,range=bound,weights=weights*weights)
+       err = np.sqrt(err)
     else:
         err = np.sqrt(h)
     return draw_compare(f,arg,e,h,err,normed)

@@ -39,13 +39,13 @@ cdef double compute_bin_lh_f(f,
         tm = midvalues[i]
         if not extend:
             if not use_sumw2:
-                ret -= cxlogyx(th,tm*N*bw)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
+                ret -= cxlogyx(th,tm*N*bw)+(th-tm*bw*N)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
             else:
                 if w2[i]<1e-200: continue
                 tw = w2[i]
                 tw = sqrt(tw)
                 factor = th/tw
-                ret -= factor*cwlogyx(th,tm*N*bw,th)
+                ret -= factor*(cwlogyx(th,tm*N*bw,th)+(th-tm*bw*N))
         else:
             #print 'h',h[i],'midvalues',midvalues[i]*bw
             if not use_sumw2:
@@ -617,7 +617,7 @@ cdef class BinnedLH:
         #bw = np.diff(xs)
         xs = mid(xs)
         expy = self.vf(xs,*arg)*bw
-        if not self.extended: expy/=sum(expy)
+        #if not self.extended: expy/=sum(expy)
         ax.plot(xs,expy,'r-')
 
         minu = minuit

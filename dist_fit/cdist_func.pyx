@@ -10,6 +10,7 @@ from numpy cimport PyArray_SimpleNew
 from math import ceil
 from .common import *
 from util import describe
+from warnings import warn
 np.import_array()
 cdef double badvalue = 1e-300
 cdef double smallestdiv = 1e-10
@@ -73,7 +74,31 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
         pos.append(np.array(tmp,dtype=np.int))
     return MinimalFuncCode(merge_arg), pos
 
-cdef tuple cconstruct_arg(tuple arg, 
+# def merge_func_code(f,g):
+#     nf = f.func_code.co_argcount
+#     farg = f.func_code.co_varnames[:nf]
+#     ng = g.func_code.co_argcount
+#     garg = g.func_code.co_varnames[:ng]
+#
+#     mergearg = []
+#     #TODO: do something smarter
+#     #first merge the list
+#     for v in farg:
+#         mergearg.append(v)
+#     for v in garg:
+#         if v not in farg:
+#             mergearg.append(v)
+#
+#     #now build the map
+#     fpos=[]
+#     gpos=[]
+#     for v in farg:
+#         fpos.append(mergearg.index(v))
+#     for v in garg:
+#         gpos.append(mergearg.index(v))
+#     return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
+
+cdef tuple cconstruct_arg(tuple arg,
     np.ndarray fpos):
     cdef int size = fpos.shape[0]    
     cdef int i,itmp
@@ -567,13 +592,13 @@ def integrate1d(f,tuple bound,int nint,tuple arg=None):
     return cintegrate1d(f,bound,nint,arg)
 
 
-cdef cintegrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg):
+cdef double cintegrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg) except *:
     cdef np.ndarray[np.double_t] y = cvectorize_f(f,edges,arg)
     return csum(y*bw)-0.5*(y[0]+y[-1])*bw#trapezoid
 
 
 #to do runge kutta or something smarter
-cdef double cintegrate1d(f, tuple bound, int nint, tuple arg=None):
+cdef double cintegrate1d(f, tuple bound, int nint, tuple arg=None) except*:
     if arg is None: arg = tuple()
     #vectorize_f
     cdef double ret = 0
@@ -590,7 +615,9 @@ def xlogyx(x,y):
 
 cdef double cxlogyx(double x,double y):
     cdef double ret
-    if x<1e-100: return 0.
+    if x<1e-100:
+        warn('x is really small return 0')
+        return 0.
     if x<y:
         ret = x*log1p((y-x)/x)
     else:
@@ -604,7 +631,9 @@ def wlogyx(double w,double y, double x):
 
 #compute w*log(y/x) where w < x and goes to zero faster than x
 cdef double cwlogyx(double w,double y, double x):
-    if x<1e-100: return 0.
+    if x<1e-100:
+        warn('x is really small return 0')
+        return 0.
     if x<y:
         ret = w*log1p((y-x)/x)
     else:
