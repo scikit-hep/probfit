@@ -41,6 +41,7 @@ class FakeFuncCode:
     def __init__(self,f,prmt=None,dock=0,append=None):
         #f can either be tuple or function object
         self.co_varnames=describe(f)
+        self.co_argcount=len(self.co_varnames)
         self.co_argcount-=dock
         self.co_varnames = self.co_varnames[dock:]
         if prmt is not None:#rename parameters from the front
