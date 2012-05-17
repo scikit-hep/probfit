@@ -54,4 +54,5 @@ def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
     ax.set_ylim(ylim) #sometime it will decide to resize the plot
 
 def describe(f):
-    return f.func_code.co_varnames[:f.func_code.co_argcount]  
+    return better_arg_spec(f)
+    #return f.func_code.co_varnames[:f.func_code.co_argcount]  

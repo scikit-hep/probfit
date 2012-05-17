@@ -3,6 +3,7 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp,pow,fabs,log
+from util import describe
 #from .util import FakeFuncCode
 
 def mid(np.ndarray x):
@@ -39,23 +40,37 @@ class MinimalFuncCode:
 class FakeFuncCode:
     def __init__(self,f,prmt=None,dock=0,append=None):
         #f can either be tuple or function object
-        if hasattr(f,'func_code'):#copy function code
-            for attr in dir(f.func_code):
-                if '__' not in attr: 
-                    #print attr, type(getattr(f.func_code,attr))
-                    setattr(self,attr,getattr(f.func_code,attr))
-            self.co_argcount-=dock
-            self.co_varnames = self.co_varnames[dock:]
-            if prmt is not None:#rename parameters from the front
-                for i,p in enumerate(prmt):
-                    self.co_varnames[i] = p
-            if isinstance(append,str): append = [append]
-            if append is not None:
-                old_count = self.co_argcount
-                self.co_argcount+=len(append)
-                self.co_varnames=tuple(list(self.co_varnames[:old_count])+append+list(self.co_varnames[old_count:]))
-        else:#build a really fake one from bare bone
-            raise TypeError('f does not have func_code')
+        self.co_varnames=describe(f)
+        self.co_argcount-=dock
+        self.co_varnames = self.co_varnames[dock:]
+        if prmt is not None:#rename parameters from the front
+            for i,p in enumerate(prmt):
+                self.co_varnames[i] = p
+        if isinstance(append,str): append = [append]
+        if append is not None:
+            old_count = self.co_argcount
+            self.co_argcount+=len(append)
+            self.co_varnames=tuple(list(self.co_varnames[:old_count])+append+list(self.co_varnames[old_count:]))
+
+#    def __init__(self,f,prmt=None,dock=0,append=None):
+#        #f can either be tuple or function object
+#        if hasattr(f,'func_code'):#copy function code
+#            for attr in dir(f.func_code):
+#                if '__' not in attr:
+#                    #print attr, type(getattr(f.func_code,attr))
+#                    setattr(self,attr,getattr(f.func_code,attr))
+#            self.co_argcount-=dock
+#            self.co_varnames = self.co_varnames[dock:]
+#            if prmt is not None:#rename parameters from the front
+#                for i,p in enumerate(prmt):
+#                    self.co_varnames[i] = p
+#            if isinstance(append,str): append = [append]
+#            if append is not None:
+#                old_count = self.co_argcount
+#                self.co_argcount+=len(append)
+#                self.co_varnames=tuple(list(self.co_varnames[:old_count])+append+list(self.co_varnames[old_count:]))
+#        else:#build a really fake one from bare bone
+#            raise TypeError('f does not have func_code')
 
 #just a function wrapper with a fake manipulable func_code
 cdef class FakeFunc:
