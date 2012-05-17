@@ -9,6 +9,7 @@ cimport numpy as np
 from numpy cimport PyArray_SimpleNew
 from math import ceil
 from .common import *
+from util import describe
 np.import_array()
 cdef double badvalue = 1e-300
 cdef double smallestdiv = 1e-10
@@ -45,10 +46,9 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
     all_arg = []
 
     for i,f in enumerate(arg):
-        nf = f.func_code.co_argcount
         tmp = []
         first = skip_first
-        for vn in f.func_code.co_varnames[:nf]:
+        for vn in describe(f):
             newv = vn
             if not first and prefix is not None:
                 newv = prefix[i]+newv
@@ -72,30 +72,6 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
             tmp.append(merge_arg.index(v))
         pos.append(np.array(tmp,dtype=np.int))
     return MinimalFuncCode(merge_arg), pos
-
-# def merge_func_code(f,g):
-#     nf = f.func_code.co_argcount
-#     farg = f.func_code.co_varnames[:nf]
-#     ng = g.func_code.co_argcount
-#     garg = g.func_code.co_varnames[:ng]
-#     
-#     mergearg = []
-#     #TODO: do something smarter
-#     #first merge the list
-#     for v in farg:
-#         mergearg.append(v)
-#     for v in garg:
-#         if v not in farg:
-#             mergearg.append(v)
-#     
-#     #now build the map
-#     fpos=[]
-#     gpos=[]
-#     for v in farg:
-#         fpos.append(mergearg.index(v))
-#     for v in garg:
-#         gpos.append(mergearg.index(v))
-#     return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
 
 cdef tuple cconstruct_arg(tuple arg, 
     np.ndarray fpos):
@@ -418,7 +394,7 @@ cdef class Extend:
     cdef public func_defaults
     def __init__(self,f,extname='N'):
         self.f = f
-        if extname in f.func_code.co_varnames[:f.func_code.co_argcount]:
+        if extname in describe(f):
             raise ValueError('%s is already taken pick something else for extname')
         self.func_code = FakeFuncCode(f,append=extname)
         #print self.func_code.__dict__
