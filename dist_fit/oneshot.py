@@ -6,6 +6,8 @@ import numpy.random as npr
 import itertools as itt
 import collections
 from warnings import warn
+from dist_fit.util import parse_arg
+from dist_fit.common import minmax
 from util import vertical_highlight, better_arg_spec
 
 def randfr(r):
@@ -301,6 +303,44 @@ def draw_contour2d(fit, m, var1, var2, bins=12, bound1=None, bound2=None, lh=Tru
     plt.axvline(m.values[var1], color='k', ls='--')
     plt.grid(True)
     return x1s, x2s, y, CS
+
+def draw_compare(f, arg, edges, data, errors=None, normed=False):
+    #arg is either map or tuple
+    if isinstance(arg, dict): arg = parse_arg(f,arg,1)
+    x = (edges[:-1]+edges[1:])/2.0
+    bw = np.diff(edges)
+    vf = np.vectorize(f)
+    yf = vf(x,*arg)
+    total = np.sum(data)
+    if normed:
+        plt.errorbar(x,data/bw/total,errors/bw/total,fmt='.')
+        plt.plot(x,yf)
+    else:
+        plt.errorbar(x,data,errors,fmt='.')
+        plt.plot(x,yf*bw)
+
+    plt.grid(True)
+    return x,yf,data
+
+#draw comprison between function given args and data
+def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None, normed=False, use_w2=False):
+    if bound is None: bound = minmax(data)
+    h,e = np.histogram(data,bins=bins,range=bound,weights=weights)
+    err = None
+    if weights is not None and use_w2:
+       err,_ = np.histogram(data,bins=bins,range=bound,weights=weights*weights)
+    else:
+        err = np.sqrt(h)
+    return draw_compare(f,arg,e,h,err,normed)
+
+def safe_getattr(o,attr,default=None):
+    if hasattr(o,attr):
+        return getattr(o,attr)
+    else:
+        return default
+
+def draw_compare_fit_statistics(lh, m):
+    pass
 
 
 def val_contour2d(fit, m, var1, var2, bins=12, bound1=None, bound2=None):

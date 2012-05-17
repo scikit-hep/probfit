@@ -5,6 +5,7 @@ from .cdist_func import Normalize
 def better_arg_spec(f):
     """
     
+    :param f:
     """
     #built-in funccode
     try:
@@ -27,6 +28,12 @@ def better_arg_spec(f):
 #   return complicated_function(x,y,z)
 #
 class normalized_function:
+    """
+
+    :param xmin:
+    :param xmax:
+    """
+
     def __init__(self, xmin, xmax):
         self.xmin = xmin
         self.xmax = xmax
@@ -34,16 +41,34 @@ class normalized_function:
         return Normalize(f,(self.xmin,self.xmax))
 
 class rename_parameters:
+    """
+
+    :param arg:
+    """
+
     def __init__(self,*arg):
         self.arg = arg
     def __call__(self,f):
         return FakeFunc(f,self.arg)
 
 def extended(f):
+    """
+
+    :param f:
+    :return:
+    """
     return Extended(f)
 
 #useful for highlight some xrange
 def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
+    """
+
+    :param x1:
+    :param x2:
+    :param color:
+    :param alpha:
+    :param ax:
+    """
     from matplotlib import pyplot as plt
     if(ax is None): ax=plt.gca()
     if x2 is None:
@@ -54,5 +79,19 @@ def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
     ax.set_ylim(ylim) #sometime it will decide to resize the plot
 
 def describe(f):
+    """
+
+    :param f:
+    :return:
+    """
     return better_arg_spec(f)
-    #return f.func_code.co_varnames[:f.func_code.co_argcount]  
+    #return f.func_code.co_varnames[:f.func_code.co_argcount]
+
+def parse_arg(f,kwd,offset=0):
+    """
+
+    :param f:
+    :param kwd:
+    """
+    vnames = describe(f)
+    return tuple([kwd[k] for k in vnames[offset:]])
