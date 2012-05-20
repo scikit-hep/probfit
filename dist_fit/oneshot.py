@@ -304,7 +304,7 @@ def draw_contour2d(fit, m, var1, var2, bins=12, bound1=None, bound2=None, lh=Tru
     plt.grid(True)
     return x1s, x2s, y, CS
 
-def draw_compare(f, arg, edges, data, errors=None, normed=False):
+def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
     #arg is either map or tuple
     if isinstance(arg, dict): arg = parse_arg(f,arg,1)
     x = (edges[:-1]+edges[1:])/2.0
@@ -313,17 +313,47 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False):
     yf = vf(x,*arg)
     total = np.sum(data)
     if normed:
-        plt.errorbar(x,data/bw/total,errors/bw/total,fmt='.')
+        plt.errorbar(x,data/bw/total,errors/bw/total,fmt='.b')
         plt.plot(x,yf,'r',lw=2)
     else:
-        plt.errorbar(x,data,errors,fmt='.')
+        plt.errorbar(x,data,errors,fmt='.b')
         plt.plot(x,yf*bw,'r',lw=2)
 
+    #now draw the parts
+    if parts:
+        if not hasattr(f,'nparts') or not hasattr(f,'eval_parts'):
+            warn('parts is set to True but function does not have nparts or eval_parts method')
+        else:
+            scale = bw if not normed else 1.
+            nparts = f.nparts
+            parts_val = list()
+            for tx in x:
+                val = f.eval_parts(tx,*arg)
+                parts_val.append(val)
+            py = zip(*parts_val)
+            for y in py:
+                tmpy = np.array(y)
+                plt.plot(x,tmpy*scale,lw=2,alpha=0.5)
     plt.grid(True)
     return x,yf,data
 
+def draw_pdf(f,arg,bound,bins,scale=1.0,normed=True,**kwds):
+    edges = np.linspace(bound[0],bound[1],bins)
+    return draw_pdf_with_edges(f,arg,edges,scale=scale,normed=normed,**kwds)
+
+def draw_pdf_with_edges(f,arg,edges,scale=1.0,normed=True,**kwds):
+    if isinstance(arg, dict): arg = parse_arg(f,arg,1)
+    x = (edges[:-1]+edges[1:])/2.0
+    bw = np.diff(edges)
+    vf = np.vectorize(f)
+    yf = vf(x,*arg)
+    scale*= bw if not normed else 1.
+    yf*=scale
+    plt.plot(x,yf,lw=2,**kwds)
+    return x,yf
+
 #draw comprison between function given args and data
-def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None, normed=False, use_w2=False):
+def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None, normed=False, use_w2=False, parts=False):
     if bound is None: bound = minmax(data)
     h,e = np.histogram(data,bins=bins,range=bound,weights=weights)
     err = None
@@ -332,7 +362,7 @@ def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None, normed=Fa
        err = np.sqrt(err)
     else:
         err = np.sqrt(h)
-    return draw_compare(f,arg,e,h,err,normed)
+    return draw_compare(f,arg,e,h,err,normed,parts)
 
 def safe_getattr(o,attr,default=None):
     if hasattr(o,attr):

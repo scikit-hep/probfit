@@ -1,7 +1,7 @@
 import numpy as np
 from .common import FakeFunc
 from .cdist_func import Normalize
-
+import inspect
 def better_arg_spec(f):
     """
     

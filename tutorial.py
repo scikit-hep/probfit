@@ -116,6 +116,13 @@ uml.show(minu)
 
 # <codecell>
 
+#or unextended one
+uml,minu = fit_binlh(ncball,g,alpha=1.,n=2.,mean=1.,sigma=1.,N=7000.,
+    limit_n=(1.,10.),limit_sigma=(0.01,3),limit_mean=(0.7,1),quiet=False,extended=False)
+uml.show(minu)
+
+# <codecell>
+
 #guessing initial parameter can be hard so I made these for you
 try_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=0.1)
 

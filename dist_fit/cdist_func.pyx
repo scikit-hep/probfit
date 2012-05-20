@@ -439,7 +439,7 @@ cdef class AddPdf:
     cdef np.ndarray cache
     cdef list argcache
     cdef public int hit
-    
+    cdef public int nparts
     def __init__(self,*arg,prefix=None):
         self.func_code, self.allpos = merge_func_code(*arg,prefix=prefix,skip_first=True)
         self.func_defaults=None
@@ -469,6 +469,26 @@ cdef class AddPdf:
             ret+=tmp
         return ret
 
+    def eval_parts(self,*arg):
+        cdef tuple this_arg
+        cdef double tmp = 0.
+        cdef int i
+        cdef list ref
+        cdef np.ndarray thispos
+        ret = list()
+        for i in range(self.numf):
+            thispos = self.allpos[i]
+            this_arg = cconstruct_arg(arg,thispos)
+            if self.argcache[i] is not None and fast_tuple_equal(this_arg,self.argcache[i],0):
+                tmp = self.cache[i]
+                self.hit+=1
+            else:
+                tmp = self.allf[i](*this_arg)
+                self.argcache[i]=this_arg
+                self.cache[i]=tmp
+            ret.append(tmp)
+        return tuple(ret)
+
 cdef class Add2PdfNorm:
     cdef public object func_code
     cdef public object func_defaults
@@ -479,6 +499,7 @@ cdef class Add2PdfNorm:
     cdef np.ndarray gpos
     cdef np.ndarray farg_buffer
     cdef np.ndarray garg_buffer
+    cdef public int nparts
     def __init__(self,f,g,facname='k_f'):
         self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
         self.func_code.append(facname)
@@ -486,10 +507,10 @@ cdef class Add2PdfNorm:
         self.func_defaults=None
         self.f=f
         self.g=g
+        self.nparts = 2
         self.farg_buffer = np.empty(len(self.fpos))
         self.garg_buffer = np.empty(len(self.gpos))
-        
-    
+
     def __call__(self,*arg):
         cdef double fac = arg[-1]
         cdef tuple farg = cconstruct_arg(arg,self.fpos)
@@ -498,6 +519,14 @@ cdef class Add2PdfNorm:
         cdef double gv = self.g(*garg)
         cdef double ret = fac*fv+(1.-fac)*gv
         return ret
+
+    def eval_parts(self,*arg):
+        cdef double fac = arg[-1]
+        cdef tuple farg = cconstruct_arg(arg,self.fpos)
+        cdef tuple garg = cconstruct_arg(arg,self.gpos)
+        cdef double fv = fac*self.f(*farg)
+        cdef double gv = (1.-fac)*self.g(*garg)
+        return (fv,gv)
 
 cdef class Normalize:
     cdef f
