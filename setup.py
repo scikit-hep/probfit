@@ -2,19 +2,24 @@ from distutils.core import setup, Extension
 import distutils.util
 import subprocess
 import numpy as np
-from Cython.Distutils import build_ext
+source_suffix = 'pyx'
+try:
+    from Cython.Distutils import build_ext
+except:
+    source_suffix='c'
+
 cdist_fit = Extension('dist_fit.cdist_fit',
-                    sources = ['dist_fit/cdist_fit.pyx'],
+                    sources = ['dist_fit/cdist_fit.'+source_suffix],
                     include_dirs= [np.get_include()],
                     extra_link_args = [])
 
 cdist_func = Extension('dist_fit.cdist_func',
-        sources = ['dist_fit/cdist_func.pyx'],
+        sources = ['dist_fit/cdist_func.pyx'+source_suffix],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
 common = Extension('dist_fit.common',
-        sources = ['dist_fit/common.pyx'],
+        sources = ['dist_fit/common.pyx'+source_suffix],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
