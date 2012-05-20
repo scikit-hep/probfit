@@ -14,12 +14,12 @@ cdist_fit = Extension('dist_fit.cdist_fit',
                     extra_link_args = [])
 
 cdist_func = Extension('dist_fit.cdist_func',
-        sources = ['dist_fit/cdist_func.pyx'+source_suffix],
+        sources = ['dist_fit/cdist_func.'+source_suffix],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
 common = Extension('dist_fit.common',
-        sources = ['dist_fit/common.pyx'+source_suffix],
+        sources = ['dist_fit/common.'+source_suffix],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
