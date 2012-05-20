@@ -10,7 +10,7 @@ try:
 except:
     pass
 
-cmdclass=None
+cmdclass={}
 if not has_cython:
     source_suffix = 'c'
 else:
