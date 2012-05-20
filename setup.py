@@ -3,10 +3,19 @@ import distutils.util
 import subprocess
 import numpy as np
 source_suffix = 'pyx'
+has_cython = False
 try:
     from Cython.Distutils import build_ext
+    has_cython = True
 except:
-    source_suffix='c'
+    pass
+
+cmdclass=None
+if not has_cython:
+    source_suffix = 'c'
+else:
+    cmdclass = {'build_ext':build_ext}
+
 
 cdist_fit = Extension('dist_fit.cdist_fit',
                     sources = ['dist_fit/cdist_fit.'+source_suffix],
@@ -24,7 +33,7 @@ common = Extension('dist_fit.common',
         extra_link_args = [])
 
 setup (
-       cmdclass={'build_ext':build_ext},
+       cmdclass=cmdclass,
        name = 'dist_fit',
        version = '1.00',
        description = 'Distribution Fitting/Regression Library',
