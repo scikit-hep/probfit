@@ -5,7 +5,7 @@
 
 from dist_fit import *
 import numpy as np
-import minuit
+import RTMinuit
 import UserDict
 
 # <codecell>
@@ -56,6 +56,15 @@ print minu.values
 
 # <codecell>
 
+minu.html_error_matrix()
+
+# <codecell>
+
+minu.minos()
+minu.html_results()
+
+# <codecell>
+
 #lets try a function that builtin one is not availble
 #this is slow though you can speed this up by using cython but for most purpose this is fast "enough"
 peak1 = randn(10000)
@@ -77,7 +86,7 @@ def tofit(x,m1,s1,m2,s2,a):
 # <codecell>
 
 #see all good
-uml, minu = fit_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=.6)
+uml, minu = fit_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=.6,fix_a=True)
 uml.draw(minu)
 
 # <codecell>
@@ -209,6 +218,7 @@ to_minimize.draw(m)
 
 # <codecell>
 
+m.
 
 # <codecell>
 

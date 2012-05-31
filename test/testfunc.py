@@ -150,6 +150,11 @@ class TestFunc(unittest.TestCase):
         b = (1.,4.,3.)
         ret = fast_tuple_equal(a,b,1)
         self.assertFalse(ret)
+
+        a = tuple([])
+        b = tuple([])
+        ret = fast_tuple_equal(a,b,0)
+        self.assertTrue(ret)
         
     def test_Normalize_cache_hit(self):
         def f(x,y,z) : return 1.*(x+y+z)

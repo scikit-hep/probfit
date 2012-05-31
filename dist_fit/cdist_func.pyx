@@ -27,7 +27,9 @@ cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
     cdef int i,ind
     cdef int tsize = len(t2)-t2_offset
     cdef bint ret = 0 
-
+    if len(t1) ==0 and tsize==0:
+        return 1
+    
     for i in range(tsize):
         ind = i+t2_offset
         tmp1 = PyFloat_AsDouble(<object>PyTuple_GetItem(t1,i))
@@ -299,7 +301,7 @@ def crystalball(double x,double alpha,double n,double mean,double sigma):
         ret = badvalue
     else:
         d = (x-mean)/sigma
-        if d > -alpha : 
+        if d > -alpha :
             ret = exp(-0.5*d**2)
         else:
             al = fabs(alpha)
