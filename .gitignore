@@ -7,5 +7,5 @@ build
 *.pyc
 test_*
 .idea
-
+*.swp
 !tutorial.ipynb
