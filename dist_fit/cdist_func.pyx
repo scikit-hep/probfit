@@ -375,6 +375,16 @@ def poly3(double x, double a, double b, double c, double d):
     cdef double ret = a*x3+b*x2+c*x+d
     return ret
 
+
+@cython.binding(True)
+def nlinear(double x,double m,double c):
+    """
+    y = mx+c
+    """
+    double ret = m*x+c
+    return ret
+
+
 @cython.binding(True)
 def novosibirsk(double x, double width, double peak, double tail):
     #credit roofit implementation
