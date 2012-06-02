@@ -152,16 +152,17 @@ def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
     ret = {k: v for k, v in zip(vnames, minarg)}
     return ret
 
-def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kwd):
-    fom = BinnedLH(f, data)
+def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=False, bound=None,*arg, **kwd):
+    if bound is None: bound = minmax(data)
+    fom = BinnedLH(f, data,extended=extended,range=bound)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [tuplize(kwd[name]) for name in vnames]
     h, e = None, None
     if show == 'both':
-        h, e, _ = plt.hist(data, bins=bins, histtype='step', weights=weights)
+        h, e, _ = plt.hist(data, bins=bins, range=bound, histtype='step', weights=weights, normed=not extended)
     else:
-        h, e = np.histogram(data, bins=bins, weights=weights)
+        h, e = np.histogram(data, bins=bins, range=bound, weights=weights, normed=not extended)
     bw = e[1] - e[0]
     vf = np.vectorize(f)
     vx = np.linspace(e[0], e[-1], fbins)
@@ -169,7 +170,8 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **k
     minfom = 0
     minarg = None
     for thisarg in itt.product(*my_arg):
-        vy = vf(vx, *thisarg) * bw
+        vy = vf(vx, *thisarg)
+        if extended: vy*=bw
         plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
         if first or thisfom < minfom:
