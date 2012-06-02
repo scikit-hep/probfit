@@ -377,15 +377,6 @@ def poly3(double x, double a, double b, double c, double d):
 
 
 @cython.binding(True)
-def nlinear(double x,double m,double c):
-    """
-    y = mx+c
-    """
-    double ret = m*x+c
-    return ret
-
-
-@cython.binding(True)
 def novosibirsk(double x, double width, double peak, double tail):
     #credit roofit implementation
     cdef double qa
