@@ -423,7 +423,7 @@ cdef class Chi2Regression:
         expy = vf(x,*arg)
         
         if err is None:
-            plt.plot(x,y,',')
+            plt.plot(x,y,'+')
         else:
             plt.errorbar(x,y,err,fmt='.')
         plt.plot(x,expy,'r-')
