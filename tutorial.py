@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# <nbformat>3</nbformat>
+# <nbformat>3.0</nbformat>
 
 # <codecell>
 
@@ -85,8 +85,40 @@ def tofit(x,m1,s1,m2,s2,a):
 
 # <codecell>
 
-#see all good
-uml, minu = fit_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=.6,fix_a=True)
+%%timeit
+#see all good but kinda slow
+uml, minu = fit_uml(tofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=.6)
+uml.draw(minu)
+
+# <codecell>
+
+#skip this part if you don't have cython
+#but that's too slow for our taste luckily there is cython
+%load_ext cythonmagic
+
+# <codecell>
+
+%%cython
+cimport cython
+from libc.math cimport exp,sqrt,M_PI
+cdef inline double gaussian(double x,double m,double s):
+    cdef double N = 1/sqrt(2*M_PI)
+    return N*exp(-(x-m)*(x-m)/(s*s)/2)
+@cython.binding(True)
+def ctofit(double x,double m1,double s1,double m2,double s2,double a):
+    cdef double g1 = gaussian(x,m1,s1)
+    cdef double g2 = gaussian(x,m2,s2)
+    cdef double ret = a*g1+(1-a)*g2
+    return ret
+
+# <codecell>
+
+ntofit = Normalize(ctofit,(-20,20))
+
+# <codecell>
+
+%%timeit
+uml, minu = fit_uml(ntofit,twopeak,m1=0.,m2=10.,s1=2.,s2=2.,a=.6)
 uml.draw(minu)
 
 # <codecell>
@@ -171,7 +203,7 @@ xlim(-3,3)
 # <codecell>
 
 to_minimize = Chi2Regression(f,x,y,err)
-m=minuit.Minuit(to_minimize)
+m=RTMinuit.Minuit(to_minimize)
 m.migrad()
 
 # <codecell>
@@ -184,7 +216,7 @@ to_minimize.draw(m)
 
 #fixing parameter is easy to through minuit
 to_minimize = Chi2Regression(f,x,y,err)
-m=minuit.Minuit(to_minimize,c=3.,fix_c=True)#just that
+m=RTMinuit.Minuit(to_minimize,c=3.,fix_c=True)#just that
 m.migrad()
 print m.values
 print m.errors#yep error on c is the default one
@@ -212,13 +244,9 @@ errorbar(x,y,err,fmt='.b');
 # <codecell>
 
 to_minimize = Chi2Regression(p,x,y,err)
-m=minuit.Minuit(to_minimize)
+m=RTMinuit.Minuit(to_minimize)
 m.migrad()
 to_minimize.draw(m)
-
-# <codecell>
-
-m.
 
 # <codecell>
 
