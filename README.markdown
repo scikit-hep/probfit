@@ -6,12 +6,8 @@ Fitting distribution do regression and such in python.
 Requirement
 -----------
 
-Patched [Minuit](http://code.google.com/p/pyminuit/downloads/detail?name=Minuit-1_7_9-patch1.tar.gz&can=2&q=)
-
-My version of [pyminuit](https://github.com/piti118/pyminuit) from my repository. Usual python setup.py install.
-
+RTMinuit https://github.com/piti118/RTMinuit
 numpy
-
 matplotlib
 
 Tutorial
