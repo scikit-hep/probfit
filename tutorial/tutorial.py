@@ -495,7 +495,7 @@ binlh.show(minimizer)
 
 # <codecell>
 
-minimizer.html_results()
+display(minimizer.html_results())
 minimizer.html_error_matrix()
 
 # <headingcell level=2>
@@ -532,8 +532,8 @@ print describe(ulh2)
 #you can also use cython to do this
 class CustomCost:
     def __init__(self,pdf1,data1,pdf2,data2):
-        self.ulh1 = UnbinnedML(norm_gauss,data1)
-        self.ulh2 = UnbinnedML(norm_gauss,data2)
+        self.ulh1 = UnbinnedML(pdf1,data1)
+        self.ulh2 = UnbinnedML(pdf2,data2)
     #this is the important part you need __call__ to calculate your cost
     #in our case it's sum of likelihood with sigma
     def __call__(self,mu1,mu2,sigma):
@@ -541,11 +541,12 @@ class CustomCost:
 
 # <codecell>
 
-simul_lh = CustomCost(norm_gauss,data1,norm_gauss,data2)
+simul_lh = CustomCost(gaussian,data1,gaussian,data2)
 
 # <codecell>
 
 minimizer = RTMinuit.Minuit(simul_lh,sigma=0.5)
+minimizer.set_up(0.5)#remember it's likelihood
 minimizer.migrad()
 
 # <codecell>
