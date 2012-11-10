@@ -460,7 +460,7 @@ def val_contour(fit, m, var, bound=None, step=None):
     val = m.values[var]
     error = m.errors[var]
     if bound is None: bound = (val - 2. * error, val + 2. * error)
-    if step is None: step = error / 100.
+    if step is None: step = error / 20.
 
     xs = np.arange(bound[0], bound[1], step)
     ys = np.zeros(len(xs))
