@@ -248,6 +248,3 @@ m=RTMinuit.Minuit(to_minimize)
 m.migrad()
 to_minimize.draw(m)
 
-# <codecell>
-
-
