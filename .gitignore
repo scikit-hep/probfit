@@ -9,4 +9,5 @@ test_*
 .idea
 *.swp
 archive
+_build
 !tutorial.ipynb
