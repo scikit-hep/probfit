@@ -8,13 +8,14 @@ Welcome to dist_fit's documentation!
 
 Tutorial
 ^^^^^^^^
-See :download:`Tutorial <tutorial.html>`. The ipython notebook can be also found in tutorial/tutorial.ipynb in the pacakge
+
+lorem ipsum
 
 API
 ^^^
 Sorry no real documentation yet.
 
 
-.. automodule:: dist_fit
+.. automodule:: probfit
     :members:
     :undoc-members:

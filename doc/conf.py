@@ -12,7 +12,8 @@
 # serve to show the default.
 
 import sys, os
-
+from os.path import dirname,join
+sys.path.append(join(dirname(__file__),'../'))
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -40,7 +41,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'dist_fit'
+project = u'probfit'
 copyright = u'2012, Piti Ongmongkolkul'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -164,7 +165,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'dist_fitdoc'
+htmlhelp_basename = 'probfitdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,7 +184,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'dist_fit.tex', u'dist\\_fit Documentation',
+  ('index', 'probfit.tex', u'dist\\_fit Documentation',
    u'Piti Ongmongkolkul', 'manual'),
 ]
 
@@ -213,7 +214,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'dist_fit', u'dist_fit Documentation',
+    ('index', 'probfit', u'probfit Documentation',
      [u'Piti Ongmongkolkul'], 1)
 ]
 
@@ -227,8 +228,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'dist_fit', u'dist_fit Documentation',
-   u'Piti Ongmongkolkul', 'dist_fit', 'Fitting Stuff',
+  ('index', 'probfit', u'probfit Documentation',
+   u'Piti Ongmongkolkul', 'probfit', 'Fitting Stuff',
    'Miscellaneous'),
 ]
 
