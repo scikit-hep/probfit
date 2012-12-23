@@ -1,5 +1,5 @@
 import unittest
-from dist_fit.util import describe, parse_arg
+from probfit.util import describe, parse_arg
 
 class Func_Code:
     def __init__(self,varname):

@@ -15,18 +15,20 @@ def fwhm_f(f,range,arg=None,bins=1000):
     il = first_neg(ls,'l')
     #print il,x[il],ls[il],x[il+1],ls[il+1]
     xl = xintercept(x[il],ls[il],x[il+1],ls[il+1])
-    
+
     ir = first_neg(rs,'r')
     #print ir,x[imax+ir],rs[ir],x[ir+1],rs[ir+1]
-    xr = xintercept(x[imax+ir],rs[ir],x[imax+ir-1],rs[ir-1])        
+    xr = xintercept(x[imax+ir],rs[ir],x[imax+ir-1],rs[ir-1])
 
     return (xl,xr)
 
 def xintercept_tuple(t0,t1):
     return xintercept(t0[0],t0[1],t1[0],t1[1])
+
 def xintercept(x0,y0,x1,y1):
     m = (y1-y0)/(x1-x0)
     return -y0/m+x0
+
 def first_neg(y,direction='r'):
     if direction == 'l':
         xlist = xrange(len(y)-1,-1,-1)

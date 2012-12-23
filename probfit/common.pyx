@@ -20,7 +20,7 @@ def float2double(a):
         return a.astype(np.float64)
 
 def bool2int(b):
-    if b: 
+    if b:
         return 1
     else:
         return 0

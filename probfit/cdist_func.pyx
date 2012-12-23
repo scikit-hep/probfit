@@ -26,17 +26,17 @@ cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
     cdef double tmp1,tmp2
     cdef int i,ind
     cdef int tsize = len(t2)-t2_offset
-    cdef bint ret = 0 
+    cdef bint ret = 0
     if len(t1) ==0 and tsize==0:
         return 1
-    
+
     for i in range(tsize):
         ind = i+t2_offset
         tmp1 = PyFloat_AsDouble(<object>PyTuple_GetItem(t1,i))
         tmp2 =  PyFloat_AsDouble(<object>PyTuple_GetItem(t2,ind))
         ret = abs(tmp1-tmp2) < precision
         if not ret: break
-        
+
     return ret
 
 cdef inline np.ndarray fast_empty(int size):
@@ -58,7 +58,7 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
             first = False
             tmp.append(newv)
         all_arg.append(tmp)
-    
+
     #now merge it
     #do something smarter
     merge_arg = []
@@ -66,7 +66,7 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
         for v in a:
             if v not in merge_arg:
                 merge_arg.append(v)
-    
+
     #build the map list of numpy int array
     pos = []
     for a in all_arg:
@@ -102,7 +102,7 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
 
 cdef tuple cconstruct_arg(tuple arg,
     np.ndarray fpos):
-    cdef int size = fpos.shape[0]    
+    cdef int size = fpos.shape[0]
     cdef int i,itmp
     cdef np.int_t* fposdata = <np.int_t*>fpos.data
     cdef tuple ret = PyTuple_New(size)
@@ -115,7 +115,7 @@ cdef tuple cconstruct_arg(tuple arg,
         PyTuple_SET_ITEM(ret, i, tmpo)
     return ret
 
-def construct_arg(tuple arg, 
+def construct_arg(tuple arg,
         np.ndarray[np.int_t] fpos):
     return cconstruct_arg(arg, fpos)
 
@@ -123,7 +123,7 @@ def construct_arg(tuple arg,
 def adjusted_bound(bound,bw):
     numbin = ceil((bound[1]-bound[0])/bw)
     return (bound[0],bound[0]+numbin*bw),numbin
-    
+
 cdef class Convolve:#with gy cache
     """
     Convolve)
@@ -142,6 +142,7 @@ cdef class Convolve:#with gy cache
     cdef public object func_defaults
     cdef tuple last_garg
     cdef np.ndarray gy_cache
+
     #g is resolution function gbound need to be set so that the end of g is zero
     def __init__(self,f,g,gbound,nbins=1000):
         self.vf = np.vectorize(f)
@@ -155,23 +156,24 @@ cdef class Convolve:#with gy cache
         self.gbound,self.nbg = gbound,nbins
         self.bw = 1.0*(gbound[1]-gbound[0])/nbins
         self.gy_cache = None
+
     def __call__(self,*arg):
         #skip the first one
         cdef int iconv
         cdef double ret = 0
         cdef np.ndarray[np.double_t] gy,fy
-        
+
         tmp_arg = arg[1:]
         x=arg[0]
         garg = list()
 
         for i in self.gpos: garg.append(arg[i])
         garg = tuple(garg[1:])#dock off the dependent variable
-        
+
         farg = list()
         for i in self.fpos: farg.append(arg[i])
         farg = tuple(farg[1:])
-        
+
         xg = np.linspace(self.gbound[0],self.gbound[1],self.nbg)
 
         gy = None
@@ -181,7 +183,7 @@ cdef class Convolve:#with gy cache
         else:
             gy = self.vg(xg,*garg)
             self.gy_cache=gy
-        
+
         #now prepare f... f needs to be calculated and padded to f-gbound[1] to f+gbound[0]
         #yep this is not a typo because we are "reverse" sliding g onto f so we need to calculate f from
         # f-right bound of g to f+left bound of g
@@ -193,10 +195,10 @@ cdef class Convolve:#with gy cache
         #now do the inverse slide g and f
         for iconv in range(self.nbg):
             ret+=fy[iconv]*gy[self.nbg-iconv-1]
-        
+
         #now normalize the integral
         ret*=self.bw
-        
+
         return ret
 
 cdef class Polynomial:
@@ -286,7 +288,7 @@ def gaussian(double x, double mean, double sigma):
 @cython.binding(True)
 def crystalball(double x,double alpha,double n,double mean,double sigma):
     """
-    unnormalized crystal ball function 
+    unnormalized crystal ball function
     see http://en.wikipedia.org/wiki/Crystal_Ball_function
     """
     cdef double d
@@ -324,9 +326,9 @@ def argus(double x, double c, double chi, double p):
     cdef double xc = x/c
     cdef double xc2 = xc*xc
     cdef double ret = 0
-    
+
     ret = xc/c*pow(1.-xc2,p)*exp(-0.5*chi*chi*(1-xc2))
-    
+
     return ret
 
 @cython.binding(True)
@@ -412,6 +414,7 @@ def novosibirsk(double x, double width, double peak, double tail):
 #         pass
 # cdef class AddAndRenorm
 #     pass
+
 cdef class Extend:
     """
     f = lambda x,y: x+y
@@ -452,7 +455,7 @@ cdef class AddPdf:
         self.argcache=[None]*self.numf
         self.cache = np.zeros(self.numf)
         self.hit = 0
-    
+
     def __call__(self,*arg):
         cdef tuple this_arg
         cdef double ret = 0.
@@ -465,7 +468,7 @@ cdef class AddPdf:
             if self.argcache[i] is not None and fast_tuple_equal(this_arg,self.argcache[i],0):
                 tmp = self.cache[i]
                 self.hit+=1
-            else:    
+            else:
                 tmp = self.allf[i](*this_arg)
                 self.argcache[i]=this_arg
                 self.cache[i]=tmp
@@ -567,11 +570,11 @@ cdef class Normalize:
 
     def __call__(self,*arg):
         #print arg
-        cdef double n 
+        cdef double n
         cdef double x
         n = self._compute_normalization(*arg)
         x = self.f(*arg)
-        if self.floatwarned < self.warnfloat  and n < 1e-100: 
+        if self.floatwarned < self.warnfloat  and n < 1e-100:
             print 'Potential float erorr:', arg
             self.floatwarned+=1
         return x/n

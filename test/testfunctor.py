@@ -1,5 +1,5 @@
 import unittest
-from dist_fit import *
+from probfit import *
 
 class TestFunctor(unittest.TestCase):
     def setUp(self):
@@ -13,7 +13,7 @@ class TestFunctor(unittest.TestCase):
     def test_Normalize(self):
         f = ugaussian
         g = Normalize(f,(-1,1))
-        
+
         norm = integrate1d(f,(-1.,1.),1000,(0.,1.))
         self.assertAlmostEqual(g(1.,0.,1.),f(1.,0.,1.)/norm)
 

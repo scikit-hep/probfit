@@ -5,20 +5,18 @@ cimport numpy as np
 from libc.math cimport exp,pow,fabs,log,tgamma,lgamma,log1p,sqrt
 from matplotlib import pyplot as plt
 from .common import *
-from cython.parallel import prange, parallel, threadid
-import multiprocessing as mp
 from warnings import warn
 from cdist_func cimport *
 cdef extern from "math.h":
     bint isnan(double x)
 
 
-cdef double compute_bin_lh_f(f, 
+cdef double compute_bin_lh_f(f,
                     np.ndarray[np.double_t] edges,
                     np.ndarray[np.double_t] h, #histogram,
                     np.ndarray[np.double_t] w2,
                     double N, #sum of h
-                    tuple arg, double badvalue, 
+                    tuple arg, double badvalue,
                     bint extend,bint use_sumw2) except *:
     cdef int i
     cdef int n = len(edges)
@@ -86,7 +84,6 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
     cdef np.ndarray[np.double_t] w_
     if w is None:
         for i in range(data_len):
-        #for i in prange(data_len,nogil=True): #nope!!!! gilllllllll
             thisdata = data_[i]
             lh = f(thisdata,*arg)
             if lh<=0:
@@ -97,14 +94,13 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
     else:
         w_ = w
         for i in range(data_len):
-        #for i in prange(data_len,nogil=True): #nope!!!! gillllllll
             thisdata = data_[i]
             lh = f(thisdata,*arg,nogil=True)
             if lh<=0:
                 ret = badvalue
                 break
             else:
-                ret+=log(lh)*w_[i]        
+                ret+=log(lh)*w_[i]
     return -1*ret
 
 
@@ -266,7 +262,7 @@ cdef class UnbinnedMLP:
         self.badvalue = badvalue
         numcpu = mp.cpu_count()
         numworker = numcpu
-        
+
         #self.pool = mp.Pool(numworker)
         self.num_chunk = numworker
         dic = int(self.data_len/numworker)
@@ -280,28 +276,28 @@ cdef class UnbinnedMLP:
                 self.data_chunk.append(self.data[i*dic:])
                 self.weight_chunk.append(self.weights[i*dic:])
         self.result_tmp = []*self.num_chunk
-        
+
     def __call__(self,*arg):
         self.last_arg = arg
-        
+
         jobs = []
         for i in range(self.num_chunk):
             p = mp.Process(target=self.call_worker,args=(i,arg,))
             jobs.append(p)
             p.start()
-        
+
         for p in jobs:
             p.join()
-        
+
         return sum(nll)
-    
+
     def call_worker(self,i,arg):
         print 'call '+str(i)
         ret = compute_nll(self.f,self.data_chunk[i],self.weight_chunk[i],arg,self.badvalue)
         print 'ready to return '+str(i)+' result ='+str(ret)
         self.result_tmp[i]=ret
         return ret
-    
+
     def draw(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500):
         if ax is None: ax=plt.gca()
 
@@ -325,7 +321,7 @@ cdef class UnbinnedMLP:
                 err = minu.errors[k]
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             print txt
-            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)        
+            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
 
 
 cdef class UnbinnedML:
@@ -337,7 +333,7 @@ cdef class UnbinnedML:
     cdef double badvalue
     cdef tuple last_arg
     cdef object pool
-    
+
     def __init__(self, f, data ,weights=None,badvalue=-100000):
         #self.vf = np.vectorize(f)
         self.f = f
@@ -351,8 +347,7 @@ cdef class UnbinnedML:
     def __call__(self,*arg):
         self.last_arg = arg
         return compute_nll(self.f,self.data,self.weights,arg,self.badvalue)
-    
-    @cython.binding(True)
+
     def draw(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500,print_par=False):
         if ax is None: ax=plt.gca()
         arg = self.last_arg
@@ -366,7 +361,7 @@ cdef class UnbinnedML:
         # plt.plot(fxs,v,color='r')
         v = vf(fxs,*arg)
         ax.plot(fxs,v,color='r')
-        
+
         ax.grid(True)
         minu = minuit
         ax = plt.gca()
@@ -378,7 +373,7 @@ cdef class UnbinnedML:
                 txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
             if print_par: print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
-                
+
     def show(self,*arg,**kwd):
         self.draw(*arg,**kwd)
         plt.show()
@@ -396,19 +391,19 @@ cdef class Chi2Regression:
     cdef np.ndarray x
     cdef np.ndarray y
     cdef tuple last_arg
-    
+
     def __init__(self, f, x, y,error=None,weights=None,badvalue=1000000):
         #self.vf = np.vectorize(f)
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
-        self.weights = float2double(weights) 
+        self.weights = float2double(weights)
         self.error = float2double(error)
         self.x = float2double(x)
         self.y = float2double(y)
         self.data_len = len(x)
         self.badvalue = badvalue
         self.ndof = self.data_len - (self.func_code.co_argcount-1)
-        
+
     def __call__(self,*arg):
         self.last_arg = arg
         return compute_chi2_f(self.f,self.x,self.y,self.error,self.weights,arg)
@@ -421,7 +416,7 @@ cdef class Chi2Regression:
         y=self.y
         err = self.error
         expy = vf(x,*arg)
-        
+
         if err is None:
             plt.plot(x,y,'+')
         else:
@@ -439,7 +434,7 @@ cdef class Chi2Regression:
             chi2 = self(*self.last_arg)
             txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof,chi2,self.ndof)
             plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
-  
+
     def show(self,*arg):
         self.draw(*arg)
         plt.show()
@@ -466,8 +461,8 @@ cdef class BinnedChi2:
         self.func_code = FakeFuncCode(f,dock=True)
         if range is None:
             range = minmax(data)
-        self.mymin,self.mymax = range 
-        
+        self.mymin,self.mymax = range
+
         h,self.edges = np.histogram(data,bins,range=range,weights=weights)
         self.h = float2double(h)
         self.midpoints = mid(self.edges)
@@ -485,12 +480,12 @@ cdef class BinnedChi2:
         self.bins = bins
         self.badvalue = badvalue
         self.ndof = self.bins-(self.func_code.co_argcount-1)#fix this taking care of fixed parameter
-    
+
     #lazy mid point implementation
     def __call__(self,*arg):
         self.last_arg = arg
         return compute_bin_chi2_f(self.f,self.midpoints,self.h,self.err,self.binwidth,None,arg)
-    
+
     # def __call__(self,*arg):
     #        #can be optimized much better than this
     #        cdef np.ndarray[np.double_t] edges_values
@@ -513,9 +508,9 @@ cdef class BinnedChi2:
         #bw = np.diff(xs)
         xs = mid(xs)
         expy = self.vf(xs,*arg)*bw
-        
+
         ax.plot(xs,expy,'r-')
-        
+
         minu = minuit
         ax.grid(True)
 
@@ -529,7 +524,7 @@ cdef class BinnedChi2:
             txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof,chi2,self.ndof)
             if print_par: print txt
             ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
-    
+
     def show(self,*arg,**kwd):
         self.draw(*arg,**kwd)
         plt.show()
@@ -554,16 +549,16 @@ cdef class BinnedLH:
     cdef int ndof
     cdef bint extended
     cdef bint use_w2
-    def __init__(self, f, data, bins=40, weights=None, range=None, badvalue=1000000, 
+    def __init__(self, f, data, bins=40, weights=None, range=None, badvalue=1000000,
             extended=False, use_w2=False,use_normw=False):
         self.f = f
         self.vf = np.vectorize(f)
         self.func_code = FakeFuncCode(f,dock=True)
         self.use_w2 = use_w2
         self.extended = extended
-        
+
         if range is None: range = minmax(data)
-        self.mymin,self.mymax = range 
+        self.mymin,self.mymax = range
         self.w = float2double(weights)
         if use_normw: self.w=self.w/np.sum(self.w)*len(self.w)
         h,self.edges = np.histogram(data,bins,range=range,weights=weights)
@@ -577,7 +572,7 @@ cdef class BinnedLH:
         self.w2 = float2double(self.w2)
         self.midpoints = mid(self.edges)
         self.binwidth = np.diff(self.edges)
-        
+
         self.bins = bins
         self.badvalue = badvalue
         self.ndof = self.bins-(self.func_code.co_argcount-1)
@@ -585,15 +580,15 @@ cdef class BinnedLH:
     #lazy mid point implementation
     def __call__(self,*arg):
         self.last_arg = arg
-        ret = compute_bin_lh_f(self.f, 
+        ret = compute_bin_lh_f(self.f,
                                 self.edges,
                                 self.h, #histogram,
                                 self.w2,
                                 self.N, #sum of h
-                                arg, self.badvalue, 
+                                arg, self.badvalue,
                                 self.extended, self.use_w2)
         return ret
-            
+
     def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
         if ax is None: ax = plt.gca()
         arg = self.last_arg
@@ -609,7 +604,7 @@ cdef class BinnedLH:
         else:
             scale = sum(self.h)
             ax.errorbar(m,self.h/scale,err/scale,fmt='.')
-        
+
         #assume equal spacing
         #self.edges[0],self.edges[-1]
         bw = self.edges[1]-self.edges[0]

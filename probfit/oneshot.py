@@ -1,13 +1,13 @@
 from .cdist_fit import UnbinnedML, BinnedChi2, compute_cdf, invert_cdf, BinnedLH
-from RTMinuit import Minuit
+from iminuit import Minuit
 from matplotlib import pyplot as plt
 import numpy as np
 import numpy.random as npr
 import itertools as itt
 import collections
 from warnings import warn
-from dist_fit.util import parse_arg
-from dist_fit.common import minmax
+from .util import parse_arg
+from .common import minmax
 from util import vertical_highlight, better_arg_spec
 
 def randfr(r):
@@ -21,7 +21,7 @@ def randfr(r):
     return np.random.ranf() * (b - a) + a
 
 
-def fit_uml(f, data, quiet=False, printlevel=0, *arg, **kwd):
+def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
     """
     perform unbinned likelihood fit
     :param f: pdf
@@ -31,7 +31,7 @@ def fit_uml(f, data, quiet=False, printlevel=0, *arg, **kwd):
     :return:
     """
     uml = UnbinnedML(f, data)
-    m = Minuit(uml, printlevel=printlevel, **kwd)
+    m = Minuit(uml, print_level=print_level, **kwd)
     m.set_strategy(2)
     m.set_up(0.5)
     m.migrad()
@@ -43,7 +43,7 @@ def fit_uml(f, data, quiet=False, printlevel=0, *arg, **kwd):
     return (uml, m)
 
 
-def fit_binx2(f, data, bins=30, range=None, printlevel=0, quiet=False, *arg, **kwd):
+def fit_binx2(f, data, bins=30, range=None, print_level=0, quiet=False, *arg, **kwd):
     """
     perform chi^2 fit
     :param f:
@@ -57,7 +57,7 @@ def fit_binx2(f, data, bins=30, range=None, printlevel=0, quiet=False, *arg, **k
     :return:
     """
     uml = BinnedChi2(f, data, bins=bins, range=range)
-    m = Minuit(uml, printlevel=printlevel, **kwd)
+    m = Minuit(uml, print_level=print_level, **kwd)
     m.set_strategy(2)
     m.set_up(1)
     m.migrad()
@@ -72,7 +72,7 @@ def fit_binx2(f, data, bins=30, range=None, printlevel=0, quiet=False, *arg, **k
 
 def fit_binlh(f, data, bins=30,
               range=None, quiet=False, weights=None, use_w2=False,
-              printlevel=0, pedantic=True, extended=False,
+              print_level=0, pedantic=True, extended=False,
               *arg, **kwd):
     """
     perform bin likelihood fit
@@ -90,8 +90,9 @@ def fit_binlh(f, data, bins=30,
     :param kwd:
     :return:
     """
-    uml = BinnedLH(f, data, bins=bins, range=range, weights=weights, use_w2=use_w2, extended=extended)
-    m = Minuit(uml, printlevel=printlevel, pedantic=pedantic, **kwd)
+    uml = BinnedLH(f, data, bins=bins, range=range,
+                    weights=weights, use_w2=use_w2, extended=extended)
+    m = Minuit(uml, print_level=print_level, pedantic=pedantic, **kwd)
     m.set_strategy(2)
     m.set_up(0.5)
     m.migrad()
