@@ -17,7 +17,7 @@ cdef double compute_bin_lh_f(f,
                     np.ndarray[np.double_t] w2,
                     double N, #sum of h
                     tuple arg, double badvalue,
-                    bint extend,bint use_sumw2) except *:
+                    bint extend, bint use_sumw2) except *:
     cdef int i
     cdef int n = len(edges)
 
