@@ -4,10 +4,13 @@ from probfit.cdist_func import Extend, gaussian
 import numpy as np
 from numpy.random import randn, seed
 from math import sqrt
+from iminuit.iminuit_warnings import InitialParamWarning
+import warnings
 class TestOneshot(unittest.TestCase):
 
     def setUp(self):
         self.ndata = 20000
+        warnings.simplefilter("ignore", InitialParamWarning)
         seed(0)
         self.data = randn(self.ndata)*2. + 5.
         self.wdown = np.empty(self.ndata)

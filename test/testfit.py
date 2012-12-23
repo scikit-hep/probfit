@@ -3,9 +3,12 @@ from probfit.cdist_fit import *
 from probfit.cdist_func import *
 from numpy.random import randn, seed
 from math import log,pi,sqrt
+import warnings
+from iminuit.iminuit_warnings import InitialParamWarning
 class TestFit(unittest.TestCase):
 
     def setUp(self):
+        warnings.simplefilter("ignore", InitialParamWarning)
         seed(0)
         self.ndata = 20000
         self.data = randn(self.ndata)
