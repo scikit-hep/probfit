@@ -1,4 +1,4 @@
-from .cdist_fit import UnbinnedML, BinnedChi2, compute_cdf, invert_cdf, BinnedLH
+from .cdist_fit import UnbinnedLH, BinnedChi2, compute_cdf, invert_cdf, BinnedLH
 from iminuit import Minuit
 from matplotlib import pyplot as plt
 import numpy as np
@@ -30,7 +30,7 @@ def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
     :param printlevel: minuit printlevel
     :return:
     """
-    uml = UnbinnedML(f, data)
+    uml = UnbinnedLH(f, data)
     m = Minuit(uml, print_level=print_level, **kwd)
     m.set_strategy(2)
     m.set_up(0.5)
@@ -130,7 +130,7 @@ def pprint_arg(vnames, value):
 
 
 def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
-    fom = UnbinnedML(f, data)
+    fom = UnbinnedLH(f, data)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [tuplize(kwd[name]) for name in vnames]

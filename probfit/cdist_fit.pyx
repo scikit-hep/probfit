@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from .common import *
 from warnings import warn
 from cdist_func cimport *
+import plotting
 cdef extern from "math.h":
     bint isnan(double x)
 
@@ -218,121 +219,14 @@ cdef double compute_chi2(np.ndarray[np.double_t] actual, np.ndarray[np.double_t]
     return ret
 
 
-cdef class UnbinnedMLWorker:
-    cdef np.ndarray data
+cdef class UnbinnedLH:
     cdef public object f
-    cdef object weights
-    cdef double badvalue
-    def __init__(self,f,data,weights,badvalue):
-        self.f=f
-        self.data=data
-        self.weights=weights
-        self.badvalue=badvalue
-    def __call__(self,*arg):
-        return compute_nll(self.f,self.data,self.weights,arg,self.badvalue)
-
-
-cdef class UnbinnedMLP:
-    """
-    This will die on throwing exception don't use this ever I should change this to zmq instead
-    """
-    cdef public object f
-    cdef object weights
+    cdef public object weights
     cdef public object func_code
-    cdef np.ndarray data
-    cdef int data_len
+    cdef public np.ndarray data
+    cdef public int data_len
     cdef double badvalue
-    cdef tuple last_arg
-    cdef list data_chunk
-    cdef list weight_chunk
-    #cdef object pool
-    cdef int num_chunk
-    cdef result_tmp
-    def __init__(self, f, data ,weights=None,badvalue=-100000):
-        #self.vf = np.vectorize(f)
-        self.f = f
-        self.func_code = FakeFuncCode(f,dock=True)
-        self.weights = weights
-        #only make copy when type mismatch
-        self.data = float2double(data)
-        self.data_len = len(data)
-        if weights is None:
-            self.weights = np.zeros(self.data_len)
-            self.weights.fill(1.)
-        self.badvalue = badvalue
-        numcpu = mp.cpu_count()
-        numworker = numcpu
-
-        #self.pool = mp.Pool(numworker)
-        self.num_chunk = numworker
-        dic = int(self.data_len/numworker)
-        self.data_chunk = []
-        self.weight_chunk = []
-        for i in xrange(numworker):
-            if i!=numworker:
-                self.data_chunk.append(self.data[i*dic:(i+1)*dic])
-                self.weight_chunk.append(self.weights[i*dic:(i+1)*dic])
-            else:
-                self.data_chunk.append(self.data[i*dic:])
-                self.weight_chunk.append(self.weights[i*dic:])
-        self.result_tmp = []*self.num_chunk
-
-    def __call__(self,*arg):
-        self.last_arg = arg
-
-        jobs = []
-        for i in range(self.num_chunk):
-            p = mp.Process(target=self.call_worker,args=(i,arg,))
-            jobs.append(p)
-            p.start()
-
-        for p in jobs:
-            p.join()
-
-        return sum(nll)
-
-    def call_worker(self,i,arg):
-        print 'call '+str(i)
-        ret = compute_nll(self.f,self.data_chunk[i],self.weight_chunk[i],arg,self.badvalue)
-        print 'ready to return '+str(i)+' result ='+str(ret)
-        self.result_tmp[i]=ret
-        return ret
-
-    def draw(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500):
-        if ax is None: ax=plt.gca()
-
-        n,e,patches = ax.hist(self.data,bins=bins,weights=self.weights,
-            histtype='step',range=range,normed=True)
-        m = mid(e)
-        vf = np.vectorize(self.f)
-        fxs = np.linspace(e[0],e[-1],nfbins)
-        # v = vf(fxs,*self.last_arg)
-        # plt.plot(fxs,v,color='r')
-        v = vf(fxs,*self.last_arg)
-        ax.plot(fxs,v,color='r')
-
-        ax.grid(True)
-        minu = minuit
-        ax = plt.gca()
-        if minu is not None:
-            #build text
-            txt = u'';
-            for k,v  in minu.values.items():
-                err = minu.errors[k]
-                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            print txt
-            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
-
-
-cdef class UnbinnedML:
-    cdef public object f
-    cdef object weights
-    cdef public object func_code
-    cdef np.ndarray data
-    cdef int data_len
-    cdef double badvalue
-    cdef tuple last_arg
-    cdef object pool
+    cdef public tuple last_arg
 
     def __init__(self, f, data ,weights=None,badvalue=-100000):
         #self.vf = np.vectorize(f)
@@ -348,31 +242,10 @@ cdef class UnbinnedML:
         self.last_arg = arg
         return compute_nll(self.f,self.data,self.weights,arg,self.badvalue)
 
-    def draw(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500,print_par=False):
-        if ax is None: ax=plt.gca()
-        arg = self.last_arg
-        if minuit is not None: arg = minuit.args
-        n,e,patches = ax.hist(self.data,bins=bins,weights=self.weights,
-            histtype='step',range=range,normed=True)
-        m = mid(e)
-        vf = np.vectorize(self.f)
-        fxs = np.linspace(e[0],e[-1],nfbins)
-        # v = vf(fxs,*self.last_arg)
-        # plt.plot(fxs,v,color='r')
-        v = vf(fxs,*arg)
-        ax.plot(fxs,v,color='r')
-
-        ax.grid(True)
-        minu = minuit
-        ax = plt.gca()
-        if minu is not None:
-            #build text
-            txt = u'';
-            for k,v  in minu.values.items():
-                err = minu.errors[k]
-                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            if print_par: print txt
-            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+    def draw(self, minuit=None, bins=100, ax=None, range=None,
+            parmloc=(0.05,0.95),nfbins=500,print_par=False):
+        return plotting.draw_ulh(self, minuit, bins, ax, range,
+            parmloc, nfbins, print_par)
 
     def show(self,*arg,**kwd):
         self.draw(*arg,**kwd)
@@ -382,17 +255,18 @@ cdef class UnbinnedML:
 #fit a line with given function using minimizing chi2
 cdef class Chi2Regression:
     cdef public object f
-    cdef object weights
-    cdef object error
+    cdef public object weights
+    cdef public object error
     cdef public object func_code
-    cdef int data_len
-    cdef double badvalue
-    cdef int ndof
-    cdef np.ndarray x
-    cdef np.ndarray y
-    cdef tuple last_arg
+    cdef public int data_len
+    cdef public double badvalue
+    cdef public int ndof
+    cdef public np.ndarray x
+    cdef public np.ndarray y
+    cdef public tuple last_arg
 
-    def __init__(self, f, x, y,error=None,weights=None,badvalue=1000000):
+
+    def __init__(self, f, x, y, error=None, weights=None, badvalue=1000000):
         #self.vf = np.vectorize(f)
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
@@ -404,36 +278,15 @@ cdef class Chi2Regression:
         self.badvalue = badvalue
         self.ndof = self.data_len - (self.func_code.co_argcount-1)
 
+
     def __call__(self,*arg):
         self.last_arg = arg
         return compute_chi2_f(self.f,self.x,self.y,self.error,self.weights,arg)
 
-    def draw(self,minuit=None,parmloc=(0.05,0.95),print_par=False):
-        arg = self.last_arg
-        if minuit is not None: arg = minuit.args
-        vf = np.vectorize(self.f)
-        x=self.x
-        y=self.y
-        err = self.error
-        expy = vf(x,*arg)
 
-        if err is None:
-            plt.plot(x,y,'+')
-        else:
-            plt.errorbar(x,y,err,fmt='.')
-        plt.plot(x,expy,'r-')
-        ax = plt.gca()
-        minu = minuit
-        if minu is not None:
-            #build text
-            txt = u'';
-            for k,v  in minu.values.items():
-                err = minu.errors[k]
-                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            if print_par: print txt
-            chi2 = self(*self.last_arg)
-            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof,chi2,self.ndof)
-            plt.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+    def draw(self, minuit=None, parmloc=(0.05,0.95), print_par=False):
+        return plotting.draw_x2(self, minuit, parmloc, print_par)
+
 
     def show(self,*arg):
         self.draw(*arg)
@@ -444,17 +297,17 @@ cdef class BinnedChi2:
     cdef public object f
     cdef public object vf
     cdef public object func_code
-    cdef np.ndarray h
-    cdef np.ndarray err
-    cdef np.ndarray edges
-    cdef np.ndarray midpoints
-    cdef np.ndarray binwidth
-    cdef int bins
-    cdef double mymin
-    cdef double mymax
-    cdef double badvalue
-    cdef tuple last_arg
-    cdef int ndof
+    cdef public np.ndarray h
+    cdef public np.ndarray err
+    cdef public np.ndarray edges
+    cdef public np.ndarray midpoints
+    cdef public np.ndarray binwidth
+    cdef public int bins
+    cdef public double mymin
+    cdef public double mymax
+    cdef public double badvalue
+    cdef public tuple last_arg
+    cdef public int ndof
     def __init__(self, f, data, bins=40, weights=None,range=None, sumw2=False,badvalue=1000000):
         self.f = f
         self.vf = np.vectorize(f)
@@ -481,6 +334,7 @@ cdef class BinnedChi2:
         self.badvalue = badvalue
         self.ndof = self.bins-(self.func_code.co_argcount-1)#fix this taking care of fixed parameter
 
+
     #lazy mid point implementation
     def __call__(self,*arg):
         self.last_arg = arg
@@ -495,35 +349,12 @@ cdef class BinnedChi2:
     #        expy = mid(edges_values)
     #        return compute_chi2(self.h,expy,self.err)
 
-    def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
-        if ax is None: ax = plt.gca()
-        arg = self.last_arg
-        if minuit is not None: arg = minuit.args
-        m = mid(self.edges)
-        ax.errorbar(m,self.h,self.err,fmt='.')
-        #assume equal spacing
-        #self.edges[0],self.edges[-1]
-        bw = self.edges[1]-self.edges[0]
-        xs = np.linspace(self.edges[0],self.edges[-1],fbins)
-        #bw = np.diff(xs)
-        xs = mid(xs)
-        expy = self.vf(xs,*arg)*bw
 
-        ax.plot(xs,expy,'r-')
+    def draw(self, minuit=None, parmloc=(0.05,0.95),
+                fbins=1000, ax = None, print_par=False):
+        return plotting.draw_bx2(self, minuit,
+            parmloc, fbins, ax, print_par)
 
-        minu = minuit
-        ax.grid(True)
-
-        if minu is not None:
-            #build text
-            txt = u'';
-            for k,v  in minu.values.items():
-                err = minu.errors[k]
-                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            chi2 = self(*self.last_arg)
-            txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof,chi2,self.ndof)
-            if print_par: print txt
-            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
 
     def show(self,*arg,**kwd):
         self.draw(*arg,**kwd)
@@ -534,21 +365,21 @@ cdef class BinnedLH:
     cdef public object f
     cdef public object vf
     cdef public object func_code
-    cdef np.ndarray h
-    cdef np.ndarray w
-    cdef np.ndarray w2
-    cdef double N
-    cdef np.ndarray edges
-    cdef np.ndarray midpoints
-    cdef np.ndarray binwidth
-    cdef int bins
-    cdef double mymin
-    cdef double mymax
-    cdef double badvalue
-    cdef tuple last_arg
-    cdef int ndof
-    cdef bint extended
-    cdef bint use_w2
+    cdef public np.ndarray h
+    cdef public np.ndarray w
+    cdef public np.ndarray w2
+    cdef public double N
+    cdef public np.ndarray edges
+    cdef public np.ndarray midpoints
+    cdef public np.ndarray binwidth
+    cdef public int bins
+    cdef public double mymin
+    cdef public double mymax
+    cdef public double badvalue
+    cdef public tuple last_arg
+    cdef public int ndof
+    cdef public bint extended
+    cdef public bint use_w2
     def __init__(self, f, data, bins=40, weights=None, range=None, badvalue=1000000,
             extended=False, use_w2=False,use_normw=False):
         self.f = f
@@ -577,6 +408,7 @@ cdef class BinnedLH:
         self.badvalue = badvalue
         self.ndof = self.bins-(self.func_code.co_argcount-1)
 
+
     #lazy mid point implementation
     def __call__(self,*arg):
         self.last_arg = arg
@@ -589,50 +421,10 @@ cdef class BinnedLH:
                                 self.extended, self.use_w2)
         return ret
 
+
     def draw(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
-        if ax is None: ax = plt.gca()
-        arg = self.last_arg
-        if minuit is not None: arg = minuit.args
-        m = mid(self.edges)
-        if self.use_w2:
-            err = np.sqrt(self.w2)
-        else:
-            err = np.sqrt(self.h)
+        return plotting.draw_blh(self, minuit, parmloc, fbins, ax, print_par)
 
-        if self.extended:
-            ax.errorbar(m,self.h,err,fmt='.')
-        else:
-            scale = sum(self.h)
-            ax.errorbar(m,self.h/scale,err/scale,fmt='.')
-
-        #assume equal spacing
-        #self.edges[0],self.edges[-1]
-        bw = self.edges[1]-self.edges[0]
-        xs = np.linspace(self.edges[0],self.edges[-1],fbins)
-        #bw = np.diff(xs)
-        xs = mid(xs)
-        expy = self.vf(xs,*arg)*bw
-        #if not self.extended: expy/=sum(expy)
-        ax.plot(xs,expy,'r-')
-
-        minu = minuit
-        ax.grid(True)
-
-        if minu is not None:
-            #build text
-            txt = u'';
-            sortk = minu.values.keys()
-            sortk.sort()
-            #for k,v  in minu.values.items():
-            val = minu.values
-            for k in sortk:
-                v = val[k]
-                err = minu.errors[k]
-                txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
-            #chi2 = self(*self.last_arg)
-            #txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
-            if print_par: print txt
-            ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
 
     def show(self,*arg,**kwd):
         self.draw(*arg,**kwd)

@@ -12,7 +12,7 @@ __all__ = [
     'Minuit',
     'Normalize',
     'Polynomial',
-    'UnbinnedML',
+    'UnbinnedLH',
     'adjusted_bound',
     'argus',
     'better_arg_spec',

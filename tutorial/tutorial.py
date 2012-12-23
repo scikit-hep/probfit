@@ -7,9 +7,9 @@
 
 # <codecell>
 
-from dist_fit import *
+from probfit import *
 import numpy as np
-import RTMinuit
+import iminuit
 import UserDict
 from math import sqrt, exp, pi
 

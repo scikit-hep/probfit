@@ -1,18 +1,19 @@
 import unittest
 from probfit.cdist_fit import *
 from probfit.cdist_func import *
-from numpy.random import randn
+from numpy.random import randn, seed
 from math import log,pi,sqrt
 class TestFit(unittest.TestCase):
 
     def setUp(self):
+        seed(0)
         self.ndata = 20000
         self.data = randn(self.ndata)
         self.analytic = self.ndata*0.5*(log(2*pi)+1)
 
-    def test_UnbinnedML(self):
+    def test_UnbinnedLH(self):
         f = gaussian
-        blh = UnbinnedML(gaussian,self.data)
+        blh = UnbinnedLH(gaussian,self.data)
         self.assertAlmostEqual(blh(0,1),self.analytic,delta=self.analytic*0.01)
 
     def test_BinnedLH_poisson(self):
