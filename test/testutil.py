@@ -31,12 +31,15 @@ class TestUtil(unittest.TestCase):
         self.f2=Func2()
         self.f3=func3
 
+    def iterable_equal(self, x, y):
+        self.assertEqual(list(x),list(y))
+
     def test_parse_arg(self):
         td = {'x':1,'y':2}
         ts = parse_arg(self.f1,td)
         self.assertEqual(ts,(1,2))
 
     def test_describe(self):
-        self.assertEqual(describe(self.f1),('x','y'))
-        self.assertEqual(describe(self.f2),['x','y'])
-        self.assertEqual(describe(self.f3),('x','y'))
+        self.iterable_equal(describe(self.f1),('x','y'))
+        self.iterable_equal(describe(self.f2),['x','y'])
+        self.iterable_equal(describe(self.f3),('x','y'))

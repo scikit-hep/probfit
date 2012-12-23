@@ -24,7 +24,7 @@ class TestOneshot(unittest.TestCase):
         self.assertAlmostEqual(m.values['sigma'], 2., delta=3*m.errors['sigma'])
 
     def test_binlh(self):
-        ngauss=Normalize(gaussian,(1.,9.))
+        ngauss=Normalized(gaussian,(1.,9.))
         fit,m = fit_binlh(ngauss, self.data,bins=1000, range=(1.,9.), quiet=True,
             mean=4., sigma=1.5, print_level=0)
         self.assertAlmostEqual(m.values['mean'],5.,delta=3*m.errors['mean'])

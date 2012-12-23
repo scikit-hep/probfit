@@ -18,7 +18,7 @@ cdef double smallestln = 0.
 cdef double largestpow = 200
 cdef double maxnegexp = 200
 cdef double precision = 1e-16
-cdef class Normalize
+cdef class Normalized
 
 cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
     #t=last_arg
@@ -534,7 +534,7 @@ cdef class Add2PdfNorm:
         cdef double gv = (1.-fac)*self.g(*garg)
         return (fv,gv)
 
-cdef class Normalize:
+cdef class Normalized:
     cdef f
     cdef double norm_cache
     cdef tuple last_arg

@@ -10,12 +10,11 @@ __all__ = [
     'FakeFuncCode',
     'MinimalFuncCode',
     'Minuit',
-    'Normalize',
+    'Normalized',
     'Polynomial',
     'UnbinnedLH',
     'adjusted_bound',
     'argus',
-    'better_arg_spec',
     'compute_cdf',
     'construct_arg',
     'cruijff',
@@ -43,7 +42,7 @@ __all__ = [
     'invert_cdf',
     'linear',
     'merge_func_code',
-    'normalized_function',
+    'normalized',
     'novosibirsk',
     'parse_arg',
     'poly2',
@@ -68,3 +67,5 @@ from .cdist_func import *
 from .util import *
 from .oneshot import *
 from .stat_util import *
+from .plotting import *
+

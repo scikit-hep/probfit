@@ -10,8 +10,12 @@ class TestFunc(unittest.TestCase):
         self.ndata = 20000
         self.data = randn(self.ndata)*2. + 5.
 
+    def iterable_equal(self, x, y):
+        self.assertEqual(list(x), list(y))
+
     def test_cruijff(self):
-        self.assertEqual(describe(cruijff),tuple(['x', 'm0', 'sigma_L', 'sigma_R', 'alpha_L', 'alpha_R']))
+        self.iterable_equal(describe(cruijff),
+            tuple(['x', 'm0', 'sigma_L', 'sigma_R', 'alpha_L', 'alpha_R']))
         val = cruijff(0,0,1.,2.,1.,2.)
         self.assertAlmostEqual(val,1.)
         vl = cruijff(0,1,1.,1.,2.,2.)
@@ -106,7 +110,7 @@ class TestFunc(unittest.TestCase):
         def h(x,c,d): return 3*(x+c+d)
 
         A = AddPdf(f,g,h)
-        self.assertEqual(describe(A),('x','y','z','a','b','c','d'))
+        self.iterable_equal(describe(A),('x','y','z','a','b','c','d'))
 
         ret = A(1,2,3,4,5,6,7)
         expected = f(1,2,3)+g(1,4,5)+h(1,6,7)
@@ -118,7 +122,7 @@ class TestFunc(unittest.TestCase):
         def h(x,c,d): return 3*(x+c+d)
 
         A = AddPdf(f,g,h)
-        self.assertEqual(describe(A),('x','y','z','a','b','c','d'))
+        self.iterable_equal(describe(A),('x','y','z','a','b','c','d'))
 
         ret = A(1,2,3,4,5,6,7)
         self.assertEqual(A.hit,0)
@@ -159,8 +163,8 @@ class TestFunc(unittest.TestCase):
     def test_Normalize_cache_hit(self):
         def f(x,y,z) : return 1.*(x+y+z)
         def g(x,y,z) : return 1.*(x+y+2*z)
-        nf = Normalize(f,(-10.,10.))
-        ng = Normalize(g,(-10.,10.))
+        nf = Normalized(f,(-10.,10.))
+        ng = Normalized(g,(-10.,10.))
         self.assertEqual(nf.hit,0)
         nf(1.,2.,3.)
         ng(1.,2.,3.)
