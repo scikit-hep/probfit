@@ -1,4 +1,5 @@
-from .cdist_fit import UnbinnedLH, BinnedChi2, compute_cdf, invert_cdf, BinnedLH
+from .cdist_fit import UnbinnedLH, BinnedChi2, BinnedLH
+from .toy import compute_cdf, invert_cdf
 from iminuit import Minuit
 from matplotlib import pyplot as plt
 import numpy as np

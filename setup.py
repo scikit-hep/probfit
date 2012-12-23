@@ -32,15 +32,21 @@ common = Extension('probfit.common',
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
+toy = Extension('probfit.toy',
+        sources = ['probfit/toy.'+source_suffix],
+        include_dirs= [np.get_include()],
+        extra_link_args = [])
+
 setup (
        cmdclass=cmdclass,
        name = 'probfit',
-       version = '1.00',
+       version = '1.0.0',
        description = 'Distribution Fitting/Regression Library',
        author='Piti Ongmongkolkul',
        author_email='piti118@gmail.com',
        url='https://github.com/piti118/dist_fit',
        package_dir = {'probfit': 'probfit'},
        packages = ['probfit'],
-       ext_modules = [cdist_fit,cdist_func,common], requires=['numpy','iminuit']
+       ext_modules = [cdist_fit,cdist_func,common, toy],
+       requires=['numpy','iminuit']
        )

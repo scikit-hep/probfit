@@ -8,6 +8,7 @@ from .common import *
 from warnings import warn
 from cdist_func cimport *
 import plotting
+
 cdef extern from "math.h":
     bint isnan(double x)
 
@@ -19,6 +20,9 @@ cdef double compute_bin_lh_f(f,
                     double N, #sum of h
                     tuple arg, double badvalue,
                     bint extend, bint use_sumw2) except *:
+    """
+    TODO:
+    """
     cdef int i
     cdef int n = len(edges)
 
@@ -56,23 +60,7 @@ cdef double compute_bin_lh_f(f,
                 factor = th/tw
                 ret -= factor*(cwlogyx(th,tm*bw,th)+(th-tm*bw))
     return ret
-
-
-cdef double cgauss(double x, double mean, double sigma):
-    return 1/sqrt(2*pi*sigma)*exp((x-mean)*(x-mean)/sigma/sigma/2.);
-
-
-cdef np.ndarray[np.double_t] midvalues(f,np.ndarray[np.double_t]edges,tuple arg):
-    cdef int n = len(edges)
-    cdef int i
-    cdef np.ndarray[np.double_t] ret=np.zeros(n-1)
-    cdef np.ndarray[np.double_t] tmp=np.zeros(n)
-    for i in range(n):
-        tmp[i] = f(edges[i],*arg)
-    for i in range(n-1):
-        ret[i] = (tmp[i]+tmp[i+1])/2
-    return ret
-
+    
 
 cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
     cdef int i=0
@@ -96,7 +84,7 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
         w_ = w
         for i in range(data_len):
             thisdata = data_[i]
-            lh = f(thisdata,*arg,nogil=True)
+            lh = f(thisdata,*arg)
             if lh<=0:
                 ret = badvalue
                 break
@@ -105,8 +93,12 @@ cdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *:
     return -1*ret
 
 
-cdef double compute_chi2_f(f,np.ndarray[np.double_t] x,np.ndarray[np.double_t] y ,
-                np.ndarray[np.double_t]error,np.ndarray[np.double_t]weights,tuple arg) except *:
+cdef double compute_chi2_f(f,
+                    np.ndarray[np.double_t] x,
+                    np.ndarray[np.double_t] y,
+                    np.ndarray[np.double_t] error,
+                    np.ndarray[np.double_t] weights,
+                    tuple arg) except *:
     cdef int usew = 1 if weights is not None else 0
     cdef int usee = 1 if error is not None else 0
     cdef int i
@@ -156,47 +148,6 @@ cdef double compute_bin_chi2_f(f,
         if usew==1:
             diff*=weights[i]
         ret += diff
-    return ret
-
-
-def compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x) :
-
-    cdef int i
-    cdef int n = len(pdf)
-    cdef double lpdf
-    cdef double rpdf
-    cdef bw
-    cdef np.ndarray[np.double_t] ret
-    ret = np.zeros(n)
-    ret[0] = 0
-    for i in range(1,n):#do a trapezoid sum
-        lpdf = pdf[i]
-        rpdf = pdf[i-1]
-        bw = x[i]-x[i-1]
-        ret[i] = 0.5*(lpdf+rpdf)*bw + ret[i-1]
-    return ret
-
-#invert cdf useful for making toys
-def invert_cdf(np.ndarray[np.double_t] r, np.ndarray[np.double_t] cdf, np.ndarray[np.double_t] x):
-    cdef np.ndarray[np.int_t] loc = np.searchsorted(cdf,r,'right')
-    cdef int n = len(r)
-    cdef np.ndarray[np.double_t] ret = np.zeros(n)
-    cdef int i = 0
-    cdef int ind
-    cdef double ly
-    cdef double lx
-    cdef double ry
-    cdef double rx
-    cdef double minv
-    for i in range(n):
-        ind = loc[i]
-        #print ind,i,len(loc),len(x)
-        ly = cdf[ind-1]
-        ry = cdf[ind]
-        lx = x[ind-1]
-        rx = x[ind]
-        minv = (rx-lx)/(ry-ly)
-        ret[i] = minv*(r[i]-ly)+lx
     return ret
 
 
