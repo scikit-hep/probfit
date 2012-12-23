@@ -4,6 +4,7 @@ python:
   - "2.7"
 # command to install dependencies
 install:
+    - "pip install matplotlib --use-mirrors"
     - "git clone git://github.com/piti118/iminuit.git; cd iminuit; python setup.py install; cd .."
 # command to run tests
 script:
