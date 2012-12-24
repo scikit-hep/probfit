@@ -52,7 +52,7 @@ cpdef double compute_bin_chi2_f(f,
 
 cpdef double compute_chi2(np.ndarray[np.double_t] actual,
                         np.ndarray[np.double_t] expected,
-                        np.ndarray[np.double_t] err)
+                        np.ndarray[np.double_t] err) except *
 
 cpdef compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x)
 

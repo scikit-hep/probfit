@@ -160,7 +160,7 @@ cpdef double compute_chi2_f(f,
     cdef int datalen = len(x)
     cdef double diff
     cdef double fx
-    cdef double ret=0
+    cdef double ret = 0.
     cdef double err
     for i in range(datalen):
         fx = f(x[i],*arg)
@@ -187,7 +187,7 @@ cpdef double compute_bin_chi2_f(f,
     cdef int datalen = len(x)
     cdef double diff
     cdef double fx
-    cdef double ret=0
+    cdef double ret = 0.
     cdef double err
     cdef double bw
     for i in range(datalen):
@@ -208,13 +208,13 @@ cpdef double compute_bin_chi2_f(f,
 
 cpdef double compute_chi2(np.ndarray[np.double_t] actual,
                         np.ndarray[np.double_t] expected,
-                        np.ndarray[np.double_t] err):
+                        np.ndarray[np.double_t] err) except *:
     cdef int i=0
     cdef int maxi = len(actual)
     cdef double a
     cdef double e
     cdef double er
-    cdef double ret
+    cdef double ret = 0.
     for i in range(maxi):
         e = expected[i]
         a = actual[i]

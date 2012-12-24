@@ -12,13 +12,13 @@ from probfit._libstat import compute_chi2
 def test_gentoy():
     npr.seed(0)
     bound = (-1,2)
-    ntoy = 10000
+    ntoy = 100000
     toy = gen_toy( crystalball,ntoy, bound=bound,
         alpha=1., n=2., mean=1., sigma=0.3, quiet=False)
 
     assert_equal(len(toy), ntoy)
 
-    htoy, bins = np.histogram(toy, bins=100, range=bound)
+    htoy, bins = np.histogram(toy, bins=1000, range=bound)
 
     ncball = Normalized(crystalball,bound)
 
