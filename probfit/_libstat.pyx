@@ -222,8 +222,8 @@ cpdef double compute_chi2(np.ndarray[np.double_t] actual,
         if er<1e-10:
             raise ValueError('error contains value too small or negative')
         ea = (e-a)/er
-        ea *=ea
-        ret +=ea
+        ea *= ea
+        ret += ea
     return ret
 
 cpdef compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x):
