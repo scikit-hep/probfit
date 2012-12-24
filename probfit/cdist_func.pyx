@@ -8,10 +8,12 @@ import numpy as np
 cimport numpy as np
 from numpy cimport PyArray_SimpleNew
 from math import ceil
-from .common import *
 from util import describe
 from warnings import warn
+from funcutil import FakeFuncCode, MinimalFuncCode
+from _libstat cimport integrate1d_with_edges
 np.import_array()
+
 cdef double badvalue = 1e-300
 cdef double smallestdiv = 1e-10
 cdef double smallestln = 0.
@@ -246,10 +248,13 @@ def doublegaussian(double x, double mean, double sigmal, double sigmar):
     """
     unnormed gaussian normalized
     """
-    cdef double ret = 0
+    cdef double ret = 0.
+    cdef double sigma = 0.
+    sigma = sigmal if x < mean else sigmar
     if sigma < smallestdiv:
         ret = badvalue
     else:
+
         d = (x-mean)/sigma
         d2 = d*d
         ret = exp(-0.5*d2)
@@ -582,95 +587,13 @@ cdef class Normalized:
     def _compute_normalization(self,*arg):
         cdef tuple targ = arg[self.ndep:]
         #if targ == self.last_arg:#cache hit
-        if self.last_arg is not None and fast_tuple_equal(targ,self.last_arg,0):#targ == self.last_arg:#cache hit
+        if self.last_arg is not None and fast_tuple_equal(targ,self.last_arg,0):
+            #targ == self.last_arg:#cache hit
             #yah exact match for float since this is expected to be used
             #in vectorize which same value are passed over and over
             self.hit+=1
             pass
         else:
             self.last_arg = targ
-            self.norm_cache = cintegrate1d_with_edges(self.f,self.edges,self.binwidth,targ)
+            self.norm_cache = integrate1d_with_edges(self.f,self.edges,self.binwidth,targ)
         return self.norm_cache
-
-
-def vectorize_f(f,x,arg):
-    return cvectorize_f(f,x,arg)
-
-
-cdef np.ndarray[np.double_t] cvectorize_f(f,np.ndarray[np.double_t] x,tuple arg):
-    cdef int i
-    cdef int n = len(x)
-    cdef np.ndarray[np.double_t] ret = np.empty(n,dtype=np.double)#fast_empty(n)
-    cdef double tmp
-    for i in range(n):
-        tmp = f(x[i],*arg)
-        ret[i]=tmp
-    return ret
-
-
-def py_csum(x):
-    return csum(x)
-
-
-cdef double csum(np.ndarray x):
-    cdef int i
-    cdef np.ndarray[np.double_t] xd = x
-    cdef int n = len(x)
-    cdef double s=0.
-    for i in range(n):
-        s+=xd[i]
-    return s
-
-
-def integrate1d(f,tuple bound,int nint,tuple arg=None):
-    if arg is None: arg = tuple()
-    return cintegrate1d(f,bound,nint,arg)
-
-
-cdef double cintegrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg) except *:
-    cdef np.ndarray[np.double_t] y = cvectorize_f(f,edges,arg)
-    return csum(y*bw)-0.5*(y[0]+y[-1])*bw#trapezoid
-
-
-#to do runge kutta or something smarter
-cdef double cintegrate1d(f, tuple bound, int nint, tuple arg=None) except*:
-    if arg is None: arg = tuple()
-    #vectorize_f
-    cdef double ret = 0
-    cdef np.ndarray[np.double_t] edges = np.linspace(bound[0],bound[1],nint)
-    #cdef np.ndarray[np.double_t] bw = edges[1:]-edges[:-1]
-    cdef double bw = edges[1]-edges[0]
-    return cintegrate1d_with_edges(f,edges,bw,arg)
-
-
-#compute x*log(y/x) to a good precision especially when y~x
-def xlogyx(x,y):
-    return cxlogyx(x,y)
-
-
-cdef double cxlogyx(double x,double y):
-    cdef double ret
-    if x<1e-100:
-        warn('x is really small return 0')
-        return 0.
-    if x<y:
-        ret = x*log1p((y-x)/x)
-    else:
-        ret = -x*log1p((x-y)/y)
-    return ret
-
-
-def wlogyx(double w,double y, double x):
-    return cwlogyx(w,y,x)
-
-
-#compute w*log(y/x) where w < x and goes to zero faster than x
-cdef double cwlogyx(double w,double y, double x):
-    if x<1e-100:
-        warn('x is really small return 0')
-        return 0.
-    if x<y:
-        ret = w*log1p((y-x)/x)
-    else:
-        ret = -w*log1p((x-y)/y)
-    return ret

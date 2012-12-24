@@ -10,4 +10,7 @@ test_*
 *.swp
 archive
 _build
-!tutorial.ipynb
+/tutorial.ipynb
+/tutorial.py
+
+!/tutorial/*.ipynb

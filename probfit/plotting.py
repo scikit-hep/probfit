@@ -5,7 +5,7 @@
 #needs a serious refactor
 from matplotlib import pyplot as plt
 import numpy as np
-from common import mid, minmax
+from .nputil import mid, minmax
 
 #from UML
 def draw_ulh(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500,print_par=False):

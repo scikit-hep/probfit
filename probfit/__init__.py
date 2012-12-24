@@ -15,7 +15,6 @@ __all__ = [
     'UnbinnedLH',
     'adjusted_bound',
     'argus',
-    'compute_cdf',
     'construct_arg',
     'cruijff',
     'crystalball',
@@ -29,7 +28,6 @@ __all__ = [
     'draw_pdf',
     'draw_pdf_with_edges',
     'extended',
-    'fast_tuple_equal',
     'fit_binlh',
     'fit_binx2',
     'fit_uml',
@@ -38,7 +36,7 @@ __all__ = [
     'gen_toy',
     'gen_toyn',
     'guess_initial',
-    'integrate1d',
+
     'invert_cdf',
     'linear',
     'merge_func_code',
@@ -56,16 +54,17 @@ __all__ = [
     'ugaussian',
     'val_contour',
     'val_contour2d',
-    'vectorize_f',
     'vertical_highlight',
-    'wlogyx',
     'xintercept',
     'xintercept_tuple',
-    'xlogyx']
+    ]
 
 from .cdist_fit import *
 from .cdist_func import *
 from .util import *
 from .oneshot import *
-from .stat_util import *
+from .statutil import *
 from .plotting import *
+from .funcutil import *
+from .decorator import *
+from .toy import *

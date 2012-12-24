@@ -27,13 +27,13 @@ cdist_func = Extension('probfit.cdist_func',
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
-common = Extension('probfit.common',
-        sources = ['probfit/common.'+source_suffix],
+libstat = Extension('probfit._libstat',
+        sources = ['probfit/_libstat.'+source_suffix],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
-toy = Extension('probfit.toy',
-        sources = ['probfit/toy.'+source_suffix],
+funcutil = Extension('probfit.funcutil',
+        sources = ['probfit/funcutil.'+source_suffix],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
@@ -47,6 +47,6 @@ setup (
        url='https://github.com/piti118/dist_fit',
        package_dir = {'probfit': 'probfit'},
        packages = ['probfit'],
-       ext_modules = [cdist_fit,cdist_func,common, toy],
+       ext_modules = [cdist_fit, cdist_func, libstat, funcutil],
        requires=['numpy','iminuit']
        )

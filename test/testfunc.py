@@ -5,6 +5,9 @@ from probfit.cdist_fit import *
 from math import log
 import numpy as np
 from numpy.random import randn
+from probfit._libstat import xlogyx, wlogyx, csum, integrate1d, vectorize_f
+
+
 class TestFunc(unittest.TestCase):
     def setUp(self):
         self.ndata = 20000
@@ -43,7 +46,7 @@ class TestFunc(unittest.TestCase):
 
     def test_csum(self):
         x = np.array([1,2,3],dtype=np.double)
-        s = py_csum(x)
+        s = csum(x)
         self.assertAlmostEqual(s,6.)
 
     def test_xlogyx(self):

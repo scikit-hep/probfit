@@ -1,6 +1,6 @@
 import unittest
 from probfit import *
-
+from probfit._libstat import integrate1d
 class TestFunctor(unittest.TestCase):
 
     def setUp(self):
