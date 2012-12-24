@@ -25,8 +25,8 @@ def test_gentoy():
     f = lambda x: ncball(x, 1., 2., 1., 0.3)
     vf = np.vectorize(f)
     expected = vf(mid(bins))*ntoy*(bins[1]-bins[0])
-    print htoy[10:]
-    print expected[10:]
+    print htoy[:100]
+    print expected[:100]
 
     htoy = htoy*1.0
     err = np.sqrt(expected)
