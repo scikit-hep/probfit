@@ -21,21 +21,21 @@ class TestOneshot(unittest.TestCase):
 
     def test_binx2(self):
         egauss = Extend(gaussian)
-        fit,m = fit_binx2(egauss, self.data, bins=100, range=(1.,9.),
+        fit,m = fit_binx2(egauss, self.data, bins=100, bound=(1.,9.),
             quiet=True, mean=4., sigma=1., N=10000., print_level=0)
         self.assertAlmostEqual(m.values['mean'], 5., delta=3*m.errors['mean'])
         self.assertAlmostEqual(m.values['sigma'], 2., delta=3*m.errors['sigma'])
 
     def test_binlh(self):
         ngauss=Normalized(gaussian,(1.,9.))
-        fit,m = fit_binlh(ngauss, self.data,bins=1000, range=(1.,9.), quiet=True,
+        fit,m = fit_binlh(ngauss, self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.5, print_level=0)
         self.assertAlmostEqual(m.values['mean'],5.,delta=3*m.errors['mean'])
         self.assertAlmostEqual(m.values['sigma'],2.,delta=3*m.errors['sigma'])
 
     def test_extended_binlh(self):
         egauss = Extend(gaussian)
-        fit,m = fit_binlh(egauss,self.data, bins=1000, range=(1.,9.), quiet=True,
+        fit,m = fit_binlh(egauss,self.data, bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1., N=10000.,
             print_level=0, extended=True)
         self.assertAlmostEqual(m.values['mean'],5.,delta=3*m.errors['mean'])
@@ -44,7 +44,7 @@ class TestOneshot(unittest.TestCase):
 
     def test_extended_binlh_ww(self):
         egauss = Extend(gaussian)
-        fit,m = fit_binlh(egauss,self.data,bins=1000, range=(1.,9.), quiet=True,
+        fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=-1, extended=True)
         self.assertAlmostEqual(m.values['mean'],5.,delta=3*m.errors['mean'])
@@ -53,14 +53,14 @@ class TestOneshot(unittest.TestCase):
 
     def test_extended_binlh_ww_w2(self):
         egauss = Extend(gaussian)
-        fit,m = fit_binlh(egauss,self.data,bins=1000, range=(1.,9.), quiet=True,
+        fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=-1, extended=True)
         self.assertAlmostEqual(m.values['mean'],5.,delta=3*m.errors['mean'])
         self.assertAlmostEqual(m.values['sigma'],2.,delta=3*m.errors['sigma'])
         self.assertAlmostEqual(m.values['N'],2000,delta=3*m.errors['N'])
 
-        fit2,m2 = fit_binlh(egauss,self.data,bins=1000, range=(1.,9.), quiet=True,
+        fit2,m2 = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=-1, extended=True, use_w2=True)
         #self.assertAlmostEqual(m2.values['mean'],5.,delta=3*m2.errors['mean'])
@@ -68,16 +68,21 @@ class TestOneshot(unittest.TestCase):
         self.assertAlmostEqual(m2.values['N'], 2000., delta=3*m2.errors['N'])
         m.minos()
         m2.minos()
-
         #now error should scale correctly
-        self.assertAlmostEqual(m.errors['mean']/sqrt(10),m2.errors['mean'],delta = m.errors['mean']/sqrt(10))
-        self.assertAlmostEqual(m.errors['sigma']/sqrt(10),m2.errors['sigma'],delta = m.errors['sigma']/sqrt(10))
-        self.assertAlmostEqual(m.errors['N']/sqrt(10),m2.errors['N'],delta = m.errors['N']/sqrt(10))
+        self.assertAlmostEqual( m.errors['mean']/sqrt(10),
+                                m2.errors['mean'],
+                                delta = m.errors['mean']/sqrt(10)/100.)
+        self.assertAlmostEqual(m.errors['sigma']/sqrt(10),
+                               m2.errors['sigma'],
+                               delta = m.errors['sigma']/sqrt(10)/100.)
+        self.assertAlmostEqual(m.errors['N']/sqrt(10),
+                               m2.errors['N'],
+                               delta = m.errors['N']/sqrt(10)/100.)
 
     def test_gen_toy(self):
         pdf = gaussian
         toy = gen_toy(pdf,10000,(-5,5),mean=0,sigma=1)
-        binlh = BinnedLH(pdf,toy,range=(-5,5),bins=100)
+        binlh = BinnedLH(pdf,toy,bound=(-5,5),bins=100)
         lh = binlh(0.,1.)
         for x in toy:
             self.assertLessEqual(x,5)

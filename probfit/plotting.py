@@ -8,12 +8,12 @@ import numpy as np
 from .nputil import mid, minmax
 
 #from UML
-def draw_ulh(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nfbins=500,print_par=False):
+def draw_ulh(self,minuit=None,bins=100,ax=None,bound=None,parmloc=(0.05,0.95),nfbins=500,print_par=False):
     if ax is None: ax=plt.gca()
     arg = self.last_arg
     if minuit is not None: arg = minuit.args
     n,e,patches = ax.hist(self.data,bins=bins,weights=self.weights,
-        histtype='step',range=range,normed=True)
+        histtype='step',range=bound,normed=True)
     m = mid(e)
     vf = np.vectorize(self.f)
     fxs = np.linspace(e[0],e[-1],nfbins)
@@ -36,7 +36,8 @@ def draw_ulh(self,minuit=None,bins=100,ax=None,range=None,parmloc=(0.05,0.95),nf
 
 
 #from chi2 regression
-def draw_x2(self,minuit=None,parmloc=(0.05,0.95),print_par=False):
+def draw_x2(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False):
+    ax = ax=plt.gca() if ax is None else ax
     arg = self.last_arg
     if minuit is not None: arg = minuit.args
     vf = np.vectorize(self.f)
@@ -65,7 +66,8 @@ def draw_x2(self,minuit=None,parmloc=(0.05,0.95),print_par=False):
 
 
 #from binned chi2
-def draw_bx2(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
+def draw_bx2(self, minuit=None, parmloc=(0.05,0.95),
+            nfbins=1000, ax = None, print_par=False):
     if ax is None: ax = plt.gca()
     arg = self.last_arg
     if minuit is not None: arg = minuit.args
@@ -74,7 +76,7 @@ def draw_bx2(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par
     #assume equal spacing
     #self.edges[0],self.edges[-1]
     bw = self.edges[1]-self.edges[0]
-    xs = np.linspace(self.edges[0],self.edges[-1],fbins)
+    xs = np.linspace(self.edges[0],self.edges[-1],nfbins)
     #bw = np.diff(xs)
     xs = mid(xs)
     expy = self.vf(xs,*arg)*bw
@@ -97,7 +99,7 @@ def draw_bx2(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par
 
 
 #from binnedLH
-def draw_blh(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par=False):
+def draw_blh(self,minuit=None,parmloc=(0.05,0.95),nfbins=1000,ax = None,print_par=False):
     if ax is None: ax = plt.gca()
     arg = self.last_arg
     if minuit is not None: arg = minuit.args
@@ -116,7 +118,7 @@ def draw_blh(self,minuit=None,parmloc=(0.05,0.95),fbins=1000,ax = None,print_par
     #assume equal spacing
     #self.edges[0],self.edges[-1]
     bw = self.edges[1]-self.edges[0]
-    xs = np.linspace(self.edges[0],self.edges[-1],fbins)
+    xs = np.linspace(self.edges[0],self.edges[-1],nfbins)
     #bw = np.diff(xs)
     xs = mid(xs)
     expy = self.vf(xs,*arg)*bw

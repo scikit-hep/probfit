@@ -35,8 +35,6 @@ __all__ = [
     'gaussian',
     'gen_toy',
     'gen_toyn',
-    'guess_initial',
-
     'invert_cdf',
     'linear',
     'merge_func_code',

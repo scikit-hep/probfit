@@ -9,7 +9,7 @@ from probfit.toy import gen_toy
 from probfit.util import describe
 from probfit._libstat import compute_chi2
 
-def test_gentoy():
+def test_gen_toy():
     npr.seed(0)
     bound = (-1,2)
     ntoy = 100000

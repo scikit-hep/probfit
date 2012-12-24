@@ -13,9 +13,31 @@ lorem ipsum
 
 API
 ^^^
-Sorry no real documentation yet.
+
+.. currentmodule:: probfit.cdist_fit
+
+.. autoclass:: UnbinnedLH
+
+    .. automethod:: __call__
+    .. automethod:: draw
+    .. automethod:: show
+
+.. autoclass:: BinnedLH
+
+    .. automethod:: __call__
+    .. automethod:: draw
+    .. automethod:: show
+
+.. autoclass:: Chi2Regression
+
+    .. automethod:: __call__
+    .. automethod:: draw
+    .. automethod:: show
+
+.. autoclass:: BinnedChi2
+
+    .. automethod:: __call__
+    .. automethod:: draw
+    .. automethod:: show
 
 
-.. automodule:: probfit
-    :members:
-    :undoc-members:

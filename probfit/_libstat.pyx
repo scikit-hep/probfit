@@ -76,7 +76,20 @@ cpdef double compute_bin_lh_f(f,
                     tuple arg, double badvalue,
                     bint extend, bint use_sumw2) except *:
     """
-    TODO:
+    Calculate binned likelihood. The behavior depends whether extended
+    likelihood and whether use_sumw2 is requested
+
+    - ``extended=False`` and ``use_sumw2=False``. The second term in the sum is
+       to subtract off the minimum to get better precision.
+
+      .. math::
+            $-\sum_i h_i * log(f(x_i,...)*N*bin_width) - (h_i-f(x_i,...)*N*bin_width)$
+
+    - ``extended=False`` and ``use_sumw2=True``
+
+    - ``extended=True`` and ``use_sumw2=False``
+
+    - ``extended=True`` and ``use_sumw2=True``
     """
     cdef int i
     cdef int n = len(edges)
@@ -85,7 +98,8 @@ cpdef double compute_bin_lh_f(f,
     cdef np.ndarray[np.double_t] midvalues = (fedges[1:]+fedges[:-1])/2
     cdef double ret = 0.
     cdef double bw = 0.
-    cdef double E = integrate1d(f,(edges[0],edges[-1]),10000,arg)
+    #TODO: change this. This is super inefficient.
+    #cdef double E = integrate1d(f,(edges[0],edges[-1]),10000,arg)
     cdef double factor=0.
     cdef double th=0.
     cdef double tw=0.
@@ -97,11 +111,13 @@ cpdef double compute_bin_lh_f(f,
         tm = midvalues[i]
         if not extend:
             if not use_sumw2:
-                ret -= xlogyx(th,tm*N*bw)+(th-tm*bw*N)#h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
+                ret -= xlogyx(th,tm*N*bw)+(th-tm*bw*N)
+                #h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
+                #the second term is added for added precision near the minimum
             else:
                 if w2[i]<1e-200: continue
                 tw = w2[i]
-                tw = sqrt(tw)
+                #tw = sqrt(tw)
                 factor = th/tw
                 ret -= factor*(wlogyx(th,tm*N*bw,th)+(th-tm*bw*N))
         else:
@@ -111,9 +127,10 @@ cpdef double compute_bin_lh_f(f,
             else:
                 if w2[i]<1e-200: continue
                 tw = w2[i]
-                tw = sqrt(tw)
+                #tw = sqrt(tw)
                 factor = th/tw
                 ret -= factor*(wlogyx(th,tm*bw,th)+(th-tm*bw))
+
     return ret
 
 
@@ -158,10 +175,10 @@ cpdef double compute_chi2_f(f,
     cdef int usee = 1 if error is not None else 0
     cdef int i
     cdef int datalen = len(x)
-    cdef double diff
-    cdef double fx
+    cdef double diff = 0.
+    cdef double fx = 0.
     cdef double ret = 0.
-    cdef double err
+    cdef double err = 0.
     for i in range(datalen):
         fx = f(x[i],*arg)
         diff = fx-y[i]
@@ -178,9 +195,9 @@ cpdef double compute_chi2_f(f,
 
 
 cpdef double compute_bin_chi2_f(f,
-                np.ndarray[np.double_t] x,np.ndarray[np.double_t] y,
-                np.ndarray[np.double_t]error,np.ndarray[np.double_t] binwidth,
-                np.ndarray[np.double_t]weights,tuple arg) except *:
+                np.ndarray[np.double_t] x, np.ndarray[np.double_t] y,
+                np.ndarray[np.double_t]error, np.ndarray[np.double_t] binwidth,
+                np.ndarray[np.double_t]weights, tuple arg) except *:
     cdef int usew = 1 if weights is not None else 0
     cdef int usee = 1 if error is not None else 0
     cdef int i
