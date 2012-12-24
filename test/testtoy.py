@@ -12,22 +12,27 @@ from probfit._libstat import compute_chi2
 def test_gentoy():
     npr.seed(0)
     bound = (-1,2)
-    ntoy = 100000
+    ntoy = 10000
     toy = gen_toy( crystalball,ntoy, bound=bound,
         alpha=1., n=2., mean=1., sigma=0.3, quiet=False)
 
     assert_equal(len(toy), ntoy)
 
-    htoy, bins = np.histogram(toy, bins=1000, range=bound)
+    htoy, bins = np.histogram(toy, bins=100, range=bound)
 
     ncball = Normalized(crystalball,bound)
 
     f = lambda x: ncball(x, 1., 2., 1., 0.3)
     vf = np.vectorize(f)
     expected = vf(mid(bins))*ntoy*(bins[1]-bins[0])
+    print htoy[10:]
+    print expected[10:]
+
     htoy = htoy*1.0
     err = np.sqrt(expected)
 
     chi2 = compute_chi2(htoy, expected, err)
+
     print chi2, len(bins), chi2/len(bins)
+
     assert(0.9<(chi2/len(bins))<1.1)
