@@ -5,22 +5,22 @@
 #needs a serious refactor
 from matplotlib import pyplot as plt
 import numpy as np
-from .nputil import mid, minmax
+from .nputil import mid, minmax, vector_apply
 
 #from UML
-def draw_ulh(self,minuit=None,bins=100,ax=None,bound=None,parmloc=(0.05,0.95),nfbins=500,print_par=False):
+def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
+            parmloc=(0.05,0.95), nfbins=500, print_par=False):
     if ax is None: ax=plt.gca()
     arg = self.last_arg
     if minuit is not None: arg = minuit.args
-    n,e,patches = ax.hist(self.data,bins=bins,weights=self.weights,
-        histtype='step',range=bound,normed=True)
+    n, e, patches = ax.hist(self.data, bins=bins, weights=self.weights,
+        histtype='step', range=bound, normed=True)
     m = mid(e)
-    vf = np.vectorize(self.f)
     fxs = np.linspace(e[0],e[-1],nfbins)
     # v = vf(fxs,*self.last_arg)
     # plt.plot(fxs,v,color='r')
-    v = vf(fxs,*arg)
-    ax.plot(fxs,v,color='r')
+    v = vector_apply(self.f, fxs, *arg)
+    ax.plot(fxs, v, color='r')
 
     ax.grid(True)
     minu = minuit
@@ -32,7 +32,8 @@ def draw_ulh(self,minuit=None,bins=100,ax=None,bound=None,parmloc=(0.05,0.95),nf
             err = minu.errors[k]
             txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
         if print_par: print txt
-        ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+                transform=ax.transAxes)
 
 
 #from chi2 regression
@@ -40,11 +41,10 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False):
     ax = ax=plt.gca() if ax is None else ax
     arg = self.last_arg
     if minuit is not None: arg = minuit.args
-    vf = np.vectorize(self.f)
     x=self.x
     y=self.y
     err = self.error
-    expy = vf(x,*arg)
+    expy = vector_apply(self.f, x, *arg)
 
     if err is None:
         plt.plot(x,y,'+')
@@ -67,21 +67,20 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False):
 
 #from binned chi2
 def draw_bx2(self, minuit=None, parmloc=(0.05,0.95),
-            nfbins=1000, ax = None, print_par=False):
+            nfbins=1000, ax=None, print_par=False):
     if ax is None: ax = plt.gca()
-    arg = self.last_arg
-    if minuit is not None: arg = minuit.args
+    arg = self.last_arg if minuit is None else minuit.args
     m = mid(self.edges)
-    ax.errorbar(m,self.h,self.err,fmt='.')
+    ax.errorbar(m, self.h, self.err, fmt='.')
     #assume equal spacing
     #self.edges[0],self.edges[-1]
     bw = self.edges[1]-self.edges[0]
-    xs = np.linspace(self.edges[0],self.edges[-1],nfbins)
+    xs = np.linspace(self.edges[0], self.edges[-1], nfbins)
     #bw = np.diff(xs)
     xs = mid(xs)
-    expy = self.vf(xs,*arg)*bw
+    expy = vector_apply(self.f, xs, *arg)*bw
 
-    ax.plot(xs,expy,'r-')
+    ax.plot(xs, expy, 'r-')
 
     minu = minuit
     ax.grid(True)
@@ -91,18 +90,19 @@ def draw_bx2(self, minuit=None, parmloc=(0.05,0.95),
         txt = u'';
         for k,v  in minu.values.items():
             err = minu.errors[k]
-            txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
+            txt += u'%s = %5.4g±%5.4g\n'%(k, v, err)
         chi2 = self(*self.last_arg)
-        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof,chi2,self.ndof)
+        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
         if print_par: print txt
-        ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+                transform=ax.transAxes)
 
 
 #from binnedLH
-def draw_blh(self,minuit=None,parmloc=(0.05,0.95),nfbins=1000,ax = None,print_par=False):
+def draw_blh(self, minuit=None, parmloc=(0.05,0.95),
+                nfbins=1000, ax = None, print_par=False):
     if ax is None: ax = plt.gca()
-    arg = self.last_arg
-    if minuit is not None: arg = minuit.args
+    arg = self.last_arg if minuit is None else minuit.args
     m = mid(self.edges)
     if self.use_w2:
         err = np.sqrt(self.w2)
@@ -110,20 +110,20 @@ def draw_blh(self,minuit=None,parmloc=(0.05,0.95),nfbins=1000,ax = None,print_pa
         err = np.sqrt(self.h)
 
     if self.extended:
-        ax.errorbar(m,self.h,err,fmt='.')
+        ax.errorbar(m, self.h, err, fmt='.')
     else:
         scale = sum(self.h)
-        ax.errorbar(m,self.h/scale,err/scale,fmt='.')
+        ax.errorbar(m, self.h/scale, err/scale, fmt='.')
 
     #assume equal spacing
     #self.edges[0],self.edges[-1]
     bw = self.edges[1]-self.edges[0]
-    xs = np.linspace(self.edges[0],self.edges[-1],nfbins)
+    xs = np.linspace(self.edges[0], self.edges[-1], nfbins)
     #bw = np.diff(xs)
     xs = mid(xs)
-    expy = self.vf(xs,*arg)*bw
+    expy = vector_apply(self.f, xs, *arg)*bw
     #if not self.extended: expy/=sum(expy)
-    ax.plot(xs,expy,'r-')
+    ax.plot(xs, expy, 'r-')
 
     minu = minuit
     ax.grid(True)
@@ -138,15 +138,16 @@ def draw_blh(self,minuit=None,parmloc=(0.05,0.95),nfbins=1000,ax = None,print_pa
         for k in sortk:
             v = val[k]
             err = minu.errors[k]
-            txt += u'%s = %5.4g±%5.4g\n'%(k,v,err)
+            txt += u'%s = %5.4g±%5.4g\n'%(k, v, err)
         #chi2 = self(*self.last_arg)
         #txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2,chi2*self.ndof,self.ndof)
         if print_par: print txt
-        ax.text(parmloc[0],parmloc[1],txt,ha='left',va='top',transform=ax.transAxes)
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+                transform=ax.transAxes)
 
 
 #useful for highlight some xrange
-def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
+def vertical_highlight(x1, x2=None, color='g', alpha=0.3, ax=None):
     """
 
     :param x1:
@@ -161,12 +162,14 @@ def vertical_highlight(x1,x2=None,color='g',alpha=0.3,ax=None):
         x1,x2=x1
     ylim = plt.gca().get_ylim()
     y = np.array(ylim)
-    ax.fill_betweenx(y,np.array(x1,x1),np.array(x2,x2),color=color,alpha=alpha)
+    ax.fill_betweenx(y, np.array(x1,x1), np.array(x2,x2),
+                    color=color, alpha=alpha)
     ax.set_ylim(ylim) #sometime it will decide to resize the plot
 
 
 def draw_contour2d(fit, m, var1, var2, bins=12, bound1=None, bound2=None, lh=True):
-    x1s, x2s, y = val_contour2d(fit, m, var1, var2, bins=bins, bound1=bound1, bound2=bound2)
+    x1s, x2s, y = val_contour2d(fit, m, var1, var2, bins=bins,
+                                bound1=bound1, bound2=bound2)
     y -= np.min(y)
     v = np.array([0.5, 1, 1.5])
     if not lh: v *= 2
@@ -185,11 +188,10 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
     if isinstance(arg, dict): arg = parse_arg(f,arg,1)
     x = (edges[:-1]+edges[1:])/2.0
     bw = np.diff(edges)
-    vf = np.vectorize(f)
-    yf = vf(x,*arg)
+    yf = vector_apply(f, x, *arg)
     total = np.sum(data)
     if normed:
-        plt.errorbar(x,data/bw/total,errors/bw/total,fmt='.b')
+        plt.errorbar(x, data/bw/total, errors/bw/total, fmt='.b')
         plt.plot(x,yf,'r',lw=2)
     else:
         plt.errorbar(x,data,errors,fmt='.b')
@@ -209,39 +211,41 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
             py = zip(*parts_val)
             for y in py:
                 tmpy = np.array(y)
-                plt.plot(x,tmpy*scale,lw=2,alpha=0.5)
+                plt.plot(x, tmpy*scale, lw=2, alpha=0.5)
     plt.grid(True)
     return x,yf,data
 
 
-def draw_pdf(f,arg,bound,bins,scale=1.0,normed=True,**kwds):
-    edges = np.linspace(bound[0],bound[1],bins)
-    return draw_pdf_with_edges(f,arg,edges,scale=scale,normed=normed,**kwds)
+def draw_pdf(f, arg, bound, bins, scale=1.0, normed=True, **kwds):
+    edges = np.linspace(bound[0], bound[1], bins)
+    return draw_pdf_with_edges(f, arg, edges, scale=scale,
+                                normed=normed, **kwds)
 
 
-def draw_pdf_with_edges(f,arg,edges,scale=1.0,normed=True,**kwds):
-    if isinstance(arg, dict): arg = parse_arg(f,arg,1)
+def draw_pdf_with_edges(f, arg, edges, scale=1.0, normed=True, **kwds):
+    if isinstance(arg, dict): arg = parse_arg(f, arg, 1)
     x = (edges[:-1]+edges[1:])/2.0
     bw = np.diff(edges)
-    vf = np.vectorize(f)
-    yf = vf(x,*arg)
-    scale*= bw if not normed else 1.
-    yf*=scale
-    plt.plot(x,yf,lw=2,**kwds)
+    yf = vector_apply(f, x, *arg)
+    scale *= bw if not normed else 1.
+    yf *= scale
+    plt.plot(x, yf, lw=2, **kwds)
     return x,yf
 
 
 #draw comprison between function given args and data
-def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None, normed=False, use_w2=False, parts=False):
+def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None,
+                      normed=False, use_w2=False, parts=False):
     if bound is None: bound = minmax(data)
-    h,e = np.histogram(data,bins=bins,range=bound,weights=weights)
+    h,e = np.histogram(data, bins=bins, range=bound, weights=weights)
     err = None
     if weights is not None and use_w2:
-       err,_ = np.histogram(data,bins=bins,range=bound,weights=weights*weights)
+       err,_ = np.histogram(data, bins=bins, range=bound,
+                            weights=weights*weights)
        err = np.sqrt(err)
     else:
         err = np.sqrt(h)
-    return draw_compare(f,arg,e,h,err,normed,parts)
+    return draw_compare(f, arg, e, h, err, normed, parts)
 
 
 def draw_compare_fit_statistics(lh, m):

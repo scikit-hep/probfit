@@ -1,207 +1,17 @@
 #cython: embedsignature=True
 cimport cython
-from cpython cimport PyFloat_AsDouble,PyTuple_GetItem,PyTuple_GET_ITEM, PyObject, PyTuple_SetItem,PyTuple_SET_ITEM, PyTuple_New,Py_INCREF
 
-from libc.math cimport exp,pow,fabs,log,sqrt,sinh,tgamma,log1p,abs
-cdef double pi=3.1415926535897932384626433832795028841971693993751058209749445923078164062
+from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, log1p, abs
+cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
-from numpy cimport PyArray_SimpleNew
-from math import ceil
 from util import describe
 from warnings import warn
-from funcutil import FakeFuncCode, MinimalFuncCode
-from _libstat cimport integrate1d_with_edges
+from funcutil import MinimalFuncCode
 np.import_array()
 
 cdef double badvalue = 1e-300
 cdef double smallestdiv = 1e-10
-cdef double smallestln = 0.
-cdef double largestpow = 200
-cdef double maxnegexp = 200
-cdef double precision = 1e-16
-cdef class Normalized
-
-cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
-    #t=last_arg
-    #t2=arg
-    cdef double tmp1,tmp2
-    cdef int i,ind
-    cdef int tsize = len(t2)-t2_offset
-    cdef bint ret = 0
-    if len(t1) ==0 and tsize==0:
-        return 1
-
-    for i in range(tsize):
-        ind = i+t2_offset
-        tmp1 = PyFloat_AsDouble(<object>PyTuple_GetItem(t1,i))
-        tmp2 =  PyFloat_AsDouble(<object>PyTuple_GetItem(t2,ind))
-        ret = abs(tmp1-tmp2) < precision
-        if not ret: break
-
-    return ret
-
-cdef inline np.ndarray fast_empty(int size):
-    cdef np.npy_intp tsize = size
-    cdef np.ndarray[np.double_t] ret = PyArray_SimpleNew(1, &tsize, np.NPY_DOUBLE)
-    return ret
-
-def merge_func_code(*arg,prefix=None,skip_first=False):
-    assert(prefix is None or len(prefix)==len(arg))
-    all_arg = []
-
-    for i,f in enumerate(arg):
-        tmp = []
-        first = skip_first
-        for vn in describe(f):
-            newv = vn
-            if not first and prefix is not None:
-                newv = prefix[i]+newv
-            first = False
-            tmp.append(newv)
-        all_arg.append(tmp)
-
-    #now merge it
-    #do something smarter
-    merge_arg = []
-    for a in all_arg:
-        for v in a:
-            if v not in merge_arg:
-                merge_arg.append(v)
-
-    #build the map list of numpy int array
-    pos = []
-    for a in all_arg:
-        tmp = []
-        for v in a:
-            tmp.append(merge_arg.index(v))
-        pos.append(np.array(tmp,dtype=np.int))
-    return MinimalFuncCode(merge_arg), pos
-
-# def merge_func_code(f,g):
-#     nf = f.func_code.co_argcount
-#     farg = f.func_code.co_varnames[:nf]
-#     ng = g.func_code.co_argcount
-#     garg = g.func_code.co_varnames[:ng]
-#
-#     mergearg = []
-#     #TODO: do something smarter
-#     #first merge the list
-#     for v in farg:
-#         mergearg.append(v)
-#     for v in garg:
-#         if v not in farg:
-#             mergearg.append(v)
-#
-#     #now build the map
-#     fpos=[]
-#     gpos=[]
-#     for v in farg:
-#         fpos.append(mergearg.index(v))
-#     for v in garg:
-#         gpos.append(mergearg.index(v))
-#     return MinimalFuncCode(mergearg),np.array(fpos,dtype=np.int),np.array(gpos,dtype=np.int)
-
-cdef tuple cconstruct_arg(tuple arg,
-    np.ndarray fpos):
-    cdef int size = fpos.shape[0]
-    cdef int i,itmp
-    cdef np.int_t* fposdata = <np.int_t*>fpos.data
-    cdef tuple ret = PyTuple_New(size)
-    cdef object tmpo
-    for i in range(size):
-        itmp = fposdata[i]
-        tmpo = <object>PyTuple_GET_ITEM(arg, itmp)
-        Py_INCREF(tmpo)
-        #Py_INCREF(tmpo) #first one for the case second one for the steal
-        PyTuple_SET_ITEM(ret, i, tmpo)
-    return ret
-
-def construct_arg(tuple arg,
-        np.ndarray[np.int_t] fpos):
-    return cconstruct_arg(arg, fpos)
-
-
-def adjusted_bound(bound,bw):
-    numbin = ceil((bound[1]-bound[0])/bw)
-    return (bound[0],bound[0]+numbin*bw),numbin
-
-cdef class Convolve:#with gy cache
-    """
-    Convolve)
-    """
-    cdef int numbins
-    cdef tuple gbound
-    cdef double bw
-    cdef int nbg
-    cdef f #original f
-    cdef g #original g
-    cdef vf #vectorized f
-    cdef vg #vectorized g
-    cdef np.ndarray fpos#position of argument in f
-    cdef np.ndarray gpos#position of argument in g
-    cdef public object func_code
-    cdef public object func_defaults
-    cdef tuple last_garg
-    cdef np.ndarray gy_cache
-
-    #g is resolution function gbound need to be set so that the end of g is zero
-    def __init__(self,f,g,gbound,nbins=1000):
-        self.vf = np.vectorize(f)
-        self.vg = np.vectorize(g)
-        self.set_gbound(gbound,nbins)
-        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
-        self.func_defaults = None
-
-    def set_gbound(self,gbound,nbins):
-        self.last_garg = None
-        self.gbound,self.nbg = gbound,nbins
-        self.bw = 1.0*(gbound[1]-gbound[0])/nbins
-        self.gy_cache = None
-
-    def __call__(self,*arg):
-        #skip the first one
-        cdef int iconv
-        cdef double ret = 0
-        cdef np.ndarray[np.double_t] gy,fy
-
-        tmp_arg = arg[1:]
-        x=arg[0]
-        garg = list()
-
-        for i in self.gpos: garg.append(arg[i])
-        garg = tuple(garg[1:])#dock off the dependent variable
-
-        farg = list()
-        for i in self.fpos: farg.append(arg[i])
-        farg = tuple(farg[1:])
-
-        xg = np.linspace(self.gbound[0],self.gbound[1],self.nbg)
-
-        gy = None
-        #calculate all the g needed
-        if garg==self.last_garg:
-            gy = self.gy_cache
-        else:
-            gy = self.vg(xg,*garg)
-            self.gy_cache=gy
-
-        #now prepare f... f needs to be calculated and padded to f-gbound[1] to f+gbound[0]
-        #yep this is not a typo because we are "reverse" sliding g onto f so we need to calculate f from
-        # f-right bound of g to f+left bound of g
-        fbound = x-self.gbound[1], x-self.gbound[0] #yes again it's not a typo
-        xf = np.linspace(fbound[0],fbound[1],self.nbg)#yep nbg
-        fy = self.vf(xf,*farg)
-        #print xf[:100]
-        #print fy[:100]
-        #now do the inverse slide g and f
-        for iconv in range(self.nbg):
-            ret+=fy[iconv]*gy[self.nbg-iconv-1]
-
-        #now normalize the integral
-        ret*=self.bw
-
-        return ret
 
 cdef class Polynomial:
     cdef int order
@@ -225,7 +35,7 @@ cdef class Polynomial:
         varnames.insert(0,xname) #insert x in front
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
-    
+
     def __call__(self,*arg):
         cdef double x = arg[0]
         cdef double t
@@ -242,11 +52,10 @@ cdef class Polynomial:
                 ret += t
         return ret
 
-#peaking stuff
-@cython.binding(True)
-def doublegaussian(double x, double mean, double sigmal, double sigmar):
+
+cpdef double doublegaussian(double x, double mean, double sigmal, double sigmar):
     """
-    unnormed gaussian normalized
+    unnormed double gaussian
     """
     cdef double ret = 0.
     cdef double sigma = 0.
@@ -260,11 +69,9 @@ def doublegaussian(double x, double mean, double sigmal, double sigmar):
         ret = exp(-0.5*d2)
     return ret
 
-#peaking stuff
-@cython.binding(True)
-def ugaussian(double x, double mean, double sigma):
+cpdef double ugaussian(double x, double mean, double sigma):
     """
-    unnormed gaussian normalized
+    unnormalized gaussian
     """
     cdef double ret = 0
     if sigma < smallestdiv:
@@ -275,8 +82,8 @@ def ugaussian(double x, double mean, double sigma):
         ret = exp(-0.5*d2)
     return ret
 
-@cython.binding(True)
-def gaussian(double x, double mean, double sigma):
+
+cpdef double gaussian(double x, double mean, double sigma):
     """
     gaussian normalized for -inf to +inf
     """
@@ -290,8 +97,8 @@ def gaussian(double x, double mean, double sigma):
         ret = 1/(sqrt(2*pi)*sigma)*exp(-0.5*d2)
     return ret
 
-@cython.binding(True)
-def crystalball(double x,double alpha,double n,double mean,double sigma):
+
+cpdef double crystalball(double x,double alpha,double n,double mean,double sigma):
     """
     unnormalized crystal ball function
     see http://en.wikipedia.org/wiki/Crystal_Ball_function
@@ -317,9 +124,9 @@ def crystalball(double x,double alpha,double n,double mean,double sigma):
             ret = A*pow(B-d,-n)
     return ret
 
+
 #Background stuff
-@cython.binding(True)
-def argus(double x, double c, double chi, double p):
+cpdef double argus(double x, double c, double chi, double p):
     """
     unnormalized argus distribution
     see: http://en.wikipedia.org/wiki/ARGUS_distribution
@@ -336,8 +143,8 @@ def argus(double x, double c, double chi, double p):
 
     return ret
 
-@cython.binding(True)
-def cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L, double alpha_R):
+
+cpdef double cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L, double alpha_R):
     """
     unnormalized cruijff function
     """
@@ -355,25 +162,24 @@ def cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L,
             return 0.
         return exp(-dm2/denom)
 
-#Polynomials
-@cython.binding(True)
-def linear(double x, double m, double c):
+
+cpdef double linear(double x, double m, double c):
     """
     y=mx+c
     """
     cdef double ret = m*x+c
     return ret
 
-@cython.binding(True)
-def poly2(double x, double a, double b, double c):
+
+cpdef double poly2(double x, double a, double b, double c):
     """
     y=ax^2+bx+c
     """
     cdef double ret = a*x*x+b*x+c
     return ret
 
-@cython.binding(True)
-def poly3(double x, double a, double b, double c, double d):
+
+cpdef double poly3(double x, double a, double b, double c, double d):
     """
     y=ax^2+bx+c
     """
@@ -383,8 +189,7 @@ def poly3(double x, double a, double b, double c, double d):
     return ret
 
 
-@cython.binding(True)
-def novosibirsk(double x, double width, double peak, double tail):
+cpdef double novosibirsk(double x, double width, double peak, double tail):
     #credit roofit implementation
     cdef double qa
     cdef double qb
@@ -409,191 +214,3 @@ def novosibirsk(double x, double width, double peak, double tail):
         else:
             qc=15.
     return exp(-qc)
-
-# cdef class AddRaw:
-#     cdef int nf
-#     cdef object fs
-#     cdef public object func_code
-#     cdef public object func_defaults
-#     def __init__(self,fs,coeffname):
-#         pass
-# cdef class AddAndRenorm
-#     pass
-
-cdef class Extend:
-    """
-    f = lambda x,y: x+y
-    g = Extend(f) ==> g = lambda x,y,N: f(x,y)*N
-    """
-    cdef f
-    cdef public func_code
-    cdef public func_defaults
-    def __init__(self,f,extname='N'):
-        self.f = f
-        if extname in describe(f):
-            raise ValueError('%s is already taken pick something else for extname')
-        self.func_code = FakeFuncCode(f,append=extname)
-        #print self.func_code.__dict__
-        self.func_defaults=None
-    def __call__(self,*arg):
-        cdef double N = arg[-1]
-        cdef double fval = self.f(*arg[:-1])
-        return N*fval
-
-cdef class AddPdf:
-    cdef public object func_code
-    cdef public object func_defaults
-    cdef int arglen
-    cdef list allpos
-    cdef tuple allf
-    cdef int numf
-    cdef np.ndarray cache
-    cdef list argcache
-    cdef public int hit
-    cdef public int nparts
-    def __init__(self,*arg,prefix=None):
-        self.func_code, self.allpos = merge_func_code(*arg,prefix=prefix,skip_first=True)
-        self.func_defaults=None
-        self.arglen = self.func_code.co_argcount
-        self.allf = arg
-        self.numf = len(self.allf)
-        self.argcache=[None]*self.numf
-        self.cache = np.zeros(self.numf)
-        self.hit = 0
-
-    def __call__(self,*arg):
-        cdef tuple this_arg
-        cdef double ret = 0.
-        cdef double tmp = 0.
-        cdef int i
-        cdef np.ndarray thispos
-        for i in range(self.numf):
-            thispos = self.allpos[i]
-            this_arg = cconstruct_arg(arg,thispos)
-            if self.argcache[i] is not None and fast_tuple_equal(this_arg,self.argcache[i],0):
-                tmp = self.cache[i]
-                self.hit+=1
-            else:
-                tmp = self.allf[i](*this_arg)
-                self.argcache[i]=this_arg
-                self.cache[i]=tmp
-            ret+=tmp
-        return ret
-
-    def eval_parts(self,*arg):
-        cdef tuple this_arg
-        cdef double tmp = 0.
-        cdef int i
-        cdef list ref
-        cdef np.ndarray thispos
-        ret = list()
-        for i in range(self.numf):
-            thispos = self.allpos[i]
-            this_arg = cconstruct_arg(arg,thispos)
-            if self.argcache[i] is not None and fast_tuple_equal(this_arg,self.argcache[i],0):
-                tmp = self.cache[i]
-                self.hit+=1
-            else:
-                tmp = self.allf[i](*this_arg)
-                self.argcache[i]=this_arg
-                self.cache[i]=tmp
-            ret.append(tmp)
-        return tuple(ret)
-
-cdef class Add2PdfNorm:
-    cdef public object func_code
-    cdef public object func_defaults
-    cdef int arglen
-    cdef f
-    cdef g
-    cdef np.ndarray fpos
-    cdef np.ndarray gpos
-    cdef np.ndarray farg_buffer
-    cdef np.ndarray garg_buffer
-    cdef public int nparts
-    def __init__(self,f,g,facname='k_f'):
-        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
-        self.func_code.append(facname)
-        self.arglen = self.func_code.co_argcount
-        self.func_defaults=None
-        self.f=f
-        self.g=g
-        self.nparts = 2
-        self.farg_buffer = np.empty(len(self.fpos))
-        self.garg_buffer = np.empty(len(self.gpos))
-
-    def __call__(self,*arg):
-        cdef double fac = arg[-1]
-        cdef tuple farg = cconstruct_arg(arg,self.fpos)
-        cdef tuple garg = cconstruct_arg(arg,self.gpos)
-        cdef double fv = self.f(*farg)
-        cdef double gv = self.g(*garg)
-        cdef double ret = fac*fv+(1.-fac)*gv
-        return ret
-
-    def eval_parts(self,*arg):
-        cdef double fac = arg[-1]
-        cdef tuple farg = cconstruct_arg(arg,self.fpos)
-        cdef tuple garg = cconstruct_arg(arg,self.gpos)
-        cdef double fv = fac*self.f(*farg)
-        cdef double gv = (1.-fac)*self.g(*garg)
-        return (fv,gv)
-
-cdef class Normalized:
-    cdef f
-    cdef double norm_cache
-    cdef tuple last_arg
-    cdef int nint
-    cdef np.ndarray edges
-    #cdef np.ndarray binwidth
-    cdef double binwidth
-    cdef public object func_code
-    cdef public object func_defaults
-    cdef int ndep
-    cdef int warnfloat
-    cdef int floatwarned
-    cdef public int hit
-    def __init__(self,f,bound,prmt=None,nint=1000,warnfloat=1):
-        self.f = f
-        self.norm_cache= 1.
-        self.last_arg = None
-        self.nint = nint
-        # normx = normx if normx is not None else np.linspace(range[0],range[1],nint)
-        #         if normx.dtype!=normx.dtype:
-        #             normx = normx.astype(np.float64)
-        #print range
-        #print normx
-        self.edges = np.linspace(bound[0],bound[1],nint)
-        #print self.midpoints
-        self.binwidth = self.edges[1]-self.edges[0]
-        self.func_code = FakeFuncCode(f,prmt)
-        self.ndep = 1#TODO make the code doesn't depend on this assumption
-        self.func_defaults = None #make vectorize happy
-        self.warnfloat=warnfloat
-        self.floatwarned=0
-        self.hit=0
-
-    def __call__(self,*arg):
-        #print arg
-        cdef double n
-        cdef double x
-        n = self._compute_normalization(*arg)
-        x = self.f(*arg)
-        if self.floatwarned < self.warnfloat  and n < 1e-100:
-            print 'Potential float erorr:', arg
-            self.floatwarned+=1
-        return x/n
-
-    def _compute_normalization(self,*arg):
-        cdef tuple targ = arg[self.ndep:]
-        #if targ == self.last_arg:#cache hit
-        if self.last_arg is not None and fast_tuple_equal(targ,self.last_arg,0):
-            #targ == self.last_arg:#cache hit
-            #yah exact match for float since this is expected to be used
-            #in vectorize which same value are passed over and over
-            self.hit+=1
-            pass
-        else:
-            self.last_arg = targ
-            self.norm_cache = integrate1d_with_edges(self.f,self.edges,self.binwidth,targ)
-        return self.norm_cache

@@ -6,7 +6,9 @@ from warnings import warn
 np.import_array()
 
 
-cpdef np.ndarray[np.double_t] vectorize_f(f,np.ndarray[np.double_t] x,tuple arg):
+
+
+cpdef np.ndarray[np.double_t] _vector_apply(f,np.ndarray[np.double_t] x,tuple arg):
     cdef int i
     cdef int n = len(x)
     cdef np.ndarray[np.double_t] ret = np.empty(n,dtype=np.double)#fast_empty(n)
@@ -28,14 +30,13 @@ cpdef double csum(np.ndarray x):
 
 
 cpdef double integrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg) except *:
-    cdef np.ndarray[np.double_t] y = vectorize_f(f,edges,arg)
+    cdef np.ndarray[np.double_t] y = _vector_apply(f,edges,arg)
     return csum(y*bw)-0.5*(y[0]+y[-1])*bw#trapezoid
 
 
 #to do runge kutta or something smarter
 cpdef double integrate1d(f, tuple bound, int nint, tuple arg=None) except*:
     if arg is None: arg = tuple()
-    #vectorize_f
     cdef double ret = 0
     cdef np.ndarray[np.double_t] edges = np.linspace(bound[0],bound[1],nint)
     #cdef np.ndarray[np.double_t] bw = edges[1:]-edges[:-1]
@@ -94,7 +95,7 @@ cpdef double compute_bin_lh_f(f,
     cdef int i
     cdef int n = len(edges)
 
-    cdef np.ndarray[np.double_t] fedges = vectorize_f(f,edges,arg)
+    cdef np.ndarray[np.double_t] fedges = _vector_apply(f,edges,arg)
     cdef np.ndarray[np.double_t] midvalues = (fedges[1:]+fedges[:-1])/2
     cdef double ret = 0.
     cdef double bw = 0.

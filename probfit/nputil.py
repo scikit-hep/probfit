@@ -1,5 +1,5 @@
 import numpy as np
-
+from _libstat import _vector_apply
 def mid(x):
     return (x[:-1]+x[1:])/2
 
@@ -18,3 +18,6 @@ def bool2int(b):
         return 1
     else:
         return 0
+
+def vector_apply(f, x, *arg):
+    return _vector_apply(f,x,arg)

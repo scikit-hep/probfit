@@ -1,4 +1,5 @@
 from .cdist_fit import UnbinnedLH, BinnedChi2, BinnedLH
+from ._libstat import _vector_apply
 from iminuit import Minuit
 from matplotlib import pyplot as plt
 import numpy as np
@@ -135,13 +136,12 @@ def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [tuplize(kwd[name]) for name in vnames]
     h, e, _ = plt.hist(data, bins=bins, normed=True, histtype='step')
-    vf = np.vectorize(f)
     vx = np.linspace(e[0], e[-1], fbins)
     first = True
     minfom = 0
     minarg = None
     for thisarg in itt.product(*my_arg):
-        vy = vf(vx, *thisarg)
+        vy = _vector_apply(f, vx, thisarg)
         plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
         if first or thisfom < minfom:
@@ -166,13 +166,13 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=
     else:
         h, e = np.histogram(data, bins=bins, range=bound, weights=weights, normed=not extended)
     bw = e[1] - e[0]
-    vf = np.vectorize(f)
+
     vx = np.linspace(e[0], e[-1], fbins)
     first = True
     minfom = 0
     minarg = None
     for thisarg in itt.product(*my_arg):
-        vy = vf(vx, *thisarg)
+        vy = _vector_apply(f, vx, thisarg)
         if extended: vy*=bw
         plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
@@ -197,13 +197,12 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
     else:
         h, e = np.histogram(data, bins=bins, weights=weights)
     bw = e[1] - e[0]
-    vf = np.vectorize(f)
     vx = np.linspace(e[0], e[-1], fbins)
     first = True
     minfom = 0
     minarg = None
     for thisarg in itt.product(*my_arg):
-        vy = vf(vx, *thisarg) * bw
+        vy = _vector_apply(f, vx, thisarg) * bw
         plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
         if first or thisfom < minfom:

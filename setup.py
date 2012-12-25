@@ -37,6 +37,11 @@ funcutil = Extension('probfit.funcutil',
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
+functor = Extension('probfit.functor',
+        sources = ['probfit/functor.'+source_suffix],
+        include_dirs= [np.get_include()],
+        extra_link_args = [])
+
 setup (
        cmdclass=cmdclass,
        name = 'probfit',
@@ -47,6 +52,6 @@ setup (
        url='https://github.com/piti118/dist_fit',
        package_dir = {'probfit': 'probfit'},
        packages = ['probfit'],
-       ext_modules = [cdist_fit, cdist_func, libstat, funcutil],
+       ext_modules = [cdist_fit, cdist_func, libstat, funcutil, functor],
        requires=['numpy','iminuit']
        )

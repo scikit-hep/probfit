@@ -1,6 +1,7 @@
 import unittest
 from probfit import *
-from probfit.cdist_func import Extend, gaussian
+from probfit.cdist_func import  gaussian
+from probfit.functor import Extended
 import numpy as np
 from numpy.random import randn, seed
 from math import sqrt
@@ -20,7 +21,7 @@ class TestOneshot(unittest.TestCase):
         self.data_small = randn(self.ndata_small)*2. + 5.
 
     def test_binx2(self):
-        egauss = Extend(gaussian)
+        egauss = Extended(gaussian)
         fit,m = fit_binx2(egauss, self.data, bins=100, bound=(1.,9.),
             quiet=True, mean=4., sigma=1., N=10000., print_level=0)
         self.assertAlmostEqual(m.values['mean'], 5., delta=3*m.errors['mean'])
@@ -34,7 +35,7 @@ class TestOneshot(unittest.TestCase):
         self.assertAlmostEqual(m.values['sigma'],2.,delta=3*m.errors['sigma'])
 
     def test_extended_binlh(self):
-        egauss = Extend(gaussian)
+        egauss = Extended(gaussian)
         fit,m = fit_binlh(egauss,self.data, bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1., N=10000.,
             print_level=0, extended=True)
@@ -43,7 +44,7 @@ class TestOneshot(unittest.TestCase):
         self.assertAlmostEqual(m.values['N'],20000,delta=3*m.errors['N'])
 
     def test_extended_binlh_ww(self):
-        egauss = Extend(gaussian)
+        egauss = Extended(gaussian)
         fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=-1, extended=True)
@@ -52,7 +53,7 @@ class TestOneshot(unittest.TestCase):
         self.assertAlmostEqual(m.values['N'],2000,delta=3*m.errors['N'])
 
     def test_extended_binlh_ww_w2(self):
-        egauss = Extend(gaussian)
+        egauss = Extended(gaussian)
         fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=-1, extended=True)

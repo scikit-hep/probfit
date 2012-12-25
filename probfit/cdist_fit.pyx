@@ -62,7 +62,6 @@ cdef class UnbinnedLH:
             feel like there is a correct way to implement it feel free to do so
             and write document telling people about the caveat.
         """
-        #self.vf = np.vectorize(f)
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
         self.weights = weights
@@ -236,7 +235,6 @@ cdef class BinnedLH:
 
         """
         self.f = f
-        self.vf = np.vectorize(f)
         self.func_code = FakeFuncCode(f,dock=True)
         self.use_w2 = use_w2
         self.extended = extended
@@ -356,7 +354,6 @@ cdef class Chi2Regression:
               assumed to be all 1's.
             - **weight** 1D array weight for each data point.
         """
-        #self.vf = np.vectorize(f)
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
         self.weights = float2double(weights)
@@ -464,7 +461,6 @@ cdef class BinnedChi2:
               :math:`\sqrt{\sum_{j \in \\textrm{bin}_i} w_j^2}`.
         """
         self.f = f
-        self.vf = np.vectorize(f)
         self.func_code = FakeFuncCode(f,dock=True)
         if bound is None:
             bound = minmax(data)

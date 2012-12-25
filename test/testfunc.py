@@ -5,8 +5,9 @@ from probfit.cdist_fit import *
 from math import log
 import numpy as np
 from numpy.random import randn
-from probfit._libstat import xlogyx, wlogyx, csum, integrate1d, vectorize_f
-
+from probfit._libstat import xlogyx, wlogyx, csum, integrate1d, _vector_apply
+from probfit.functor import Normalized, AddPdf, construct_arg, fast_tuple_equal
+from probfit.funcutil import merge_func_code
 
 class TestFunc(unittest.TestCase):
     def setUp(self):
@@ -27,13 +28,14 @@ class TestFunc(unittest.TestCase):
         self.assertAlmostEqual(vl,0.7788007830714)
         self.assertAlmostEqual(vr,0.7788007830714)
 
-    def test_vectorize_f(self):
+    def test__vector_apply(self):
         def f(x,y): return x*x+y
         y = 10
         a = np.array([1.,2.,3.])
         expected = [f(x,y) for x in a]
-        va = vectorize_f(f,a,tuple([y]))
-        for i in range(len(a)): self.assertAlmostEqual(va[i],expected[i])
+        va = _vector_apply(f,a,tuple([y]))
+        for i in range(len(a)):
+            self.assertAlmostEqual(va[i], expected[i])
 
     def test_integrate1d(self):
         def f(x,y):return x*x+y

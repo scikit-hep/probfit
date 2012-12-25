@@ -1,5 +1,5 @@
 import numpy as np
-from ._libstat import compute_cdf, invert_cdf
+from ._libstat import compute_cdf, invert_cdf, _vector_apply
 from util import describe
 import numpy.random as npr
 from matplotlib import pyplot as plt
@@ -40,8 +40,7 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
     #if accuracy is None: accuracy=10*numtoys
     r = npr.random_sample(nsample)
     x = np.linspace(bound[0], bound[1], accuracy)
-    vf = np.vectorize(f)
-    pdf = vf(x, *my_arg)
+    pdf = _vector_apply(f, x, tuple(my_arg))
     cdf = compute_cdf(pdf, x)
     if cdf[-1] < 0.01:
         warn('Integral for given funcition is really low. Did you give it a reasonable range?')

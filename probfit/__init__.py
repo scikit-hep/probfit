@@ -5,7 +5,7 @@ __all__ = [
     'BinnedLH',
     'Chi2Regression',
     'Convolve',
-    'Extend',
+    'Extended',
     'FakeFunc',
     'FakeFuncCode',
     'MinimalFuncCode',
@@ -13,9 +13,7 @@ __all__ = [
     'Normalized',
     'Polynomial',
     'UnbinnedLH',
-    'adjusted_bound',
     'argus',
-    'construct_arg',
     'cruijff',
     'crystalball',
     'describe',
@@ -66,3 +64,4 @@ from .plotting import *
 from .funcutil import *
 from .decorator import *
 from .toy import *
+from .functor import Normalized, Extended, Convolve, AddPdf, Add2PdfNorm
