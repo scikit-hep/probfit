@@ -17,8 +17,8 @@ else:
     cmdclass = {'build_ext':build_ext}
 
 
-cdist_fit = Extension('probfit.cdist_fit',
-                    sources = ['probfit/cdist_fit.'+source_suffix],
+costfunc = Extension('probfit.costfunc',
+                    sources = ['probfit/costfunc.'+source_suffix],
                     include_dirs= [np.get_include()],
                     extra_link_args = [])
 
@@ -52,6 +52,6 @@ setup (
        url='https://github.com/piti118/dist_fit',
        package_dir = {'probfit': 'probfit'},
        packages = ['probfit'],
-       ext_modules = [cdist_fit, cdist_func, libstat, funcutil, functor],
+       ext_modules = [costfunc, cdist_func, libstat, funcutil, functor],
        requires=['numpy','iminuit']
        )

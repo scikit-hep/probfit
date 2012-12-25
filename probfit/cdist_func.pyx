@@ -19,8 +19,9 @@ cdef class Polynomial:
     cdef public object func_defaults
     def __init__(self,order,xname='x'):
         """
-        User can supply order as integer in which case it uses (c_0....c_n+1) default
-        or the list of coefficient name which the first one will be the lowest order and the last one will be the highest order
+        User can supply order as integer in which case it uses (c_0....c_n+1)
+        default or the list of coefficient name which the first one will be the
+        lowest order and the last one will be the highest order
         """
         varnames = None
         argcount = 0

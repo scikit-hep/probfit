@@ -13,6 +13,7 @@ from nputil import float2double, mid, minmax
 from util import describe
 
 np.import_array()
+
 cdef extern from "math.h":
     bint isnan(double x)
 
@@ -56,9 +57,9 @@ cdef class UnbinnedLH:
               number so that iminuit will avoid those points. Default -100000.
 
         .. note::
-            There is a notable lack of **sum_w2** for unbinned likelihood. I feel
-            like the solutions are quite sketchy. There are multiple ways to
-            implement it but they don't really scale correctly. If you
+            There is a notable lack of **sum_w2** for unbinned likelihood. I
+            feel like the solutions are quite sketchy. There are multiple ways
+            to implement it but they don't really scale correctly. If you
             feel like there is a correct way to implement it feel free to do so
             and write document telling people about the caveat.
         """
@@ -101,19 +102,20 @@ cdef class UnbinnedLH:
 
             - **bound** bound for histogram. If ``None`` is given the bound
               will be automatically determined from the data.
-              If you given PDF that's normalied to a region but some data is not
-              within the bound the picture may look funny.
+              If you given PDF that's normalied to a region but some data is
+              not within the bound the picture may look funny.
 
             - **parmloc** location of parameter print out. This is passed
               directy to legend loc named parameter. Default (0.05,0.95).
 
             - **nfbins** how many point pdf should be evaluated. Default 200.
 
-            - **print_par** print parameters and error on the plot. Default False.
+            - **print_par** print parameters and error on the plot. Default
+              False.
 
         """
-        return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax, bound=bound,
-            parmloc=parmloc, nfbins=nfbins, print_par=print_par)
+        return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
+            bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par)
 
 
     def show(self,*arg,**kwd):
@@ -230,8 +232,8 @@ cdef class BinnedLH:
             - **extended** Boolean whether this likelihood should be extended
               likelihood or not. Default False.
 
-            - **use_w2** Scale -log likelihood so that to the original unweighted
-              statistics. Default False.
+            - **use_w2** Scale -log likelihood so that to the original
+              unweighted statistics. Default False.
 
         """
         self.f = f
@@ -249,7 +251,8 @@ cdef class BinnedLH:
         self.N = csum(self.h)
 
         if weights is not None:
-            self.w2,_ = np.histogram(data, bins, range=bound, weights=weights*weights)
+            self.w2,_ = np.histogram(data, bins, range=bound,
+                                     weights=weights*weights)
         else:
             self.w2,_ = np.histogram(data, bins, range=bound, weights=None)
 
@@ -264,7 +267,8 @@ cdef class BinnedLH:
 
     def __call__(self,*arg):
         """
-        Calculate sum -log(poisson binned likelihood) given positional arguments
+        Calculate sum -log(poisson binned likelihood) given positional
+        arguments
         """
         self.last_arg = arg
         ret = compute_bin_lh_f(self.f,
@@ -298,7 +302,8 @@ cdef class BinnedLH:
 
             - **nfbins** how many point pdf should be evaluated. Default 200.
 
-            - **print_par** print parameters and error on the plot. Default False.
+            - **print_par** print parameters and error on the plot.
+              Default False.
         """
         return plotting.draw_blh(self, minuit=minuit,
             ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par)
@@ -391,7 +396,8 @@ cdef class Chi2Regression:
             - **parmloc** location of parameter print out. This is passed
               directy to legend loc named parameter. Default (0.05,0.95).
 
-            - **print_par** print parameters and error on the plot. Default False.
+            - **print_par** print parameters and error on the plot.
+              Default False.
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax,
                             parmloc=parmloc, print_par=print_par)
@@ -519,7 +525,8 @@ cdef class BinnedChi2:
 
             - **nfbins** number of points to calculate f
 
-            - **print_par** print parameters and error on the plot. Default False.
+            - **print_par** print parameters and error on the plot.
+              Default False.
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
             parmloc=parmloc, nfbins=nfbins, print_par=print_par)

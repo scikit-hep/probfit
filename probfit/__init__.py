@@ -55,7 +55,7 @@ __all__ = [
     'xintercept_tuple',
     ]
 
-from .cdist_fit import *
+from costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
 from .cdist_func import *
 from .util import *
 from .oneshot import *
