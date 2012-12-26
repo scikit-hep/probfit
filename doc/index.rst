@@ -51,6 +51,8 @@ Functors
     Normalized
     Extended
     Convolve
+    AddPdf
+    Add2PdfNorm
 
 Unbinned Likelihood
 ^^^^^^^^^^^^^^^^^^^
@@ -98,8 +100,8 @@ Functor
 
 .. autoclass:: Extended
 .. autoclass:: Normalized
-.. autoclass:: AddPdf
 .. autoclass:: Convolve
+.. autoclass:: AddPdf
 .. autoclass:: Add2PdfNorm
 
 Builtin PDF

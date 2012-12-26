@@ -49,7 +49,37 @@ cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
 
 cdef class Convolve:#with gy cache
     """
-    Convolve)
+    Make convolution from supplied **f** and **g**
+    Argument from **f** and **g** is automatically merge by name. For example,
+
+    ::
+
+        f = lambda x, a, b, c: a*x**2+b*x+c
+        g = lambda x, a, sigma: gaussian(x,a,sigma)
+        h = Convolve(f,g,gbound)
+        describe(h)#['x','a','b','c','sigma']
+
+        #h is equivalent to
+        def h_equiv(x, a, b, c, sigma):
+            return Integrate(f(x-t, a, b, c)*g(x, a, b, c), t_range=gbound)
+
+    .. math::
+        \\text{Convolve(f,g)}(t, arg \ldots) =
+                \int_{\\tau \in \\text{gbound}}
+                f(t-\\tau, arg \ldots)\\times g(t, arg\ldots) \, \mathrm{d}\\tau
+
+    **Argument**
+
+        - **f** Callable object, PDF.
+        - **g** Resolution function.
+        - **gbound** Bound of the resolution. Supplied something such that
+          g(x,*arg) is near 0 at the edges. Current implementation is
+          multiply reverse slide add straight up from the definition so this
+          bound is important. Overbounding is recommended.
+        - **nbins** Number of bins in multiply reverse slide add. Default(1000)
+
+    .. seealso::
+        :func:`probfit.funcutil.merge_func_code`
     """
     cdef int numbins
     cdef tuple gbound
@@ -69,6 +99,8 @@ cdef class Convolve:#with gy cache
         self.set_gbound(gbound,nbins)
         self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
         self.func_defaults = None
+        self.f = f
+        self.g = g
 
     def set_gbound(self,gbound,nbins):
         self.last_garg = None
@@ -123,8 +155,24 @@ cdef class Convolve:#with gy cache
 
 cdef class Extended:
     """
-    f = lambda x,y: x+y
-    g = Extend(f) ==> g = lambda x,y,N: f(x,y)*N
+    Transformed given **f** into extended from.
+
+    ::
+
+        def f(x,mu,sigma):
+            return gaussian(x,mu,sigma)
+        g = Extended(f) #g is equivalent to N*f(x,mu,sigma)
+        describe(g) #('x','mu','sigma','N')
+
+        #g is equivalent to
+        def g_equiv(x, mu, sigma, N):
+            return N*f(x, mu, sigma)
+
+    **Arguments**
+        - **f** call object. PDF.
+        - **extname** optional string. Name of the extended parameter. Default
+          `'N'`
+
     """
     cdef f
     cdef public func_code
@@ -142,6 +190,35 @@ cdef class Extended:
         return N*fval
 
 cdef class AddPdf:
+    """
+    Directly add PDF without normalization nor factor.
+    Parmeters are merged by names.
+
+    ::
+
+        def f(x, a, b, c):
+            return do_something(x,a,b,c)
+        def g(x, d, a, e):
+            return do_something_else(x, d, a, e)
+
+        h = AddPdf(f, g)# you can do AddPdf(f, g, h)
+        #h is equivalent to
+        def h_equiv(x, a, b, c, d, e):
+            return f(x, a, b, c) + g(x, d, a, e)
+
+    **Arguments**
+
+        - **prefix** array of prefix string with length equal to number of
+          callable object passed. This allows you to add two PDF without having
+          parameters from the two merge. ::
+
+                h2 = AddPdf(f, g, prefix=['f','g'])
+                #h is equivalent to
+                def h2_equiv(x, f_a, f_b, f_c, g_d, g_a, g_e):
+                    return f(x, f_a, f_b, f_c) + g(x, g_d, g_a, g_e)
+
+    """
+
     cdef public object func_code
     cdef public object func_defaults
     cdef int arglen
@@ -152,6 +229,7 @@ cdef class AddPdf:
     cdef list argcache
     cdef public int hit
     cdef public int nparts
+
     def __init__(self,*arg,prefix=None):
         self.func_code, self.allpos = merge_func_code(*arg,prefix=prefix,skip_first=True)
         self.func_defaults=None
@@ -202,6 +280,33 @@ cdef class AddPdf:
         return tuple(ret)
 
 cdef class Add2PdfNorm:
+    """
+    Add 2 PDF with normalization factor. Parameters are merged by name.
+
+    ::
+
+        def f(x, a, b, c):
+            return do_something(x, a, b, c)
+        def g(x, d, a, e):
+            return do_something_else(x, d, a, e)
+
+        h = Add2PdfNorm(f,g)
+
+        #h is equivalent to
+        def h_equiv(x, a, b, c, d, e, k_f):
+            return k_f*f(x, a, b, c)+ (1-k_f)*g(x, d, a, e)
+
+    **Arguments**
+        - **f** callable object f.
+        - **g** callable object g.
+        - **facname** name of the factor
+
+    .. note::
+        You are welcome to modify this so that it adds arbitary number of
+        function with correct normalization. Submit a Pull request
+        if you have done it.
+
+    """
     cdef public object func_code
     cdef public object func_defaults
     cdef int arglen
@@ -241,6 +346,64 @@ cdef class Add2PdfNorm:
         return (fv,gv)
 
 cdef class Normalized:
+    """
+    Transformed PDF in to a normalized version. The normalization factor is
+    cached according the shape parameters(all arguments except the first one).
+
+    ::
+
+        def f(x, a, b, c):
+            return do_something(x, a, b, c)
+        g = Normalized(f, (0., 1.))
+        #g is eqivalent to (shown here without cache)
+        def g_equiv(x, a, b, c):
+            return f(x, a, b, c)/Integrate(f(x, a, b, c), range=(0., 1.))
+
+    **Arguments**
+        - **f** function to normalized.
+        - **bound** bound of the normalization.
+        - **nint** optional number of pieces to integrate. Default 1000.
+        - **warnfloat** optinal number of times it should warn if integral
+          of the given function is really small. This usually indicate
+          you bound doesn't make sense with given parameters.
+
+    .. note::
+        Integration implemented here is just a simple trapezoid rule.
+        You are welcome to implement something better and submit a pull
+        request.
+
+    .. warning::
+        Never reused Normalized object with different parameters in the same pdf.
+
+        ::
+
+            #DO NOT DO THIS
+            def f(x,y,z):
+                do_something(x,y,z)
+            pdf1 = Normalized(f,(0,1)) #h has it's own cache
+
+            pdf2 = rename(pdf1,['x','a','b'])#don't do this
+
+            totalpdf = Add2PdfNorm(pdf1,pdf2)
+
+        The reason is that Normalized has excatly one cache value. Everytime
+        it's called with different parameters the cache is invalidate and it
+        will recompute the integration which takes a long time. For the
+        example given above, when calling totalpdf, calling to `pdf2` will
+        always invalidate `pdf1` cache causing it to recompute integration
+        for every datapoint `x`. The fix is easy::
+
+            #DO THIS INSTEAD
+            def f(x,y,z):
+                do_something(x,y,z)
+            pdf1 = Normalized(f,(0,1)) #h has it's own cache
+
+            pdf2_temp = Normalized(f,(0,1)) #own separate cache
+            pdf2 = rename(pdf2_temp,['x','a','b'])
+
+            totalpdf = Add2PdfNorm(pdf1,pdf2)
+
+    """
     cdef f
     cdef double norm_cache
     cdef tuple last_arg
@@ -254,7 +417,7 @@ cdef class Normalized:
     cdef int warnfloat
     cdef int floatwarned
     cdef public int hit
-    def __init__(self,f,bound,prmt=None,nint=1000,warnfloat=1):
+    def __init__(self,f,bound,nint=1000,warnfloat=1):
         self.f = f
         self.norm_cache= 1.
         self.last_arg = None
@@ -267,7 +430,7 @@ cdef class Normalized:
         self.edges = np.linspace(bound[0],bound[1],nint)
         #print self.midpoints
         self.binwidth = self.edges[1]-self.edges[0]
-        self.func_code = FakeFuncCode(f,prmt)
+        self.func_code = FakeFuncCode(f)
         self.ndep = 1#TODO make the code doesn't depend on this assumption
         self.func_defaults = None #make vectorize happy
         self.warnfloat=warnfloat

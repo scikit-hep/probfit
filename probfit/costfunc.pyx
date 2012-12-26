@@ -341,7 +341,7 @@ cdef class Chi2Regression:
         to data points(x,y) rather than fitting PDF to a distribution.
 
         .. math::
-            \\textrm{Chi2Regression} = \sum_{i} w_i \\times \left( \\frac{f(x, arg \ldots) - y_i}{error_i} \\right)^2
+            \\textrm{Chi2Regression} = \sum_{i} w_i \\times \left( \\frac{f(x_i, arg \ldots) - y_i}{error_i} \\right)^2
 
         **Arguments**
             - **f** callable object to describe line given by (**x** , **y**).

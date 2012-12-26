@@ -258,7 +258,7 @@ cpdef double novosibirsk(double x, double width, double peak, double tail):
             -\\frac{1}{2} \\frac{\left( \ln q_y \\right)^2 }{\Lambda^2} + \Lambda^2 \\right] \\\\
         q_y(x;\sigma,x_0,\Lambda) = 1 + \\frac{\Lambda(x-x_0)}{\sigma} \\times
         \\frac{\sinh \left( \Lambda \sqrt{\ln 4} \\right)}{\Lambda \sqrt{\ln 4}}
-    
+
     where
         - width = :math:`\sigma`
         - peak = :math:`m_0`
