@@ -19,6 +19,9 @@ cdef class Polynomial:
     cdef public object func_defaults
     def __init__(self,order,xname='x'):
         """
+        .. math::
+            f(x; c_i) = \sum_{i < \\text{order}} c_i x^i
+
         User can supply order as integer in which case it uses (c_0....c_n+1)
         default or the list of coefficient name which the first one will be the
         lowest order and the last one will be the highest order
@@ -56,7 +59,15 @@ cdef class Polynomial:
 
 cpdef double doublegaussian(double x, double mean, double sigmal, double sigmar):
     """
-    unnormed double gaussian
+    Unnormalized double gaussian
+
+    .. math::
+        f(x;mean,\sigma_l,\sigma_r) =
+        \\begin{cases}
+            \exp \left[ -\\frac{1}{2} \left(\\frac{x-mean}{\sigma_l}\\right)^2 \\right], & \mbox{if } x < mean \\\\
+            \exp \left[ -\\frac{1}{2} \left( -\\frac{x-mean}{\sigma_r}\\right)^2 \\right], & \mbox{if } x >= mean
+        \end{cases}
+
     """
     cdef double ret = 0.
     cdef double sigma = 0.
@@ -72,7 +83,11 @@ cpdef double doublegaussian(double x, double mean, double sigmal, double sigmar)
 
 cpdef double ugaussian(double x, double mean, double sigma):
     """
-    unnormalized gaussian
+    Unnormalized gaussian
+
+    .. math::
+        f(x; mean, \sigma) = \exp \left[ -\\frac{1}{2} \\left( \\frac{x-mean}{\sigma} \\right)^2 \\right]
+
     """
     cdef double ret = 0
     if sigma < smallestdiv:
@@ -86,7 +101,11 @@ cpdef double ugaussian(double x, double mean, double sigma):
 
 cpdef double gaussian(double x, double mean, double sigma):
     """
-    gaussian normalized for -inf to +inf
+    Normalized gaussian.
+
+    .. math::
+        f(x; mean, \sigma) = \\frac{1}{\sqrt{2\pi}\sigma}
+        \exp \left[  -\\frac{1}{2} \left(\\frac{x-mean}{\sigma}\\right)^2 \\right]
     """
     cdef double badvalue = 1e-300
     cdef double ret = 0
@@ -101,10 +120,24 @@ cpdef double gaussian(double x, double mean, double sigma):
 
 cpdef double crystalball(double x,double alpha,double n,double mean,double sigma):
     """
-    unnormalized crystal ball function
-    see http://en.wikipedia.org/wiki/Crystal_Ball_function
+    Unnormalized crystal ball function
+
+    .. math::
+        f(x;\\alpha,n,mean,\sigma) =
+        \\begin{cases}
+            \exp\left( -\\frac{1}{2} \delta^2 \\right) & \mbox{if } \delta>-\\alpha \\\\
+            \left( \\frac{n}{|\\alpha|} \\right)^n \left( \\frac{n}{|\\alpha|} - |\\alpha| - \delta \\right)^{-n} 
+            \exp\left( -\\frac{1}{2}\\alpha^2\\right)
+            & \mbox{if } \delta \leq \\alpha
+        \end{cases}
+
+    where
+        - :math:`\delta = \\frac{x-mean}{\sigma}`
+
+    .. note::
+        http://en.wikipedia.org/wiki/Crystal_Ball_function
     """
-    cdef double d
+    cdef double d = 0.
     cdef double ret = 0
     cdef double A = 0
     cdef double B = 0
@@ -129,8 +162,14 @@ cpdef double crystalball(double x,double alpha,double n,double mean,double sigma
 #Background stuff
 cpdef double argus(double x, double c, double chi, double p):
     """
-    unnormalized argus distribution
-    see: http://en.wikipedia.org/wiki/ARGUS_distribution
+    Unnormalized argus distribution
+
+    .. math::
+        f(x;c,\chi,p) = \\frac{x}{c^2} \left( 1-\\frac{x^2}{c^2} \\right)
+            \exp \left( - \\frac{1}{2} \chi^2 \left( 1 - \\frac{x^2}{c^2} \\right) \\right)
+
+    .. note::
+        http://en.wikipedia.org/wiki/ARGUS_distribution
     """
     if c<smallestdiv:
         return badvalue
@@ -147,7 +186,17 @@ cpdef double argus(double x, double c, double chi, double p):
 
 cpdef double cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L, double alpha_R):
     """
-    unnormalized cruijff function
+    Unnormalized cruijff function
+
+    .. math::
+        f(x;m_0, \sigma_L, \sigma_R, \\alpha_L, \\alpha_R) =
+        \\begin{cases}
+            \exp\left(-\\frac{(x-m_0)^2}{2(\sigma_{L}^2+\\alpha_{L}(x-m_0)^2)}\\right)
+            & \mbox{if } x<m_0 \\\\
+            \exp\left(-\\frac{(x-m_0)^2}{2(\sigma_{R}^2+\\alpha_{R}(x-m_0)^2)}\\right)
+            & \mbox{if } x<m_0 \\\\
+        \end{cases}
+
     """
     cdef double dm2 = (x-m0)*(x-m0)
     cdef double demon=0.
@@ -166,7 +215,10 @@ cpdef double cruijff(double x, double m0, double sigma_L, double sigma_R, double
 
 cpdef double linear(double x, double m, double c):
     """
-    y=mx+c
+    Linear function.
+
+    .. math::
+        f(x;m,c) = mx+c
     """
     cdef double ret = m*x+c
     return ret
@@ -174,7 +226,10 @@ cpdef double linear(double x, double m, double c):
 
 cpdef double poly2(double x, double a, double b, double c):
     """
-    y=ax^2+bx+c
+    Parabola
+
+    .. math::
+        f(x;a,b,c) = ax^2+bx+c
     """
     cdef double ret = a*x*x+b*x+c
     return ret
@@ -182,7 +237,11 @@ cpdef double poly2(double x, double a, double b, double c):
 
 cpdef double poly3(double x, double a, double b, double c, double d):
     """
-    y=ax^2+bx+c
+    Polynomial of third order
+
+    .. math::
+        f(x; a,b,c,d) =ax^3+bx^2+cx+d
+
     """
     cdef double x2 = x*x
     cdef double x3 = x2*x
@@ -191,6 +250,20 @@ cpdef double poly3(double x, double a, double b, double c, double d):
 
 
 cpdef double novosibirsk(double x, double width, double peak, double tail):
+    """
+    Unnormalized Novosibirsk
+    
+    .. math::
+        f(x;\sigma, x_0, \Lambda) = \exp\left[
+            -\\frac{1}{2} \\frac{\left( \ln q_y \\right)^2 }{\Lambda^2} + \Lambda^2 \\right] \\\\
+        q_y(x;\sigma,x_0,\Lambda) = 1 + \\frac{\Lambda(x-x_0)}{\sigma} \\times
+        \\frac{\sinh \left( \Lambda \sqrt{\ln 4} \\right)}{\Lambda \sqrt{\ln 4}}
+    
+    where
+        - width = :math:`\sigma`
+        - peak = :math:`m_0`
+        - tail = :math:`\Lambda`
+    """
     #credit roofit implementation
     cdef double qa
     cdef double qb

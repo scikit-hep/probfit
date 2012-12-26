@@ -49,7 +49,7 @@ Functors
 
 .. autosummary::
     Normalized
-    Extendedo
+    Extended
     Convolve
 
 Unbinned Likelihood
@@ -95,10 +95,11 @@ Functor
 
 .. currentmodule:: probfit.functor
 
-.. autoclass:: Convolve
+
 .. autoclass:: Extended
 .. autoclass:: Normalized
 .. autoclass:: AddPdf
+.. autoclass:: Convolve
 .. autoclass:: Add2PdfNorm
 
 Builtin PDF
@@ -110,8 +111,10 @@ Builtin PDF
 .. autofunction:: crystalball
 .. autofunction:: cruijff
 .. autofunction:: doublegaussian
+.. autofunction:: novosibirsk
 .. autofunction:: argus
 .. autofunction:: linear
 .. autofunction:: poly2
 .. autofunction:: poly3
-.. autofunction:: novosibirsk
+.. autoclass:: Polynomial
+
