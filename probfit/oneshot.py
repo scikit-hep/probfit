@@ -1,4 +1,4 @@
-from .cdist_fit import UnbinnedLH, BinnedChi2, BinnedLH
+from .costfunc import UnbinnedLH, BinnedChi2, BinnedLH
 from ._libstat import _vector_apply
 from iminuit import Minuit
 from matplotlib import pyplot as plt

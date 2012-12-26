@@ -1,5 +1,3 @@
-#cython: embedsignature=True
-
 cpdef double doublegaussian(double x, double mean, double sigmal, double sigmar)
 
 cpdef double ugaussian(double x, double mean, double sigma)

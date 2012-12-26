@@ -55,8 +55,10 @@ __all__ = [
     'xintercept_tuple',
     ]
 
-from costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
-from .cdist_func import *
+from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
+from .pdf import doublegaussian, ugaussian, gaussian, crystalball,\
+                 argus, cruijff, linear, poly2, poly3, novosibirsk,\
+                 Polynomial
 from .util import *
 from .oneshot import *
 from .statutil import *

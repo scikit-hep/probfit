@@ -1,6 +1,6 @@
 import unittest
 from probfit import *
-from probfit.cdist_func import  gaussian
+from probfit.pdf import  gaussian
 from probfit.functor import Extended
 import numpy as np
 from numpy.random import randn, seed

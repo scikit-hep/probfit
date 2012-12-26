@@ -22,8 +22,8 @@ costfunc = Extension('probfit.costfunc',
                     include_dirs= [np.get_include()],
                     extra_link_args = [])
 
-cdist_func = Extension('probfit.cdist_func',
-        sources = ['probfit/cdist_func.'+source_suffix],
+pdf = Extension('probfit.pdf',
+        sources = ['probfit/pdf.'+source_suffix],
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
@@ -52,6 +52,6 @@ setup (
        url='https://github.com/piti118/dist_fit',
        package_dir = {'probfit': 'probfit'},
        packages = ['probfit'],
-       ext_modules = [costfunc, cdist_func, libstat, funcutil, functor],
+       ext_modules = [costfunc, pdf, libstat, funcutil, functor],
        requires=['numpy','iminuit']
        )

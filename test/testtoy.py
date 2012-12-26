@@ -4,7 +4,7 @@ from nose.tools import *
 import numpy.random as npr
 import numpy as np
 from probfit.nputil import mid
-from probfit.cdist_func import crystalball
+from probfit.pdf import crystalball
 from probfit.functor import Normalized
 from probfit.toy import gen_toy
 from probfit.util import describe

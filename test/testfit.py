@@ -1,6 +1,6 @@
 import unittest
-from probfit.cdist_fit import UnbinnedLH, BinnedLH
-from probfit.cdist_func import gaussian
+from probfit.costfunc import UnbinnedLH, BinnedLH
+from probfit.pdf import gaussian
 from numpy.random import randn, seed
 from math import log,pi,sqrt
 import warnings

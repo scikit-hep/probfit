@@ -1,7 +1,7 @@
 import unittest
-from probfit.cdist_func import *
+from probfit.pdf import *
 from probfit.util import *
-from probfit.cdist_fit import *
+from probfit.costfunc import *
 from math import log
 import numpy as np
 from numpy.random import randn
