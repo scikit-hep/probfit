@@ -3,7 +3,6 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, log1p, sqrt
-from warnings import warn
 import plotting
 from matplotlib import pyplot as plt
 from _libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f,\

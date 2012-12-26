@@ -6,7 +6,6 @@ cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
 from util import describe
-from warnings import warn
 from funcutil import MinimalFuncCode
 np.import_array()
 

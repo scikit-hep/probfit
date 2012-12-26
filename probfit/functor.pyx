@@ -6,7 +6,8 @@ from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GET_ITEM,\
 
 import numpy as np
 cimport numpy as np
-
+from warnings import warn
+from probfit_warnings import SmallIntegralWarning
 from _libstat cimport integrate1d_with_edges, _vector_apply
 from funcutil import FakeFuncCode, merge_func_code
 from util import describe
@@ -444,7 +445,7 @@ cdef class Normalized:
         n = self._compute_normalization(*arg)
         x = self.f(*arg)
         if self.floatwarned < self.warnfloat  and n < 1e-100:
-            print 'Potential float erorr:', arg
+            warn(SmallIntegralWarning(str(arg)))
             self.floatwarned+=1
         return x/n
 
