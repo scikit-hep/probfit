@@ -4,13 +4,13 @@ from nose.tools import *
 import numpy.random as npr
 import numpy as np
 from probfit.nputil import mid
-from probfit.pdf import crystalball
+from probfit.pdf import crystalball, gaussian
 from probfit.functor import Normalized
 from probfit.toy import gen_toy
 from probfit.util import describe
 from probfit._libstat import compute_chi2
 from probfit.nputil import vector_apply
-
+from probfit.costfunc import BinnedLH
 def test_gen_toy():
     npr.seed(0)
     bound = (-1,2)
@@ -38,3 +38,15 @@ def test_gen_toy():
     print chi2, len(bins), chi2/len(bins)
 
     assert(0.9<(chi2/len(bins))<1.1)
+
+def test_gen_toy2():
+    pdf = gaussian
+    npr.seed(0)
+    toy = gen_toy(pdf,10000,(-5,5),mean=0,sigma=1)
+    binlh = BinnedLH(pdf,toy,bound=(-5,5),bins=100)
+    lh = binlh(0.,1.)
+    for x in toy:
+        assert_less_equal(x,5)
+        assert_greater_equal(x,-5)
+    assert_equal(len(toy),10000)
+    assert_less(lh/100.,1.)

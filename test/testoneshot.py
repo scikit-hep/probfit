@@ -80,18 +80,6 @@ class TestOneshot(unittest.TestCase):
                                m2.errors['N'],
                                delta = m.errors['N']/sqrt(10)/100.)
 
-    def test_gen_toy(self):
-        pdf = gaussian
-        toy = gen_toy(pdf,10000,(-5,5),mean=0,sigma=1)
-        binlh = BinnedLH(pdf,toy,bound=(-5,5),bins=100)
-        lh = binlh(0.,1.)
-        for x in toy:
-            self.assertLessEqual(x,5)
-            self.assertGreaterEqual(x,-5)
-        self.assertEqual(len(toy),10000)
-        self.assertLess(lh/100.,1.)
-
-
     def test_uml(self):
         fit,m = fit_uml(gaussian, self.data, quiet=True,
                         mean=4.5, sigma=1.5, print_level=0)

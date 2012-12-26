@@ -9,176 +9,170 @@ from probfit._libstat import xlogyx, wlogyx, csum, integrate1d, _vector_apply
 from probfit.functor import Normalized, AddPdf, construct_arg, fast_tuple_equal
 from probfit.funcutil import merge_func_code
 
-class TestFunc(unittest.TestCase):
-    def setUp(self):
-        self.ndata = 20000
-        self.data = randn(self.ndata)*2. + 5.
+from nose.tools import *
 
-    def iterable_equal(self, x, y):
-        self.assertEqual(list(x), list(y))
+def iterable_equal(x, y):
+    assert_equal(list(x), list(y))
 
-    def test_cruijff(self):
-        self.iterable_equal(describe(cruijff),
-            tuple(['x', 'm0', 'sigma_L', 'sigma_R', 'alpha_L', 'alpha_R']))
-        val = cruijff(0,0,1.,2.,1.,2.)
-        self.assertAlmostEqual(val,1.)
-        vl = cruijff(0,1,1.,1.,2.,2.)
-        vr = cruijff(2,1,1.,1.,2.,2.)
-        self.assertAlmostEqual(vl,vr,msg='symmetric test')
-        self.assertAlmostEqual(vl,0.7788007830714)
-        self.assertAlmostEqual(vr,0.7788007830714)
+#cpdef double doublegaussian(double x, double mean, double sigmal, double sigmar)
+def test_doublegaussian():
+    assert_equal(tuple(describe(doublegaussian)), ('x','mean','sigmal','sigmar'))
+    assert_almost_equal(doublegaussian(0.,0.,1.,2.),1.)
+    assert_almost_equal(doublegaussian(-1.,0.,1.,2.), 0.6065306597126334)
+    assert_almost_equal(doublegaussian(1.,0.,1.,2.), 0.8824969025845955)
 
-    def test__vector_apply(self):
-        def f(x,y): return x*x+y
-        y = 10
-        a = np.array([1.,2.,3.])
-        expected = [f(x,y) for x in a]
-        va = _vector_apply(f,a,tuple([y]))
-        for i in range(len(a)):
-            self.assertAlmostEqual(va[i], expected[i])
+#cpdef double ugaussian(double x, double mean, double sigma)
+def test_ugaussian():
+    assert_equal(tuple(describe(ugaussian)), ('x','mean','sigma'))
+    assert_almost_equal(ugaussian(0,0,1), 1.)
+    assert_almost_equal(ugaussian(-1,0,1), 0.6065306597126334)
+    assert_almost_equal(ugaussian(1,0,1), 0.6065306597126334)
 
-    def test_integrate1d(self):
-        def f(x,y):return x*x+y
-        def intf(x,y): return x*x*x/3.+y*x
-        bound = (-2.,1.)
-        y = 3.
-        integral = integrate1d(f,bound,1000,tuple([y]))
-        analytic = intf(bound[1],y)-intf(bound[0],y)
-        self.assertAlmostEqual(integral,analytic,delta=1e-3)
+#cpdef double gaussian(double x, double mean, double sigma)
+def test_gaussian():
+    assert_equal(tuple(describe(gaussian)), ('x','mean','sigma'))
+    assert_almost_equal(gaussian(0,0,1), 0.3989422804014327)
+    assert_almost_equal(gaussian(-1,0,1), 0.24197072451914337)
+    assert_almost_equal(gaussian(1,0,1), 0.24197072451914337)
 
-    def test_csum(self):
-        x = np.array([1,2,3],dtype=np.double)
-        s = csum(x)
-        self.assertAlmostEqual(s,6.)
+#cpdef double crystalball(double x,double alpha,double n,double mean,double sigma)
+def test_crystalball():
+    assert_equal(tuple(describe(crystalball)), ('x','alpha','n','mean','sigma'))
+    assert_almost_equal(crystalball(10,1,2,10,2),1.)
+    assert_almost_equal(crystalball(11,1,2,10,2),0.8824969025845955)
+    assert_almost_equal(crystalball(12,1,2,10,2),0.6065306597126334)
+    assert_almost_equal(crystalball(14,1,2,10,2),0.1353352832366127)
+    assert_almost_equal(crystalball(6,1,2,10,2),0.26956918209450376)
 
-    def test_xlogyx(self):
-        def bad(x,y): return x*log(y/x)
-        self.assertAlmostEqual(xlogyx(1.,1.),bad(1.,1.))
-        self.assertAlmostEqual(xlogyx(1.,2.),bad(1.,2.))
-        self.assertAlmostEqual(xlogyx(1.,3.),bad(1.,3.))
-        self.assertAlmostEqual(xlogyx(0.,1.),0.)
+#cpdef double argus(double x, double c, double chi, double p)
+def test_argus():
+    assert_equal(tuple(describe(argus)), ('x','c','chi','p'))
+    assert_almost_equal(argus(6.,10,2,3),0.004373148605400128)
+    assert_almost_equal(argus(10.,10,2,3),0.)
+    assert_almost_equal(argus(8.,10,2,3),0.0018167930603254737)
 
-    def test_wlogyx(self):
-        def bad(w,y,x): return w*log(y/x)
-        self.assertAlmostEqual(wlogyx(1.,1.,1.),bad(1.,1.,1.))
-        self.assertAlmostEqual(wlogyx(1.,2.,3.),bad(1.,2.,3.))
-        self.assertAlmostEqual(wlogyx(1e-50,1e-20,1.),bad(1e-50,1e-20,1.))
+#cpdef double cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L, double alpha_R)
+def test_cruijff():
+    iterable_equal(tuple(describe(cruijff)),
+        ('x', 'm0', 'sigma_L', 'sigma_R', 'alpha_L', 'alpha_R'))
+    val = cruijff(0,0,1.,2.,1.,2.)
+    assert_almost_equal(val,1.)
+    vl = cruijff(0,1,1.,1.,2.,2.)
+    vr = cruijff(2,1,1.,1.,2.,2.)
+    assert_almost_equal(vl,vr,msg='symmetric test')
+    assert_almost_equal(vl,0.7788007830714)
+    assert_almost_equal(vr,0.7788007830714)
 
-    def test_construct_arg(self):
-        arg = (1,2,3,4,5,6)
-        pos = np.array([0,2,4],dtype=np.int)
-        carg = construct_arg(arg,pos)
-        expected = (1,3,5)
-        #print carg
-        for i in range(len(carg)):
-            self.assertAlmostEqual(carg[i],expected[i])
-        #
-        # def test_tuple2array(self):
-        #     t = (1.,2.,3.)
-        #
-        #     a = tuple2array(t,3,0)
-        #     for i in range(len(t)):
-        #         self.assertAlmostEqual(a[i],t[i])
-        #
-        #     expected = [2.,3.]
-        #     a = tuple2array(t,3,1)
-        #     for i in range(len(a)):
-        #         self.assertAlmostEqual(a[i],expected[i])
-        #     self.assertEqual(len(a),2)
-        #
-    def test_merge_func_code(self):
-        def f(x,y,z): return x+y+z
-        def g(x,a,b): return x+a+b
-        def h(x,c,d): return x+c+d
+#cpdef double linear(double x, double m, double c)
+def test_linear():
+    assert_equal(describe(linear),['x','m','c'])
+    assert_almost_equal(linear(1,2,3),5)
 
-        funccode, [pf,pg,ph] = merge_func_code(f,g,h)
-        self.assertEqual(funccode.co_varnames,('x','y','z','a','b','c','d'))
-        exp_pf = [0,1,2]
-        for i in range(len(pf)): self.assertAlmostEqual(pf[i],exp_pf[i])
-        exp_pg = [0,3,4]
-        for i in range(len(pf)): self.assertAlmostEqual(pg[i],exp_pg[i])
-        exp_ph = [0,5,6]
-        for i in range(len(pf)): self.assertAlmostEqual(ph[i],exp_ph[i])
+#cpdef double poly2(double x, double a, double b, double c)
+def test_poly2():
+    assert_equal(describe(poly2),['x','a','b','c'])
+    assert_almost_equal(poly2(2,3,4,5),25)
 
-        funccode, [pf,pg,ph] = merge_func_code(f,g,h,prefix=['f_','g_','h_'],skip_first=True)
-        self.assertEqual(funccode.co_varnames,('x','f_y','f_z','g_a','g_b','h_c','h_d'))
-        exp_pf = [0,1,2]
-        for i in range(len(pf)): self.assertAlmostEqual(pf[i],exp_pf[i])
-        exp_pg = [0,3,4]
-        for i in range(len(pf)): self.assertAlmostEqual(pg[i],exp_pg[i])
-        exp_ph = [0,5,6]
-        for i in range(len(pf)): self.assertAlmostEqual(ph[i],exp_ph[i])
+#cpdef double poly3(double x, double a, double b, double c, double d)
+def test_poly2():
+    assert_equal(describe(poly3),['x','a','b','c','d'])
+    assert_almost_equal(poly3(2,3,4,5,6),56.)
 
-    def test_add_pdf(self):
-        def f(x,y,z): return x+y+z
-        def g(x,a,b): return 2*(x+a+b)
-        def h(x,c,d): return 3*(x+c+d)
+#cpdef double novosibirsk(double x, double width, double peak, double tail)
+def test_novosibirsk():
+    assert_equal(describe(novosibirsk), ['x','width', 'peak', 'tail'])
+    assert_equal(novosibirsk(3,2,3,4),1.1253517471925912e-07)
 
-        A = AddPdf(f,g,h)
-        self.iterable_equal(describe(A),('x','y','z','a','b','c','d'))
+def test__vector_apply():
+    def f(x,y): return x*x+y
+    y = 10
+    a = np.array([1.,2.,3.])
+    expected = [f(x,y) for x in a]
+    va = _vector_apply(f,a,tuple([y]))
+    for i in range(len(a)):
+        assert_almost_equal(va[i], expected[i])
 
-        ret = A(1,2,3,4,5,6,7)
-        expected = f(1,2,3)+g(1,4,5)+h(1,6,7)
-        self.assertAlmostEqual(ret,expected)
+def test_integrate1d():
+    def f(x,y):return x*x+y
+    def intf(x,y): return x*x*x/3.+y*x
+    bound = (-2.,1.)
+    y = 3.
+    integral = integrate1d(f,bound,1000,tuple([y]))
+    analytic = intf(bound[1],y)-intf(bound[0],y)
+    assert_almost_equal(integral,analytic,delta=1e-3)
 
-    def test_add_pdf_cache(self):
-        def f(x,y,z): return x+y+z
-        def g(x,a,b): return 2*(x+a+b)
-        def h(x,c,d): return 3*(x+c+d)
+def test_csum():
+    x = np.array([1,2,3],dtype=np.double)
+    s = csum(x)
+    assert_almost_equal(s,6.)
 
-        A = AddPdf(f,g,h)
-        self.iterable_equal(describe(A),('x','y','z','a','b','c','d'))
+def test_xlogyx():
+    def bad(x,y): return x*log(y/x)
+    assert_almost_equal(xlogyx(1.,1.),bad(1.,1.))
+    assert_almost_equal(xlogyx(1.,2.),bad(1.,2.))
+    assert_almost_equal(xlogyx(1.,3.),bad(1.,3.))
+    assert_almost_equal(xlogyx(0.,1.),0.)
 
-        ret = A(1,2,3,4,5,6,7)
-        self.assertEqual(A.hit,0)
-        expected = f(1,2,3)+g(1,4,5)+h(1,6,7)
-        self.assertAlmostEqual(ret,expected)
+def test_wlogyx():
+    def bad(w,y,x): return w*log(y/x)
+    assert_almost_equal(wlogyx(1.,1.,1.),bad(1.,1.,1.))
+    assert_almost_equal(wlogyx(1.,2.,3.),bad(1.,2.,3.))
+    assert_almost_equal(wlogyx(1e-50,1e-20,1.),bad(1e-50,1e-20,1.))
 
-        ret = A(1,2,3,6,7,8,9)
-        self.assertEqual(A.hit,1)
-        expected = f(1,2,3)+g(1,6,7)+h(1,8,9)
-        self.assertAlmostEqual(ret,expected)
+def test_construct_arg():
+    arg = (1,2,3,4,5,6)
+    pos = np.array([0,2,4],dtype=np.int)
+    carg = construct_arg(arg,pos)
+    expected = (1,3,5)
+    #print carg
+    for i in range(len(carg)):
+        assert_almost_equal(carg[i],expected[i])
 
-    def test_fast_tuple_equal(self):
-        a = (1.,2.,3.)
-        b = (1.,2.,3.)
-        ret = fast_tuple_equal(a,b,0)
-        self.assertTrue(ret)
+def test_merge_func_code():
+    def f(x,y,z): return x+y+z
+    def g(x,a,b): return x+a+b
+    def h(x,c,d): return x+c+d
 
-        a = (1.,4.,3.)
-        b = (1.,2.,3.)
-        ret = fast_tuple_equal(a,b,0)
-        self.assertFalse(ret)
+    funccode, [pf,pg,ph] = merge_func_code(f,g,h)
+    assert_equal(funccode.co_varnames,('x','y','z','a','b','c','d'))
+    exp_pf = [0,1,2]
+    for i in range(len(pf)): assert_almost_equal(pf[i],exp_pf[i])
+    exp_pg = [0,3,4]
+    for i in range(len(pf)): assert_almost_equal(pg[i],exp_pg[i])
+    exp_ph = [0,5,6]
+    for i in range(len(pf)): assert_almost_equal(ph[i],exp_ph[i])
 
-        a = (4.,3.)
-        b = (1.,4.,3.)
-        ret = fast_tuple_equal(a,b,1)
-        self.assertTrue(ret)
+    funccode, [pf,pg,ph] = merge_func_code(f,g,h,prefix=['f_','g_','h_'],skip_first=True)
+    assert_equal(funccode.co_varnames,('x','f_y','f_z','g_a','g_b','h_c','h_d'))
+    exp_pf = [0,1,2]
+    for i in range(len(pf)): assert_almost_equal(pf[i],exp_pf[i])
+    exp_pg = [0,3,4]
+    for i in range(len(pf)): assert_almost_equal(pg[i],exp_pg[i])
+    exp_ph = [0,5,6]
+    for i in range(len(pf)): assert_almost_equal(ph[i],exp_ph[i])
 
-        a = (4.,5.)
-        b = (1.,4.,3.)
-        ret = fast_tuple_equal(a,b,1)
-        self.assertFalse(ret)
+def test_fast_tuple_equal():
+    a = (1.,2.,3.)
+    b = (1.,2.,3.)
+    ret = fast_tuple_equal(a,b,0)
+    assert(ret)
 
-        a = tuple([])
-        b = tuple([])
-        ret = fast_tuple_equal(a,b,0)
-        self.assertTrue(ret)
+    a = (1.,4.,3.)
+    b = (1.,2.,3.)
+    ret = fast_tuple_equal(a,b,0)
+    assert(not ret)
 
-    def test_Normalize_cache_hit(self):
-        def f(x,y,z) : return 1.*(x+y+z)
-        def g(x,y,z) : return 1.*(x+y+2*z)
-        nf = Normalized(f,(-10.,10.))
-        ng = Normalized(g,(-10.,10.))
-        self.assertEqual(nf.hit,0)
-        nf(1.,2.,3.)
-        ng(1.,2.,3.)
-        self.assertEqual(nf.hit,0)
-        nf(3.,2.,3.)
-        self.assertEqual(nf.hit,1)
-        ng(1.,2.,3.)
-        self.assertEqual(ng.hit,1)
+    a = (4.,3.)
+    b = (1.,4.,3.)
+    ret = fast_tuple_equal(a,b,1)
+    assert(ret)
 
+    a = (4.,5.)
+    b = (1.,4.,3.)
+    ret = fast_tuple_equal(a,b,1)
+    assert(not ret)
 
-if __name__ == '__main__':
-    unittest.main()
+    a = tuple([])
+    b = tuple([])
+    ret = fast_tuple_equal(a,b,0)
+    assert(ret)
