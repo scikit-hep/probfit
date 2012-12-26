@@ -1,9 +1,4 @@
-.. dist_fit documentation master file, created by
-   sphinx-quickstart on Sat Nov 10 11:16:37 2012.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-Welcome to dist_fit's documentation!
+Welcome to probfit's documentation!
 ====================================
 
 Tutorial
@@ -23,7 +18,7 @@ Summary
 Cost Functions.
 """""""""""""""
 
-.. currentmodule:: probfit.cdist_fit
+.. currentmodule:: probfit.costfunc
 
 .. autosummary::
     UnbinnedLH
@@ -34,7 +29,7 @@ Cost Functions.
 Builtin Functions
 """""""""""""""""
 
-.. currentmodule:: probfit.cdist_func
+.. currentmodule:: probfit.pdf
 
 .. autosummary::
     gaussian
@@ -50,17 +45,17 @@ Builtin Functions
 Functors
 """"""""
 
-.. currentmodule:: probfit.cdist_func
+.. currentmodule:: probfit.functor
 
 .. autosummary::
     Normalized
-    Extend
+    Extendedo
     Convolve
 
 Unbinned Likelihood
 ^^^^^^^^^^^^^^^^^^^
 
-.. currentmodule:: probfit.cdist_fit
+.. currentmodule:: probfit.costfunc
 
 .. autoclass:: UnbinnedLH
 
@@ -98,10 +93,18 @@ Binned :math:`\chi^2`
 Functor
 -------
 
+.. currentmodule:: probfit.functor
+
+.. autoclass:: Convolve
+.. autoclass:: Extended
+.. autoclass:: Normalized
+.. autoclass:: AddPdf
+.. autoclass:: Add2PdfNorm
+
 Builtin PDF
 -----------
 
-.. currentmodule:: probfit.cdist_func
+.. currentmodule:: probfit.pdf
 
 .. autofunction:: gaussian
 .. autofunction:: crystalball
