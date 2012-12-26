@@ -1,22 +1,50 @@
 Welcome to probfit's documentation!
 ====================================
 
+.. toctree::
+   :maxdepth: 2
+   :hidden:
+
+   api
+
+Introduction
+------------
+
+*probfit* is a set of functions that helps you construct a complex fit. It's
+intended to be used with `iminuit <http://iminuit.github.com/iminuit/>`_. The
+tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression,
+Binned:math:`\chi^2` estimator and Simultaneous fit estimator. Normalization and
+Convolution with cache are also included. Various builtin function that's
+normally used in B physics is also provided.
+
+Download & Install
+------------------
+
+From pip::
+
+    pip install probfit
+
+or get the latest development from github::
+
+    git clone git://github.com/iminuit/probfit.git
+
 Tutorial
 --------
 
 lorem ipsum
 
-API
----
+
+Commonly used API
+-----------------
 
 .. currentmodule:: probfit
 
-Summary
-^^^^^^^
-
+Refer to :ref:`fullapi` for complete reference.
 
 Cost Functions.
 """""""""""""""
+
+Refer to :ref:`costfunc`.
 
 .. currentmodule:: probfit.costfunc
 
@@ -26,8 +54,34 @@ Cost Functions.
     Chi2Regression
     BinnedChi2
 
+Functors
+""""""""
+
+Refer to :ref:`functor`
+
+.. currentmodule:: probfit.functor
+
+.. autosummary::
+    Normalized
+    Extended
+    Convolve
+    AddPdf
+    Add2PdfNorm
+    ~probfit.funcutil.rename
+
+And corresponding decorator
+
+.. currentmodule:: probfit.decorator
+
+.. autosummary::
+    normalized
+    extended
+
 Builtin Functions
 """""""""""""""""
+
+Refer to :ref:`builtin`. This list can grow: implement your favorite function
+and send us pull request.
 
 .. currentmodule:: probfit.pdf
 
@@ -42,81 +96,14 @@ Builtin Functions
     poly3
     novosibirsk
 
-Functors
-""""""""
 
-.. currentmodule:: probfit.functor
+Useful utility
+""""""""""""""
+
+You may find these functions useful in interactive environment.
 
 .. autosummary::
-    Normalized
-    Extended
-    Convolve
-    AddPdf
-    Add2PdfNorm
-
-Unbinned Likelihood
-^^^^^^^^^^^^^^^^^^^
-
-.. currentmodule:: probfit.costfunc
-
-.. autoclass:: UnbinnedLH
-
-    .. automethod:: __call__
-    .. automethod:: draw
-    .. automethod:: show
-
-Binned Likelihood
-^^^^^^^^^^^^^^^^^
-
-.. autoclass:: BinnedLH
-
-    .. automethod:: __call__
-    .. automethod:: draw
-    .. automethod:: show
-
-:math:`\chi^2` Regression
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: Chi2Regression
-
-    .. automethod:: __call__
-    .. automethod:: draw
-    .. automethod:: show
-
-Binned :math:`\chi^2`
-^^^^^^^^^^^^^^^^^^^^^
-
-.. autoclass:: BinnedChi2
-
-    .. automethod:: __call__
-    .. automethod:: draw
-    .. automethod:: show
-
-Functor
--------
-
-.. currentmodule:: probfit.functor
-
-
-.. autoclass:: Extended
-.. autoclass:: Normalized
-.. autoclass:: Convolve
-.. autoclass:: AddPdf
-.. autoclass:: Add2PdfNorm
-
-Builtin PDF
------------
-
-.. currentmodule:: probfit.pdf
-
-.. autofunction:: gaussian
-.. autofunction:: crystalball
-.. autofunction:: cruijff
-.. autofunction:: doublegaussian
-.. autofunction:: novosibirsk
-.. autofunction:: argus
-.. autofunction:: linear
-.. autofunction:: poly2
-.. autofunction:: poly3
-.. autoclass:: Polynomial
+    ~probfit.nputil.vector_apply
+    ~probfit.plotting.draw_compare
+    ~probfit.plotting.draw_pdf
 

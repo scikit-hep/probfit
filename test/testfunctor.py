@@ -95,3 +95,11 @@ def test_convolution():
     assert_almost_equal(h(0,0,1,1,2),0.1614180824489487)#left
     assert_almost_equal(h(2,0,1,1,2),0.1614180824489487)#right
     assert_almost_equal(h(3,0,1,1,2),0.119581456625684)#right
+
+
+def test_rename():
+    def f(x,y,z):
+        return None
+    assert_equal(describe(f), ['x','y','z'])
+    g = rename(f,['x','a','b'])
+    assert_equal(describe(g), ['x','a','b'])

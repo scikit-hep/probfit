@@ -20,4 +20,12 @@ def bool2int(b):
         return 0
 
 def vector_apply(f, x, *arg):
+    """
+    apply **f** to array **x** with given arguments fast. This is a fast
+    version of::
+
+        np.array([f(xi,*arg) for xi in x ])
+
+    useful when you try to plot something
+    """
     return _vector_apply(f,x,arg)

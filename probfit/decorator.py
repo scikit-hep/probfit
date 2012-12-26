@@ -5,34 +5,40 @@
 #
 class normalized:
     """
+    Normalized decorator
 
-    :param xmin:
-    :param xmax:
+    **Arguments**
+        - **bound** normalized bound
+        - **nint** option number of integral pieces. Default 1000.
+
+    .. seealso::
+
+        :class:`Normalized`
+
     """
 
-    def __init__(self, xmin, xmax):
-        self.xmin = xmin
-        self.xmax = xmax
+    def __init__(self, bound, nint=1000):
+        self.bound  = bound
+        self.nint = nint
+
     def __call__(self,f):
-        return Normalized(f,(self.xmin,self.xmax))
+        return Normalized(f, bound, self.nint)
 
 
-class rename_parameters:
+class extended:
     """
+    Extended decorator
 
-    :param arg:
+    **Arguments**
+        - **extname** extended parameter name. Default 'N'
+
+    .. seealso::
+
+        :class:`Extended`
+
     """
+    def __init__(self, extname='N'):
+        self.extname = extname
 
-    def __init__(self,*arg):
-        self.arg = arg
     def __call__(self,f):
-        return FakeFunc(f,self.arg)
-
-
-def extended(f):
-    """
-
-    :param f:
-    :return:
-    """
-    return Extended(f)
+        return Extended(f, extname=extname)

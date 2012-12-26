@@ -2,7 +2,67 @@
 import numpy as np
 from .util import describe
 
+def rename(f,newarg):
+    """
+    Rename function parameters.
+
+    ::
+
+        def f(x,y,z):
+            return do_something(x,y,z)
+        g = rename(f, ['x','a','b'])
+        print describe(g) # ['x','a','b']
+
+        #g is equivalent to
+        def g_equiv(x,a,b):
+            return f(x,a,b)
+
+    **Arguments**
+
+        - **f** callable object
+        - **newarg** list of new argument names
+
+    **Returns**
+
+        function with new argument.
+
+    """
+    return FakeFunc(f, newarg)
+
 def merge_func_code(*arg,prefix=None,skip_first=False):
+    """
+    merge function arguments.::
+
+        def f(x,y,z): return do_something(x,y,z)
+        def g(x,z,p): return do_something(x,y,z)
+        fc, pos = merge_func_code(f,g)
+        #fc is now ('x','y','z','p')
+
+    **Arguments**
+
+        - **prefix** optional array of prefix string to add to each function
+          argument. Default None.::
+
+                def f(x,y,z): return do_something(x,y,z)
+                def g(x,z,p): return do_something(x,y,z)
+                fc, pos = merge_func_code(f,g,prefix=['f','g'], skip_first=True)
+                #fc now ('x','f_y','f_z','f_p')
+
+        - **skip_first** option boolean to skip prefixing the first argument
+          of each function. This should normally be true when prefix is not
+          None.
+
+    **Return**
+
+        tuple(Merged Func Code, position array)
+
+        position array **p[i][j]** indicates where in the argument list to
+        obtain argument **j** for functin **i**
+
+    .. seealso::
+    
+        functor.construct_arg
+    """
     assert(prefix is None or len(prefix)==len(arg))
     all_arg = []
 
