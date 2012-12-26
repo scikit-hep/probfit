@@ -77,11 +77,18 @@ Add2PdfNorm
 ^^^^^^^^^^^
 .. autoclass:: Add2PdfNorm
 
+rename
+^^^^^^
+
+.. autofunction:: probfit.funcutil.rename
+
 Declarator
 ^^^^^^^^^^
-.. autoclass::normalized
+.. currentmodule:: probfit.decorator
 
-.. autoclass::extended
+.. autoclass:: normalized
+
+.. autoclass:: extended
 
 .. _builtin:
 
@@ -131,3 +138,13 @@ poly3
 Polynomial
 ^^^^^^^^^^
 .. autoclass:: Polynomial
+
+Useful Utility Function
+-----------------------
+vector_apply
+^^^^^^^^^^^^
+.. autofunction:: probfit.nputil.vector_apply
+
+draw_compare_hist
+^^^^^^^^^^^^^^^^^
+.. autofunction:: probfit.plotting.draw_compare_hist

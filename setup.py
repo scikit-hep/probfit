@@ -42,10 +42,12 @@ functor = Extension('probfit.functor',
         include_dirs= [np.get_include()],
         extra_link_args = [])
 
+execfile('probfit/info.py')
+
 setup (
        cmdclass=cmdclass,
        name = 'probfit',
-       version = '1.0.0',
+       version = __version__,
        description = 'Distribution Fitting/Regression Library',
        author='Piti Ongmongkolkul',
        author_email='piti118@gmail.com',
@@ -54,4 +56,4 @@ setup (
        packages = ['probfit'],
        ext_modules = [costfunc, pdf, libstat, funcutil, functor],
        requires=['numpy','iminuit']
-       )
+)

@@ -13,7 +13,7 @@ class normalized:
 
     .. seealso::
 
-        :class:`Normalized`
+        :class:`probfit.functor.Normalized`
 
     """
 
@@ -34,7 +34,7 @@ class extended:
 
     .. seealso::
 
-        :class:`Extended`
+        :class:`probfit.functor.Extended`
 
     """
     def __init__(self, extname='N'):

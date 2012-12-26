@@ -6,6 +6,7 @@
 from matplotlib import pyplot as plt
 import numpy as np
 from .nputil import mid, minmax, vector_apply
+from util import parse_arg
 
 #from UML
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
@@ -216,11 +217,10 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
     return x,yf,data
 
 
-def draw_pdf(f, arg, bound, bins, scale=1.0, normed=True, **kwds):
+def draw_pdf(f, arg, bound, bins=100, scale=1.0, normed=True, **kwds):
     edges = np.linspace(bound[0], bound[1], bins)
     return draw_pdf_with_edges(f, arg, edges, scale=scale,
                                 normed=normed, **kwds)
-
 
 def draw_pdf_with_edges(f, arg, edges, scale=1.0, normed=True, **kwds):
     if isinstance(arg, dict): arg = parse_arg(f, arg, 1)
@@ -236,6 +236,31 @@ def draw_pdf_with_edges(f, arg, edges, scale=1.0, normed=True, **kwds):
 #draw comprison between function given args and data
 def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None,
                       normed=False, use_w2=False, parts=False):
+    """
+    draw histogram of data with poisson error bar and f(x,*arg).
+
+    ::
+
+        np.rannd(10000)
+        f = gaussian
+        draw_compare_hist(f, {'mean':0,'sigma':1}, data, normed=True)
+
+    **Arguments**
+
+        - **f**
+        - **arg** argument pass to f. Can be dictionary or list.
+        - **data** data array
+        - **bins** number of bins. Default 100.
+        - **bound** optional boundary of plot in tuple form. If `None` is
+          given, the bound is determined from min and max of the data. Default
+          `None`
+        - **weights** weights array. Default None.
+        - **normed** optional normalized data flag. Default False.
+        - **use_w2** scaled error down to the original statistics instead of
+          weighted statistics.
+        - **parts** draw parts of pdf. (Works with AddPdf and Add2PdfNorm).
+          Default False.
+    """
     if bound is None: bound = minmax(data)
     h,e = np.histogram(data, bins=bins, range=bound, weights=weights)
     err = None

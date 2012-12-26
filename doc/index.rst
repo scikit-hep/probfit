@@ -31,7 +31,7 @@ or get the latest development from github::
 Tutorial
 --------
 
-lorem ipsum
+Tutorial is in the tutorial directory. You can `view it online <http://nbviewer.ipython.org/urls/raw.github.com/piti118/probfit/master/tutorial/tutorial.ipynb>`_ too.
 
 
 Commonly used API
@@ -104,6 +104,5 @@ You may find these functions useful in interactive environment.
 
 .. autosummary::
     ~probfit.nputil.vector_apply
-    ~probfit.plotting.draw_compare
-    ~probfit.plotting.draw_pdf
+    ~probfit.plotting.draw_compare_hist
 

@@ -44,6 +44,7 @@ __all__ = [
     'val_contour',
     'val_contour2d',
     'vertical_highlight',
+    '__version__'
     ]
 
 from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
@@ -58,3 +59,4 @@ from .funcutil import *
 from .decorator import *
 from .toy import *
 from .functor import Normalized, Extended, Convolve, AddPdf, Add2PdfNorm
+from .info import __version__

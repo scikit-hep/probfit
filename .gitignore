@@ -12,5 +12,6 @@ archive
 _build
 /tutorial.ipynb
 /tutorial.py
+actual
 
 !/tutorial/*.ipynb
