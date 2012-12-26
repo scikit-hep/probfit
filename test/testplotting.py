@@ -26,7 +26,7 @@ class image_comparison:
 
     def test(self):
         #compare_images
-        x = compare_images(self.baselineimage, self.actualimage, 0.0001)
+        x = compare_images(self.baselineimage, self.actualimage, 0.005)
         if x is not None:
             print x
             assert x is None
