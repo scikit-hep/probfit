@@ -4,22 +4,30 @@
    :target: https://travis-ci.org/iminuit/probfit
 
 
-API Change is coming
-dist_fit
+probfit
 --------
 
-Fitting distribution do regression and such in python.
+*probfit* is a set of functions that helps you construct a complex fit. It's
+intended to be used with `iminuit <http://iminuit.github.com/iminuit/>`_. The
+tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression,
+Binned:math:`\chi^2` estimator and Simultaneous fit estimator. Normalization and
+Convolution with cache are also included. Various builtin function that's
+normally used in B physics is also provided.
 
 Requirement
 -----------
 
-RTMinuit https://github.com/piti118/RTMinuit
+iminuit https://iminuit.github.com/iminuit/
 numpy
 matplotlib
 
 Tutorial
 --------
 
-open tutorial.ipynb in ipython notebook(I created it in 1.3dev version though
-you might have problem if you are using 1.2). If you can't open it just copy
-cell by cell from tutorial.py.
+open tutorial.ipynb in ipython notebook. You can `view it online <http://nbviewer.ipython.org/urls/raw.github.com/piti118/probfit/master/tutorial/tutorial.ipynb>`_ too.
+
+
+Documentation
+-------------
+
+See `here <http://iminuit.github.com/probfit/>`_
