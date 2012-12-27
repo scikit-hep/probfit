@@ -63,7 +63,6 @@ setup (
             'Topic :: Scientific/Engineering :: Mathematics',
             'Intended Audience :: Science/Research',
             'Development Status :: 4 - Beta',
-            'License :: OSI Approved :: GNU General Public License (GPL)',
             'License :: OSI Approved :: MIT License'
         ],
 )
