@@ -47,6 +47,6 @@ def test_gen_toy2():
     lh = binlh(0.,1.)
     for x in toy:
         assert(x < 5)
-        assert_greater_equal(x,-5)
+        assert(x>=-5)
     assert_equal(len(toy),10000)
     assert(lh/100. < 1.)
