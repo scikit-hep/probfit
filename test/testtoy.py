@@ -46,7 +46,7 @@ def test_gen_toy2():
     binlh = BinnedLH(pdf,toy,bound=(-5,5),bins=100)
     lh = binlh(0.,1.)
     for x in toy:
-        assert_less_equal(x,5)
+        assertl(x < 5)
         assert_greater_equal(x,-5)
     assert_equal(len(toy),10000)
-    assert_less(lh/100.,1.)
+    asser(lh/100. < 1.)
