@@ -3,6 +3,7 @@
 #def function_i_have_no_idea_how_to_normalize(x,y,z)
 #   return complicated_function(x,y,z)
 #
+from .functor import Normalized, Extended
 class normalized:
     """
     Normalized decorator
@@ -22,7 +23,7 @@ class normalized:
         self.nint = nint
 
     def __call__(self,f):
-        return Normalized(f, bound, self.nint)
+        return Normalized(f, self.bound, self.nint)
 
 
 class extended:
@@ -41,4 +42,4 @@ class extended:
         self.extname = extname
 
     def __call__(self,f):
-        return Extended(f, extname=extname)
+        return Extended(f, extname=self.extname)

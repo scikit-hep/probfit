@@ -11,23 +11,12 @@ from .util import parse_arg, describe
 from .nputil import minmax
 
 
-def randfr(r):
-    """
-    generate a uniform random number with in range r
-    :param r: tuple range
-    :return: float
-    """
-    b = r[1]
-    a = r[0]
-    return np.random.ranf() * (b - a) + a
-
-
 def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
     """
     perform unbinned likelihood fit
     :param f: pdf
     :param data: data
-    :param quiet: if not quitet draw latest fit on fail fit
+    :param quiet: if not quite draw latest fit on fail fit
     :param printlevel: minuit printlevel
     :return:
     """
@@ -214,6 +203,16 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
     ret = dict((k, v) for k, v in zip(vnames, minarg))
     return ret
 
+
+# def randfr(r):
+#     """
+#     generate a uniform random number with in range r
+#     :param r: tuple range
+#     :return: float
+#     """
+#     b = r[1]
+#     a = r[0]
+#     return np.random.ranf() * (b - a) + a
 
 # def guess_initial(alg, f, data, ntry=100, guessrange=(-100, 100), draw=False, *arg, **kwd):
 #     """

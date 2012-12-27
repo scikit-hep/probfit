@@ -13,12 +13,6 @@ def float2double(a):
     else:
         return a.astype(np.float64)
 
-def bool2int(b):
-    if b:
-        return 1
-    else:
-        return 0
-
 def vector_apply(f, x, *arg):
     """
     apply **f** to array **x** with given arguments fast. This is a fast

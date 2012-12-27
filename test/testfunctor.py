@@ -2,7 +2,7 @@ import unittest
 from probfit import *
 from probfit._libstat import integrate1d
 from nose.tools import *
-
+from probfit.decorator import extended, normalized
 
 def test_describe_normal_function():
     def f(x,y,z):
@@ -11,15 +11,22 @@ def test_describe_normal_function():
     assert_equal(list(d),['x','y','z'])
 
 
-def test_Normalize():
+def test_Normalized():
     f = ugaussian
     g = Normalized(f,(-1,1))
 
     norm = integrate1d(f,(-1.,1.),1000,(0.,1.))
     assert_almost_equal(g(1.,0.,1.),f(1.,0.,1.)/norm)
 
+def test_normalized_decorator():
+    @normalized((-1,1))
+    def f(x, mean, sigma):
+        return ugaussian(x, mean, sigma)
+    g = Normalized(ugaussian,(-1,1))
+    assert_equal(describe(f), ['x','mean','sigma'])
+    assert_almost_equal(g(1,0,1),f(1,0,1))
 
-def test_Normalize_cache_hit():
+def test_Normalized_cache_hit():
     def f(x,y,z) : return 1.*(x+y+z)
     def g(x,y,z) : return 1.*(x+y+2*z)
     nf = Normalized(f,(-10.,10.))
@@ -72,6 +79,17 @@ def test_extended():
     assert_equal(g(1,2,3,4), 4*(f(1,2,3)))
 
 
+def test_extended_decorator():
+    def f(x,y,z): return x+2*y+3*z
+
+    @extended()
+    def g(x,y,z):
+        return x+2*y+3*z
+
+    assert_equal(tuple(describe(g)), ('x','y','z','N'))
+    assert_equal(g(1,2,3,4), 4*(f(1,2,3)))
+
+
 def test_add2pdfnorm():
     def f(x,y,z): return x+2*y+3*z
     def g(x,z,p): return 4*x+5*z+6*z
@@ -103,3 +121,4 @@ def test_rename():
     assert_equal(describe(f), ['x','y','z'])
     g = rename(f,['x','a','b'])
     assert_equal(describe(g), ['x','a','b'])
+

@@ -14,5 +14,7 @@ _build
 /tutorial.py
 actual
 dist
+.coverage
+cover
 
 !/tutorial/*.ipynb
