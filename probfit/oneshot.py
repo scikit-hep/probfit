@@ -150,7 +150,7 @@ def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = {k: v for k, v in zip(vnames, minarg)}
+    ret = dict((k,v) for k, v in zip(vnames, minarg))
     return ret
 
 def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=False,
@@ -182,7 +182,7 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = {k: v for k, v in zip(vnames, minarg)}
+    ret = dict((k,v) for k, v in zip(vnames, minarg))
     return ret
 
 
@@ -211,7 +211,7 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = {k: v for k, v in zip(vnames, minarg)}
+    ret = dict((k, v) for k, v in zip(vnames, minarg))
     return ret
 
 
