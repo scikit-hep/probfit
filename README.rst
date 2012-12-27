@@ -19,8 +19,8 @@ Requirement
 -----------
 
 - iminuit https://iminuit.github.com/iminuit/
-- numpy
-- matplotlib
+- numpy http://www.numpy.org/
+- matplotlib http://matplotlib.org/
 
 Tutorial
 --------

@@ -13,5 +13,6 @@ _build
 /tutorial.ipynb
 /tutorial.py
 actual
+dist
 
 !/tutorial/*.ipynb
