@@ -15,10 +15,7 @@ __all__ = [
     'describe',
     'doublegaussian',
     'draw_compare',
-    'draw_compare_fit_statistics',
     'draw_compare_hist',
-    'draw_contour',
-    'draw_contour2d',
     'draw_pdf',
     'draw_pdf_with_edges',
     'extended',
@@ -41,9 +38,6 @@ __all__ = [
     'try_chi2',
     'try_uml',
     'ugaussian',
-    'val_contour',
-    'val_contour2d',
-    'vertical_highlight',
     '__version__'
     ]
 
