@@ -291,10 +291,21 @@ cpdef double novosibirsk(double x, double width, double peak, double tail):
 
 cpdef double breitwigner(double x, double m, double gamma):
     """
-    Unnormalized Relativistic Breit-Wigner
+    Normalized Relativistic Breit-Wigner
 
     .. math::
-        f(x; m, \Gamma) = \\frac{1}{(x^2-m^2)^2+m^2\Gamma^2}
+        f(x; m, \Gamma) = N\\times \\frac{1}{(x^2-m^2)^2+m^2\Gamma^2}
+
+    where
+    
+    .. math::
+        N = \\frac{2 \sqrt{2} m \Gamma  \gamma }{\pi \sqrt{m^2+\gamma}}
+
+    and
+
+    .. math::
+        \gamma=\sqrt{m^2\left(m^2+\Gamma^2\\right)}
+
 
     .. seealso::
         :func:`cauchy`
@@ -302,10 +313,13 @@ cpdef double breitwigner(double x, double m, double gamma):
     """
     cdef double mm = m*m
     cdef double xm = x*x-mm
-    return 1./(xm*xm+mm*gamma*gamma)
+    cdef double gg = gamma*gamma
+    cdef double s = sqrt(mm*(mm+gg))
+    cdef double N = (2*sqrt(2)/pi)*m*gamma*s/sqrt(mm+s)
+    return N/(xm*xm+mm*gg)
 
 
-cpdef cauchy(double x, double m, double gamma):
+cpdef double cauchy(double x, double m, double gamma):
     """
     Cauchy distribution aka non-relativistic Breit-Wigner
 
