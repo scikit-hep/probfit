@@ -11,6 +11,8 @@ __all__ = [
     'UnbinnedLH',
     'argus',
     'cruijff',
+    'cauchy',
+    'breitwigner',
     'crystalball',
     'describe',
     'doublegaussian',
@@ -44,7 +46,7 @@ __all__ = [
 from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball,\
                  argus, cruijff, linear, poly2, poly3, novosibirsk,\
-                 Polynomial
+                 Polynomial, cauchy, breitwigner
 from .util import *
 from .oneshot import *
 from .statutil import *
