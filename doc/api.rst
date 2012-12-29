@@ -82,7 +82,7 @@ rename
 
 .. autofunction:: probfit.funcutil.rename
 
-Declarator
+Decorator
 ^^^^^^^^^^
 .. currentmodule:: probfit.decorator
 

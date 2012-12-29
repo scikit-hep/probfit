@@ -20,4 +20,4 @@ cpdef double novosibirsk(double x, double width, double peak, double tail)
 
 cpdef double breitwigner(double x, double m, double gamma)
 
-cpdef cauchy(double x, double m, double gamma)
+cpdef double cauchy(double x, double m, double gamma)
