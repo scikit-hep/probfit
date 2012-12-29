@@ -50,7 +50,12 @@ cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
 
 cdef class Convolve:#with gy cache
     """
-    Make convolution from supplied **f** and **g**
+    Make convolution from supplied **f** and **g**. If your functions are
+    analytically convolutable you will be better off implementing
+    analytically. This functor is implemented using numerical integration with
+    bound there are numerical issue that will, in most cases, lightly affect
+    normalization.s
+
     Argument from **f** and **g** is automatically merge by name. For example,
 
     ::
@@ -65,6 +70,7 @@ cdef class Convolve:#with gy cache
             return Integrate(f(x-t, a, b, c)*g(x, a, b, c), t_range=gbound)
 
     .. math::
+
         \\text{Convolve(f,g)}(t, arg \ldots) =
                 \int_{\\tau \in \\text{gbound}}
                 f(t-\\tau, arg \ldots)\\times g(t, arg\ldots) \, \mathrm{d}\\tau
@@ -79,8 +85,18 @@ cdef class Convolve:#with gy cache
           bound is important. Overbounding is recommended.
         - **nbins** Number of bins in multiply reverse slide add. Default(1000)
 
-    .. seealso::
-        :func:`probfit.funcutil.merge_func_code`
+    .. note::
+
+        You may be worried about normalization. By the property of convolution:
+
+        .. math::
+
+            \int_{\mathbf{R}^d}(f*g)(x) \, dx=\left(\int_{\mathbf{R}^d}f(x) \, dx\\right)\left(\int_{\mathbf{R}^d}g(x) \, dx\\right).
+
+        This means if you convolute two normalized distributions you get back
+        a normalized distribution. However, since we are doing numerical
+        integration here we will be off by a little bit.
+
     """
     cdef int numbins
     cdef tuple gbound
