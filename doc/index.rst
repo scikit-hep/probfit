@@ -89,6 +89,8 @@ and send us pull request.
     gaussian
     crystalball
     cruijff
+    cauchy
+    breitwigner
     doublegaussian
     argus
     linear

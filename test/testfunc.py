@@ -81,7 +81,22 @@ def test_poly2():
 #cpdef double novosibirsk(double x, double width, double peak, double tail)
 def test_novosibirsk():
     assert_equal(describe(novosibirsk), ['x','width', 'peak', 'tail'])
-    assert_equal(novosibirsk(3,2,3,4),1.1253517471925912e-07)
+    assert_almost_equal(novosibirsk(3,2,3,4),1.1253517471925912e-07)
+
+
+def test_breitwigner():
+    assert_equal(describe(breitwigner),['x','m','gamma'])
+    assert_almost_equal(breitwigner(1,1,1.), 1.)
+    assert_almost_equal(breitwigner(1,1,2.), 0.25)
+    assert_almost_equal(breitwigner(1,2,3.), 1./(9+6.**2.))
+
+
+def test_cauchy():
+    assert_equal(describe(cauchy),['x','m','gamma'])
+    assert_almost_equal(cauchy(1,1,1.), 0.3183098861837907)
+    assert_almost_equal(cauchy(1,1,2.), 0.15915494309189535)
+    assert_almost_equal(cauchy(1,2,4.), 0.07489644380795074)
+
 
 def test__vector_apply():
     def f(x,y): return x*x+y
