@@ -17,3 +17,7 @@ cpdef double poly2(double x, double a, double b, double c)
 cpdef double poly3(double x, double a, double b, double c, double d)
 
 cpdef double novosibirsk(double x, double width, double peak, double tail)
+
+cpdef double breitwigner(double x, double m, double gamma)
+
+cpdef cauchy(double x, double m, double gamma)

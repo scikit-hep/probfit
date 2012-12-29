@@ -103,6 +103,14 @@ gaussian
 ^^^^^^^^
 .. autofunction:: gaussian
 
+cauchy
+^^^^^^
+.. autofunction:: cauchy
+
+Breit-Wigner
+^^^^^^^^^^^^
+.. autofunction:: breitwigner
+
 crystalball
 ^^^^^^^^^^^
 .. autofunction:: crystalball
