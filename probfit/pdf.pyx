@@ -297,7 +297,7 @@ cpdef double breitwigner(double x, double m, double gamma):
         f(x; m, \Gamma) = N\\times \\frac{1}{(x^2-m^2)^2+m^2\Gamma^2}
 
     where
-    
+
     .. math::
         N = \\frac{2 \sqrt{2} m \Gamma  \gamma }{\pi \sqrt{m^2+\gamma}}
 
