@@ -296,9 +296,9 @@ cdef class AddPdf:
             ret.append(tmp)
         return tuple(ret)
 
-cdef class Add2PdfNorm:
+cdef class AddPdfNorm:
     """
-    Add 2 PDF with normalization factor. Parameters are merged by name.
+    Add PDF with normalization factor. Parameters are merged by name.
 
     ::
 
@@ -306,61 +306,115 @@ cdef class Add2PdfNorm:
             return do_something(x, a, b, c)
         def g(x, d, a, e):
             return do_something_else(x, d, a, e)
-
-        h = Add2PdfNorm(f,g)
+        def p(x, b, a, c):
+            return do_something_other_thing(x,b,a,c)
+        h = Add2PdfNorm(f, g, p)
 
         #h is equivalent to
-        def h_equiv(x, a, b, c, d, e, k_f):
-            return k_f*f(x, a, b, c)+ (1-k_f)*g(x, d, a, e)
+        def h_equiv(x, a, b, c, d, e, f_0, f_1):
+            return f_0*f(x, a, b, c)+ \\
+                   f_1*g(x, d, a, e)+
+                   (1-f_0-f_1)*p(x, b, a, c)
 
     **Arguments**
-        - **f** callable object f.
-        - **g** callable object g.
-        - **facname** name of the factor
+        - **facname** optional list of factor name of length=. If None is given
+          factor name is automatically chosen to be `f_0`, `f_1` etc.
+          Default None.
+        - **prefix** optional prefix list to prefix arguments of each function.
+          Default None.
 
-    .. note::
-        You are welcome to modify this so that it adds arbitary number of
-        function with correct normalization. Submit a Pull request
-        if you have done it.
 
     """
     cdef public object func_code
     cdef public object func_defaults
     cdef int arglen
-    cdef f
-    cdef g
-    cdef np.ndarray fpos
-    cdef np.ndarray gpos
-    cdef np.ndarray farg_buffer
-    cdef np.ndarray garg_buffer
+    cdef int normalarglen
+    cdef tuple allf
+    cdef int numf
+    #cdef f
+    #cdef g
+    cdef list allpos
+    #cdef np.ndarray fpos
+    #cdef np.ndarray gpos
     cdef public int nparts
-    def __init__(self,f,g,facname='k_f'):
-        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
-        self.func_code.append(facname)
+
+    def __init__(self, *arg ,facname=None, prefix=None):
+
+        self.func_code, self.allpos = merge_func_code(*arg,
+            prefix=prefix,skip_first=True)
+
+        if facname is not None and len(facname)!=len(arg)-1:
+            raise(RuntimeError('length of facname and arguments must satisfy len(facname)==len(arg)-1'))
+
+        self.normalarglen = self.func_code.co_argcount
+        #TODO check name collisions here
+
+        if facname is None:
+            #automatic naming
+            facname = ['f_%d'%i for i in range(len(arg)-1)]
+
+        for fname in facname:
+            self.func_code.append(fname)
+
         self.arglen = self.func_code.co_argcount
         self.func_defaults=None
-        self.f=f
-        self.g=g
-        self.nparts = 2
-        self.farg_buffer = np.empty(len(self.fpos))
-        self.garg_buffer = np.empty(len(self.gpos))
+        self.allf = arg
+        self.numf = len(arg)
 
     def __call__(self,*arg):
-        cdef double fac = arg[-1]
-        cdef tuple farg = construct_arg(arg,self.fpos)
-        cdef tuple garg = construct_arg(arg,self.gpos)
-        cdef double fv = self.f(*farg)
-        cdef double gv = self.g(*garg)
-        cdef double ret = fac*fv+(1.-fac)*gv
+        cdef ret = 0.
+        cdef tuple farg
+        cdef double allfac = 0.
+        cdef double fac = 0.
+        cdef int findex = 0
+
+        for findex in range(self.numf):
+            if findex!=self.numf-1: #not the last one
+                fac = arg[self.normalarglen+findex]
+                allfac += fac
+            else: #last one
+                fac = 1-allfac
+            farg = construct_arg(arg,self.allpos[findex])
+            ret += fac*self.allf[findex](*farg)
         return ret
 
+        # for i in range(self.normalarglen, self.arglen):
+        #     fac = arg[i]
+        #     allfac += fac
+        #     farg = construct_arg(arg, self.allpos[i])
+        #     ret += fac*
+        # cdef double fac = arg[-1]
+        # cdef tuple farg = construct_arg(arg,self.fpos)
+        # cdef tuple garg = construct_arg(arg,self.gpos)
+        # cdef double fv = self.f(*farg)
+        # cdef double gv = self.g(*garg)
+        # cdef double ret = fac*fv+(1.-fac)*gv
+        # return ret
+
     def eval_parts(self,*arg):
-        cdef double fac = arg[-1]
-        cdef tuple farg = construct_arg(arg,self.fpos)
-        cdef tuple garg = construct_arg(arg,self.gpos)
-        cdef double fv = fac*self.f(*farg)
-        cdef double gv = (1.-fac)*self.g(*garg)
-        return (fv,gv)
+
+        cdef tuple farg
+        cdef double allfac = 0.
+        cdef double fac = 0.
+        cdef int findex = 0
+        cdef list ret = []
+
+        for findex in range(self.numf):
+            if findex!=self.numf-1: #not the last one
+                fac = arg[self.normalarglen+findex]
+                allfac += fac
+            else: #last one
+                fac = 1-allfac
+            farg = construct_arg(arg,self.allpos[findex])
+            ret.append(fac*self.allf[findex](*farg))
+        return tuple(ret)
+
+        # cdef double fac = arg[-1]
+        # cdef tuple farg = construct_arg(arg,self.fpos)
+        # cdef tuple garg = construct_arg(arg,self.gpos)
+        # cdef double fv = fac*self.f(*farg)
+        # cdef double gv = (1.-fac)*self.g(*garg)
+        # return (fv,gv)
 
 cdef class Normalized:
     """
