@@ -1,5 +1,5 @@
 __all__ = [
-    'Add2PdfNorm',
+    'AddPdfNorm',
     'AddPdf',
     'BinnedChi2',
     'BinnedLH',
@@ -54,5 +54,5 @@ from .plotting import *
 from .funcutil import *
 from .decorator import *
 from .toy import *
-from .functor import Normalized, Extended, Convolve, AddPdf, Add2PdfNorm
+from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm
 from .info import __version__
