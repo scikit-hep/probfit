@@ -66,7 +66,7 @@ Refer to :ref:`functor`
     Extended
     Convolve
     AddPdf
-    Add2PdfNorm
+    AddPdfNorm
     ~probfit.funcutil.rename
 
 And corresponding decorator

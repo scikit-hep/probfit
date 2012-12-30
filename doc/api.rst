@@ -73,9 +73,9 @@ AddPdf
 ^^^^^^
 .. autoclass:: AddPdf
 
-Add2PdfNorm
+AddPdfNorm
 ^^^^^^^^^^^
-.. autoclass:: Add2PdfNorm
+.. autoclass:: AddPdfNorm
 
 rename
 ^^^^^^
