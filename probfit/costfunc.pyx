@@ -7,26 +7,106 @@ import plotting
 from matplotlib import pyplot as plt
 from _libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f,\
                       csum, compute_bin_lh_f
-from funcutil import FakeFuncCode
+from funcutil import FakeFuncCode, merge_func_code
 from nputil import float2double, mid, minmax
-from util import describe
+from functor cimport construct_arg
+from util import describe, remove_prefix
 
 np.import_array()
 
 cdef extern from "math.h":
     bint isnan(double x)
 
+
+cdef class SimultaneousFit:
+
+    cdef readonly list allf
+    cdef readonly list allpos
+    cdef readonly int numf
+    cdef readonly object func_code
+    cdef readonly object func_defaults
+    cdef np.ndarray factors
+    cdef readonly object prefix
+
+    def __init__(self, *arg, factors=None, prefix=None):
+        self.allf = list(arg)
+        func_code, allpos = merge_func_code(*arg, prefix=prefix)
+        self.numf = len(arg)
+        self.func_code = func_code
+        self.func_defaults = None
+        self.allpos = allpos
+        if factors is None:
+            factors = np.array([1.]*len(arg))
+        self.prefix = prefix
+        self.factors = factors
+
+
+    def __call__(self, *arg):
+        cdef double ret = 0.
+        cdef np.ndarray[np.int_t] pos
+        cdef tuple thisarg
+        for i in range(self.numf):
+            pos = self.allpos[i]
+            thisarg = construct_arg(arg, pos)
+            ret += self.factors[i]*self.allf[i](*thisarg)
+        return ret
+
+
+    def args_and_error_for(self, findex, minuit=None, args=None, errors=None):
+        #dictionary lookup for minuit.values and minuit.errors
+        ret_val = None
+        ret_err = None
+        i = findex
+        if minuit is not None:
+            keys = minuit.parameters
+            p = self.prefix
+            #values = dict((remove_prefix(k, p), v) for k,v in minuit.values.items())
+            ret_val = construct_arg(minuit.args, self.allpos[i])
+            errors = dict((remove_prefix(k, p), v) for k,v in minuit.errors.items())
+            return ret_val, errors
+
+        if isinstance(args, dict):
+            parameters = describe(self)
+            pos = self.allpos[i]
+            ret_val = [ args[parameters[pos[j]]] for j in range(len(pos))]
+        else:
+            ret_val = construct_arg(args, self.allpos[i])
+
+        if errors is not None:
+            ret_err = errors
+
+        return ret_val, ret_err
+
+
+    def show(self, m=None):
+        """
+        Same thing as :meth:`draw`. But show the figure immediately.
+
+        .. seealso::
+            :meth:`draw` for arguments.
+
+        """
+        self.draw(m)
+        plt.show()
+
+
+    def draw(self, minuit=None, args=None, errors=None):
+        plotting.draw_simultaneous(self, minuit=minuit, args=args, errors=errors)
+
+
 cdef class UnbinnedLH:
-    cdef public object f
-    cdef public object weights
+    cdef readonly object f
+    cdef readonly object weights
     cdef public object func_code
-    cdef public np.ndarray data
-    cdef public int data_len
-    cdef double badvalue
-    cdef public tuple last_arg
+    cdef readonly np.ndarray data
+    cdef readonly int data_len
+    cdef readonly badvalue
+    cdef readonly tuple last_arg
 
     def __init__(self, f, data , weights=None, badvalue=-100000):
         """
+        __init__(self, f, data , weights=None, badvalue=-100000)
+
         Construct -log(unbinned likelihood) from callable *f*
         and data points *data*. Currently can only do 1D fit.
 
@@ -82,7 +162,8 @@ cdef class UnbinnedLH:
 
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
-            parmloc=(0.05,0.95), nfbins=200, print_par=False):
+            parmloc=(0.05,0.95), nfbins=200, print_par=False, args=None,
+            errors=None, parts=False):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -112,9 +193,17 @@ cdef class UnbinnedLH:
             - **print_par** print parameters and error on the plot. Default
               False.
 
+            - **args** Optional. If minuit is not given, parameter value is
+              determined from args. This can be dictionary of the form
+              `{'a':1.0, 'b':1.0}` or list of values. Default None.
+
+            - **errors** Optional dictionary of errors. If minuit is not given,
+              parameter errors are determined from **errors**. Default None.
+
         """
         return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
-            bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par)
+            bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
+            args=args, errors=errors, parts=parts)
 
 
     def show(self,*arg,**kwd):
@@ -130,27 +219,29 @@ cdef class UnbinnedLH:
 
 
 cdef class BinnedLH:
-    cdef public object f
-    cdef public object vf
-    cdef public object func_code
-    cdef public np.ndarray h
-    cdef public np.ndarray w
-    cdef public np.ndarray w2
-    cdef public double N
-    cdef public np.ndarray edges
-    cdef public np.ndarray midpoints
-    cdef public np.ndarray binwidth
-    cdef public int bins
-    cdef public double mymin
-    cdef public double mymax
-    cdef public double badvalue
-    cdef public tuple last_arg
-    cdef public int ndof
-    cdef public bint extended
-    cdef public bint use_w2
+    cdef readonly object f
+    cdef readonly object vf
+    cdef readonly object func_code
+    cdef readonly np.ndarray h
+    cdef readonly np.ndarray w
+    cdef readonly np.ndarray w2
+    cdef readonly double N
+    cdef readonly np.ndarray edges
+    cdef readonly np.ndarray midpoints
+    cdef readonly np.ndarray binwidth
+    cdef readonly int bins
+    cdef readonly double mymin
+    cdef readonly double mymax
+    cdef readonly double badvalue
+    cdef readonly tuple last_arg
+    cdef readonly int ndof
+    cdef readonly bint extended
+    cdef readonly bint use_w2
     def __init__(self, f, data, bins=40, weights=None, bound=None,
             badvalue=1000000, extended=False, use_w2=False):
         """
+        __init__(self, f, data, bins=40, weights=None, bound=None,
+            badvalue=1000000, extended=False, use_w2=False)
         Create a Poisson Binned Likelihood object from given PDF **f** and
         **data** (raw points not histogram). Constant term and expected minimum
         are subtracted off (aka. log likelihood ratio). The exact calculation
@@ -281,7 +372,8 @@ cdef class BinnedLH:
 
 
     def draw(self, minuit=None, ax = None,
-            parmloc=(0.05,0.95), nfbins=200, print_par=False):
+            parmloc=(0.05,0.95), nfbins=200, print_par=False,
+            args=None, errors=None, parts=False):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -305,7 +397,8 @@ cdef class BinnedLH:
               Default False.
         """
         return plotting.draw_blh(self, minuit=minuit,
-            ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par)
+            ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
+            args=args, errors=errors, parts=parts)
 
 
     def show(self,*arg,**kwd):
@@ -322,20 +415,22 @@ cdef class BinnedLH:
 
 #fit a line with given function using minimizing chi2
 cdef class Chi2Regression:
-    cdef public object f
-    cdef public object weights
-    cdef public object error
-    cdef public object func_code
-    cdef public int data_len
-    cdef public double badvalue
-    cdef public int ndof
-    cdef public np.ndarray x
-    cdef public np.ndarray y
-    cdef public tuple last_arg
+    cdef readonly object f
+    cdef readonly object weights
+    cdef readonly object error
+    cdef readonly object func_code
+    cdef readonly int data_len
+    cdef readonly double badvalue
+    cdef readonly int ndof
+    cdef readonly np.ndarray x
+    cdef readonly np.ndarray y
+    cdef readonly tuple last_arg
 
 
     def __init__(self, f, x, y, error=None, weights=None):
         """
+        __init__(self, f, x, y, error=None, weights=None):
+
         Create :math:`\chi^2` regression object. This is for fitting funciton
         to data points(x,y) rather than fitting PDF to a distribution.
 
@@ -377,7 +472,8 @@ cdef class Chi2Regression:
                               self.weights, arg)
 
 
-    def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False):
+    def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False,
+             args=None, errors=None):
         """
         Draw comparison between points (**x**,**y**) and the function **f**.
 
@@ -398,8 +494,8 @@ cdef class Chi2Regression:
             - **print_par** print parameters and error on the plot.
               Default False.
         """
-        return plotting.draw_x2(self, minuit=minuit, ax=ax,
-                            parmloc=parmloc, print_par=print_par)
+        return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
+                print_par=print_par, args=args, errors=errors)
 
 
     def show(self,*arg):
@@ -415,22 +511,25 @@ cdef class Chi2Regression:
 
 
 cdef class BinnedChi2:
-    cdef public object f
-    cdef public object vf
-    cdef public object func_code
-    cdef public np.ndarray h
-    cdef public np.ndarray err
-    cdef public np.ndarray edges
-    cdef public np.ndarray midpoints
-    cdef public np.ndarray binwidth
-    cdef public int bins
-    cdef public double mymin
-    cdef public double mymax
-    cdef public tuple last_arg
-    cdef public int ndof
+    cdef readonly object f
+    cdef readonly object vf
+    cdef readonly object func_code
+    cdef readonly np.ndarray h
+    cdef readonly np.ndarray err
+    cdef readonly np.ndarray edges
+    cdef readonly np.ndarray midpoints
+    cdef readonly np.ndarray binwidth
+    cdef readonly int bins
+    cdef readonly double mymin
+    cdef readonly double mymax
+    cdef readonly tuple last_arg
+    cdef readonly int ndof
     def __init__(self, f, data, bins=40, weights=None, bound=None,
                  sumw2=False):
         """
+        __init__(self, f, data, bins=40, weights=None, bound=None,
+                 sumw2=False):
+
         Create Binned Chi2 Object. It calculates chi^2 assuming poisson
         statistics.
 
@@ -503,8 +602,8 @@ cdef class BinnedChi2:
                                   self.binwidth, None, arg)
 
 
-    def draw(self, minuit=None, ax = None, parmloc=(0.05,0.95),
-                nfbins=200, print_par=False):
+    def draw(self, minuit=None, ax = None, parmloc=(0.05,0.95), nfbins=200,
+             print_par=False, args=None, errors=None, parts=False):
         """
         Draw comparison histogram of data and the function **f**.
 
@@ -528,7 +627,8 @@ cdef class BinnedChi2:
               Default False.
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
-            parmloc=parmloc, nfbins=nfbins, print_par=print_par)
+            parmloc=parmloc, nfbins=nfbins, print_par=print_par,
+            args=args, errors=errors, parts=parts)
 
 
     def show(self,*arg,**kwd):

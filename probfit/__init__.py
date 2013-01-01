@@ -28,7 +28,6 @@ __all__ = [
     'gaussian',
     'gen_toy',
     'gen_toyn',
-    'invert_cdf',
     'linear',
     'merge_func_code',
     'normalized',
@@ -47,12 +46,13 @@ from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball,\
                  argus, cruijff, linear, poly2, poly3, novosibirsk,\
                  Polynomial, cauchy, breitwigner
+from .toy import gen_toy, gen_toyn
 from .util import *
 from .oneshot import *
 from .statutil import *
 from .plotting import *
 from .funcutil import *
 from .decorator import *
-from .toy import *
+
 from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm
 from .info import __version__
