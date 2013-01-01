@@ -36,10 +36,11 @@ cdef class SimultaneousFit:
 
         **Arguments**
 
-            - **factors** Optiona factor array. If not None, each cost function
-              is scaled by `factors[i]` before being summed up.
-            - **prefix** add prefix to variablename of each cost function
-              so that you don't accidentall merge them
+            - **factors** Optional factor array. If not None, each cost function
+              is scaled by `factors[i]` before being summed up. Default None.
+            - **prefix** Optional list of prefix. Add prefix to variablename of
+              each cost function so that you don't accidentally merge them.
+              Default None.
         """
         self.allf = list(arg)
         func_code, allpos = merge_func_code(*arg, prefix=prefix)
