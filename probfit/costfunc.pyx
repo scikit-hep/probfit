@@ -29,6 +29,18 @@ cdef class SimultaneousFit:
     cdef readonly object prefix
 
     def __init__(self, *arg, factors=None, prefix=None):
+        """
+        __init__(self, *arg, factors=None, prefix=None):
+
+        Construct Simultaneous fit from given cost functions.
+
+        **Arguments**
+
+            - **factors** Optiona factor array. If not None, each cost function
+              is scaled by `factors[i]` before being summed up.
+            - **prefix** add prefix to variablename of each cost function
+              so that you don't accidentall merge them
+        """
         self.allf = list(arg)
         func_code, allpos = merge_func_code(*arg, prefix=prefix)
         self.numf = len(arg)
@@ -53,6 +65,10 @@ cdef class SimultaneousFit:
 
 
     def args_and_error_for(self, findex, minuit=None, args=None, errors=None):
+        """
+        convert argument from minuit/dictionary/errors to argument and error
+        for cost function with index **findex**
+        """
         #dictionary lookup for minuit.values and minuit.errors
         ret_val = None
         ret_err = None

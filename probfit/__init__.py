@@ -35,6 +35,7 @@ __all__ = [
     'poly2',
     'poly3',
     'rename',
+    'SimultaneousFit',
     'try_binlh',
     'try_chi2',
     'try_uml',
@@ -42,7 +43,8 @@ __all__ = [
     '__version__'
     ]
 
-from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
+from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
+                      SimultaneousFit
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball,\
                  argus, cruijff, linear, poly2, poly3, novosibirsk,\
                  Polynomial, cauchy, breitwigner
