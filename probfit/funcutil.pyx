@@ -2,7 +2,7 @@
 import numpy as np
 from .util import describe
 
-def rename(f,newarg):
+def rename(f, newarg):
     """
     Rename function parameters.
 
@@ -29,7 +29,7 @@ def rename(f,newarg):
     """
     return FakeFunc(f, newarg)
 
-def merge_func_code(*arg,prefix=None,skip_first=False):
+def merge_func_code(*arg, prefix=None, skip_first=False):
     """
     merge function arguments.::
 
@@ -60,7 +60,7 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
         obtain argument **j** for functin **i**
 
     .. seealso::
-    
+
         functor.construct_arg
     """
     assert(prefix is None or len(prefix)==len(arg))
@@ -78,7 +78,7 @@ def merge_func_code(*arg,prefix=None,skip_first=False):
         all_arg.append(tmp)
 
     #now merge it
-    #do something smarter
+    #FIXME: do something smarter
     merge_arg = []
     for a in all_arg:
         for v in a:
@@ -136,13 +136,13 @@ cdef class FakeFunc:
     cdef f
     cdef public func_code
     cdef public func_defaults
-
+    cdef public __name__
 
     def __init__(self, f, prmt=None):
         self.f = f
         self.func_code = FakeFuncCode(f,prmt)
-        self.func_defaults = f.func_defaults
-
+        self.func_defaults = getattr(f,'func_defaults',None)
+        self.__name__ = getattr(f,'__name__','unnamed')
 
     def __call__(self, *arg):
         return self.f(*arg)

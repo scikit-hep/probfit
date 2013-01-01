@@ -9,7 +9,7 @@ cimport numpy as np
 from warnings import warn
 from probfit_warnings import SmallIntegralWarning
 from _libstat cimport integrate1d_with_edges, _vector_apply
-from funcutil import FakeFuncCode, merge_func_code
+from funcutil import FakeFuncCode, merge_func_code, FakeFunc
 from util import describe
 
 
@@ -241,7 +241,7 @@ cdef class AddPdf:
     cdef int arglen
     cdef list allpos
     cdef tuple allf
-    cdef int numf
+    cdef readonly int numf
     cdef np.ndarray cache
     cdef list argcache
     cdef public int hit
@@ -275,6 +275,24 @@ cdef class AddPdf:
                 self.cache[i]=tmp
             ret+=tmp
         return ret
+
+
+    def parts(self):
+        return [self._part(i) for i in range(self.numf)]
+
+
+    def _part(self, int findex):
+
+        def tmp(*arg):
+            thispos = self.allpos[findex]
+            this_arg = construct_arg(arg, thispos)
+            return self.allf[findex](*this_arg)
+
+        tmp.__name__ = getattr(self.allf[findex],'__name__','unnamedpart')
+        ret = FakeFunc(tmp)
+        ret.func_code = self.func_code
+        return ret
+
 
     def eval_parts(self,*arg):
         cdef tuple this_arg
@@ -330,7 +348,7 @@ cdef class AddPdfNorm:
     cdef int arglen
     cdef int normalarglen
     cdef tuple allf
-    cdef int numf
+    cdef readonly int numf
     #cdef f
     #cdef g
     cdef list allpos
@@ -361,6 +379,7 @@ cdef class AddPdfNorm:
         self.allf = arg
         self.numf = len(arg)
 
+
     def __call__(self,*arg):
         cdef ret = 0.
         cdef tuple farg
@@ -378,18 +397,24 @@ cdef class AddPdfNorm:
             ret += fac*self.allf[findex](*farg)
         return ret
 
-        # for i in range(self.normalarglen, self.arglen):
-        #     fac = arg[i]
-        #     allfac += fac
-        #     farg = construct_arg(arg, self.allpos[i])
-        #     ret += fac*
-        # cdef double fac = arg[-1]
-        # cdef tuple farg = construct_arg(arg,self.fpos)
-        # cdef tuple garg = construct_arg(arg,self.gpos)
-        # cdef double fv = self.f(*farg)
-        # cdef double gv = self.g(*garg)
-        # cdef double ret = fac*fv+(1.-fac)*gv
-        # return ret
+    def parts(self):
+        return [self._part(i) for i in range(self.numf)]
+
+    def _part(self, int findex):
+        #FIXME make this faster. How does cython closure work?
+        def tmp(*arg):
+            if findex!=self.numf-1: #not the last one
+                fac = arg[self.normalarglen+findex]
+            else: #last one
+                fac = sum(arg[self.normalarglen:])
+            thispos = self.allpos[findex]
+            this_arg = construct_arg(arg, thispos)
+            return fac*self.allf[findex](*this_arg)
+
+        tmp.__name__ = getattr(self.allf[findex],'__name__','unnamedpart')
+        ret = FakeFunc(tmp)
+        ret.func_code = self.func_code
+        return ret
 
     def eval_parts(self,*arg):
 
@@ -409,12 +434,6 @@ cdef class AddPdfNorm:
             ret.append(fac*self.allf[findex](*farg))
         return tuple(ret)
 
-        # cdef double fac = arg[-1]
-        # cdef tuple farg = construct_arg(arg,self.fpos)
-        # cdef tuple garg = construct_arg(arg,self.gpos)
-        # cdef double fv = fac*self.f(*farg)
-        # cdef double gv = (1.-fac)*self.g(*garg)
-        # return (fv,gv)
 
 cdef class Normalized:
     """
