@@ -48,6 +48,16 @@ Binned :math:`\chi^2`
     .. automethod:: draw
     .. automethod:: show
 
+Binned SimultaneousFit
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: SimultaneousFit
+
+    .. automethod:: __call__
+    .. automethod:: args_and_error_for
+    .. automethod:: draw
+    .. automethod:: show
+
 .. _functor:
 
 Functor

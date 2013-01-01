@@ -53,6 +53,7 @@ Refer to :ref:`costfunc`.
     BinnedLH
     Chi2Regression
     BinnedChi2
+    SimultaneousFit
 
 Functors
 """"""""
