@@ -91,7 +91,7 @@ and send us pull request.
     crystalball
     cruijff
     cauchy
-    breitwigner
+    rtv_breitwigner
     doublegaussian
     argus
     linear
