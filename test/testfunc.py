@@ -84,11 +84,11 @@ def test_novosibirsk():
     assert_almost_equal(novosibirsk(3,2,3,4),1.1253517471925912e-07)
 
 
-def test_breitwigner():
-    assert_equal(describe(breitwigner),['x','m','gamma'])
-    assert_almost_equal(breitwigner(1,1,1.), 0.8194496535636714)
-    assert_almost_equal(breitwigner(1,1,2.), 0.5595531041435416)
-    assert_almost_equal(breitwigner(1,2,3.), 0.2585302502852219)
+def test_rtv_breitwigner():
+    assert_equal(describe(rtv_breitwigner),['x','m','gamma'])
+    assert_almost_equal(rtv_breitwigner(1,1,1.), 0.8194496535636714)
+    assert_almost_equal(rtv_breitwigner(1,1,2.), 0.5595531041435416)
+    assert_almost_equal(rtv_breitwigner(1,2,3.), 0.2585302502852219)
 
 
 def test_cauchy():

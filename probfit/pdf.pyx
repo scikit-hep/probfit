@@ -289,7 +289,7 @@ cpdef double novosibirsk(double x, double width, double peak, double tail):
     return exp(-qc)
 
 
-cpdef double breitwigner(double x, double m, double gamma):
+cpdef double rtv_breitwigner(double x, double m, double gamma):
     """
     Normalized Relativistic Breit-Wigner
 

@@ -119,7 +119,7 @@ cauchy
 
 Breit-Wigner
 ^^^^^^^^^^^^
-.. autofunction:: breitwigner
+.. autofunction:: rtv_breitwigner
 
 crystalball
 ^^^^^^^^^^^
