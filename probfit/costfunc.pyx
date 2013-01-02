@@ -27,7 +27,7 @@ cdef class SimultaneousFit:
     cdef readonly object func_defaults
     cdef np.ndarray factors
     cdef readonly object prefix
-
+    #FIXME: cache each part if called with same parameter
     def __init__(self, *arg, factors=None, prefix=None):
         """
         __init__(self, *arg, factors=None, prefix=None):
@@ -515,7 +515,7 @@ cdef class Chi2Regression:
                 print_par=print_par, args=args, errors=errors)
 
 
-    def show(self,*arg):
+    def show(self,*arg, **kwd):
         """
         Same thing as :meth:`draw`. But show the figure immediately.
 
@@ -523,7 +523,7 @@ cdef class Chi2Regression:
             :meth:`draw` for arguments.
 
         """
-        self.draw(*arg)
+        self.draw(*arg, **kwd)
         plt.show()
 
 

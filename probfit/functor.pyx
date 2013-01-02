@@ -235,7 +235,7 @@ cdef class AddPdf:
                     return f(x, f_a, f_b, f_c) + g(x, g_d, g_a, g_e)
 
     """
-
+    #FIXME: cache each part if called with same parameter
     cdef public object func_code
     cdef public object func_defaults
     cdef int arglen
@@ -343,6 +343,7 @@ cdef class AddPdfNorm:
 
 
     """
+    #FIXME: cache each part if called with same parameter
     cdef public object func_code
     cdef public object func_defaults
     cdef int arglen
