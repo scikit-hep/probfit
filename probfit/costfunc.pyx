@@ -17,7 +17,6 @@ np.import_array()
 cdef extern from "math.h":
     bint isnan(double x)
 
-
 cdef class SimultaneousFit:
 
     cdef readonly list allf
