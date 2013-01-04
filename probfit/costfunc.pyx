@@ -222,6 +222,10 @@ cdef class UnbinnedLH:
             args=args, errors=errors, parts=parts)
 
 
+    def default_errordef(self):
+        return 0.5
+
+
     def show(self,*arg,**kwd):
         """
         Same thing as :meth:`draw`. But show the figure immediately.
@@ -417,6 +421,10 @@ cdef class BinnedLH:
             args=args, errors=errors, parts=parts)
 
 
+    def default_errordef(self):
+        return 0.5
+
+
     def show(self,*arg,**kwd):
         """
         Same thing as :meth:`draw`. But show the figure immediately.
@@ -486,6 +494,10 @@ cdef class Chi2Regression:
         self.last_arg = arg
         return compute_chi2_f(self.f, self.x, self.y, self.error,
                               self.weights, arg)
+
+
+    def default_errordef(self):
+        return 1.0
 
 
     def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False,
@@ -645,6 +657,10 @@ cdef class BinnedChi2:
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
             parmloc=parmloc, nfbins=nfbins, print_par=print_par,
             args=args, errors=errors, parts=parts)
+
+
+    def default_errordef(self):
+        return 1.0
 
 
     def show(self,*arg,**kwd):

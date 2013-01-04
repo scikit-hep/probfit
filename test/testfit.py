@@ -30,6 +30,8 @@ class TestFit(unittest.TestCase):
         lh = UnbinnedLH(gaussian, self.data,)
         assert_equal(list(describe(lh)), ['mean','sigma'])
         assert_almost_equal(lh(0,1), 28188.201229348757)
+        m = Minuit(lh)
+        assert_equal(m.errordef, 0.5)
 
     def test_BinnedLH(self):
         #write a better test... this depends on subtraction
@@ -38,6 +40,8 @@ class TestFit(unittest.TestCase):
         lh = BinnedLH(gaussian, self.data, bound=[-3,3])
         assert_equal(list(describe(lh)), ['mean','sigma'])
         assert_almost_equal(lh(0,1), 20.446130781601543)
+        m = Minuit(lh)
+        assert_equal(m.errordef, 0.5)
 
 
     def test_BinnedChi2(self):
@@ -46,6 +50,8 @@ class TestFit(unittest.TestCase):
         lh = BinnedChi2(gaussian, self.data, bound=[-3,3])
         assert_equal(list(describe(lh)), ['mean','sigma'])
         assert_almost_equal(lh(0,1), 19951.005399882044)
+        m = Minuit(lh)
+        assert_equal(m.errordef, 1.0)
 
 
     def test_Chi2Regression(self):
@@ -61,6 +67,9 @@ class TestFit(unittest.TestCase):
         assert_almost_equal(lh(10, 1), 0)
 
         assert_almost_equal(lh(10, 0), 10.)
+        m = Minuit(lh)
+        assert_equal(m.errordef, 1.0)
+
 
     def test_simultaneous(self):
         seed(0)
