@@ -2,6 +2,7 @@ import unittest
 from probfit import *
 from probfit.pdf import  gaussian
 from probfit.functor import Extended
+from probfit.oneshot import fit_binlh, fit_binx2, fit_uml
 import numpy as np
 from numpy.random import randn, seed
 from math import sqrt

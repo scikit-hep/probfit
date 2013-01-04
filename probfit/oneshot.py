@@ -23,7 +23,6 @@ def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
     uml = UnbinnedLH(f, data)
     m = Minuit(uml, print_level=print_level, **kwd)
     m.set_strategy(2)
-    m.set_up(0.5)
     m.migrad()
     if not m.migrad_ok() or not m.matrix_accurate():
         if not quiet:
@@ -49,7 +48,6 @@ def fit_binx2(f, data, bins=30, bound=None, print_level=0, quiet=False, *arg, **
     uml = BinnedChi2(f, data, bins=bins, bound=bound)
     m = Minuit(uml, print_level=print_level, **kwd)
     m.set_strategy(2)
-    m.set_up(1)
     m.migrad()
     if not m.migrad_ok() or not m.matrix_accurate():
         if not quiet:
@@ -84,7 +82,6 @@ def fit_binlh(f, data, bins=30,
                     weights=weights, use_w2=use_w2, extended=extended)
     m = Minuit(uml, print_level=print_level, pedantic=pedantic, **kwd)
     m.set_strategy(2)
-    m.set_up(0.5)
     m.migrad()
     if not m.migrad_ok() or not m.matrix_accurate():
         if not quiet:
