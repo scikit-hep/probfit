@@ -90,16 +90,22 @@ def test_extended_decorator():
     assert_equal(g(1,2,3,4), 4*(f(1,2,3)))
 
 
-def test_add2pdfnorm():
+def test_addpdfnorm():
     def f(x,y,z): return x+2*y+3*z
     def g(x,z,p): return 4*x+5*z+6*z
+    def p(x,y,q): return 7*x+8*y+9*q
 
-    h = Add2PdfNorm(f,g)
-    assert_equal(describe(h),['x', 'y', 'z', 'p', 'k_f'])
+    h = AddPdfNorm(f,g)
+    assert_equal(describe(h),['x', 'y', 'z', 'p', 'f_0'])
 
-    assert_equal(h(1,2,3,4,0.1),
+    q = AddPdfNorm(f,g,p)
+    assert_equal(describe(q),['x', 'y', 'z', 'p', 'q', 'f_0', 'f_1'])
+
+    assert_almost_equal(h(1,2,3,4,0.1),
             0.1*f(1,2,3)+0.9*g(1,3,4))
 
+    assert_almost_equal(q(1,2,3,4,5,0.1,0.2),
+            0.1*f(1,2,3)+0.2*g(1,3,4)+0.7*p(1,2,5))
 
 def test_convolution():
     f = gaussian

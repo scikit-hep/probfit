@@ -48,6 +48,16 @@ Binned :math:`\chi^2`
     .. automethod:: draw
     .. automethod:: show
 
+Binned SimultaneousFit
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. autoclass:: SimultaneousFit
+
+    .. automethod:: __call__
+    .. automethod:: args_and_error_for
+    .. automethod:: draw
+    .. automethod:: show
+
 .. _functor:
 
 Functor
@@ -73,16 +83,16 @@ AddPdf
 ^^^^^^
 .. autoclass:: AddPdf
 
-Add2PdfNorm
+AddPdfNorm
 ^^^^^^^^^^^
-.. autoclass:: Add2PdfNorm
+.. autoclass:: AddPdfNorm
 
 rename
 ^^^^^^
 
 .. autofunction:: probfit.funcutil.rename
 
-Declarator
+Decorator
 ^^^^^^^^^^
 .. currentmodule:: probfit.decorator
 
@@ -102,6 +112,14 @@ Builtin PDF written in cython.
 gaussian
 ^^^^^^^^
 .. autofunction:: gaussian
+
+cauchy
+^^^^^^
+.. autofunction:: cauchy
+
+Breit-Wigner
+^^^^^^^^^^^^
+.. autofunction:: rtv_breitwigner
 
 crystalball
 ^^^^^^^^^^^

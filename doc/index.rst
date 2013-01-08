@@ -53,6 +53,7 @@ Refer to :ref:`costfunc`.
     BinnedLH
     Chi2Regression
     BinnedChi2
+    SimultaneousFit
 
 Functors
 """"""""
@@ -66,7 +67,7 @@ Refer to :ref:`functor`
     Extended
     Convolve
     AddPdf
-    Add2PdfNorm
+    AddPdfNorm
     ~probfit.funcutil.rename
 
 And corresponding decorator
@@ -89,6 +90,8 @@ and send us pull request.
     gaussian
     crystalball
     cruijff
+    cauchy
+    rtv_breitwigner
     doublegaussian
     argus
     linear

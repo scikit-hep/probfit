@@ -1,16 +1,17 @@
 import matplotlib
-matplotlib.use('template')
+matplotlib.use('Agg', warn=False)
 from nose.tools import *
 import numpy.random as npr
 import numpy as np
 from probfit.nputil import mid
 from probfit.pdf import crystalball, gaussian
 from probfit.functor import Normalized
-from probfit.toy import gen_toy
+from probfit.toy import gen_toy, gen_toyn
 from probfit.util import describe
 from probfit._libstat import compute_chi2
 from probfit.nputil import vector_apply
 from probfit.costfunc import BinnedLH
+
 def test_gen_toy():
     npr.seed(0)
     bound = (-1,2)

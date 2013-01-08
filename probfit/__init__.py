@@ -1,5 +1,5 @@
 __all__ = [
-    'Add2PdfNorm',
+    'AddPdfNorm',
     'AddPdf',
     'BinnedChi2',
     'BinnedLH',
@@ -11,6 +11,8 @@ __all__ = [
     'UnbinnedLH',
     'argus',
     'cruijff',
+    'cauchy',
+    'rtv_breitwigner',
     'crystalball',
     'describe',
     'doublegaussian',
@@ -19,14 +21,10 @@ __all__ = [
     'draw_pdf',
     'draw_pdf_with_edges',
     'extended',
-    'fit_binlh',
-    'fit_binx2',
-    'fit_uml',
     'fwhm_f',
     'gaussian',
     'gen_toy',
     'gen_toyn',
-    'invert_cdf',
     'linear',
     'merge_func_code',
     'normalized',
@@ -34,6 +32,7 @@ __all__ = [
     'poly2',
     'poly3',
     'rename',
+    'SimultaneousFit',
     'try_binlh',
     'try_chi2',
     'try_uml',
@@ -41,16 +40,18 @@ __all__ = [
     '__version__'
     ]
 
-from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2
+from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
+                      SimultaneousFit
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball,\
                  argus, cruijff, linear, poly2, poly3, novosibirsk,\
-                 Polynomial
+                 Polynomial, cauchy, rtv_breitwigner
+from .toy import gen_toy, gen_toyn
 from .util import *
 from .oneshot import *
 from .statutil import *
 from .plotting import *
 from .funcutil import *
 from .decorator import *
-from .toy import *
-from .functor import Normalized, Extended, Convolve, AddPdf, Add2PdfNorm
+
+from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm
 from .info import __version__

@@ -9,7 +9,7 @@ cimport numpy as np
 from warnings import warn
 from probfit_warnings import SmallIntegralWarning
 from _libstat cimport integrate1d_with_edges, _vector_apply
-from funcutil import FakeFuncCode, merge_func_code
+from funcutil import FakeFuncCode, merge_func_code, FakeFunc
 from util import describe
 
 
@@ -50,7 +50,12 @@ cpdef bint fast_tuple_equal(tuple t1, tuple t2 , int t2_offset) except *:
 
 cdef class Convolve:#with gy cache
     """
-    Make convolution from supplied **f** and **g**
+    Make convolution from supplied **f** and **g**. If your functions are
+    analytically convolutable you will be better off implementing
+    analytically. This functor is implemented using numerical integration with
+    bound there are numerical issue that will, in most cases, lightly affect
+    normalization.s
+
     Argument from **f** and **g** is automatically merge by name. For example,
 
     ::
@@ -65,6 +70,7 @@ cdef class Convolve:#with gy cache
             return Integrate(f(x-t, a, b, c)*g(x, a, b, c), t_range=gbound)
 
     .. math::
+
         \\text{Convolve(f,g)}(t, arg \ldots) =
                 \int_{\\tau \in \\text{gbound}}
                 f(t-\\tau, arg \ldots)\\times g(t, arg\ldots) \, \mathrm{d}\\tau
@@ -79,8 +85,18 @@ cdef class Convolve:#with gy cache
           bound is important. Overbounding is recommended.
         - **nbins** Number of bins in multiply reverse slide add. Default(1000)
 
-    .. seealso::
-        :func:`probfit.funcutil.merge_func_code`
+    .. note::
+
+        You may be worried about normalization. By the property of convolution:
+
+        .. math::
+
+            \int_{\mathbf{R}^d}(f*g)(x) \, dx=\left(\int_{\mathbf{R}^d}f(x) \, dx\\right)\left(\int_{\mathbf{R}^d}g(x) \, dx\\right).
+
+        This means if you convolute two normalized distributions you get back
+        a normalized distribution. However, since we are doing numerical
+        integration here we will be off by a little bit.
+
     """
     cdef int numbins
     cdef tuple gbound
@@ -219,13 +235,13 @@ cdef class AddPdf:
                     return f(x, f_a, f_b, f_c) + g(x, g_d, g_a, g_e)
 
     """
-
+    #FIXME: cache each part if called with same parameter
     cdef public object func_code
     cdef public object func_defaults
     cdef int arglen
     cdef list allpos
     cdef tuple allf
-    cdef int numf
+    cdef readonly int numf
     cdef np.ndarray cache
     cdef list argcache
     cdef public int hit
@@ -260,6 +276,24 @@ cdef class AddPdf:
             ret+=tmp
         return ret
 
+
+    def parts(self):
+        return [self._part(i) for i in range(self.numf)]
+
+
+    def _part(self, int findex):
+
+        def tmp(*arg):
+            thispos = self.allpos[findex]
+            this_arg = construct_arg(arg, thispos)
+            return self.allf[findex](*this_arg)
+
+        tmp.__name__ = getattr(self.allf[findex],'__name__','unnamedpart')
+        ret = FakeFunc(tmp)
+        ret.func_code = self.func_code
+        return ret
+
+
     def eval_parts(self,*arg):
         cdef tuple this_arg
         cdef double tmp = 0.
@@ -280,9 +314,9 @@ cdef class AddPdf:
             ret.append(tmp)
         return tuple(ret)
 
-cdef class Add2PdfNorm:
+cdef class AddPdfNorm:
     """
-    Add 2 PDF with normalization factor. Parameters are merged by name.
+    Add PDF with normalization factor. Parameters are merged by name.
 
     ::
 
@@ -290,61 +324,117 @@ cdef class Add2PdfNorm:
             return do_something(x, a, b, c)
         def g(x, d, a, e):
             return do_something_else(x, d, a, e)
-
-        h = Add2PdfNorm(f,g)
+        def p(x, b, a, c):
+            return do_something_other_thing(x,b,a,c)
+        h = Add2PdfNorm(f, g, p)
 
         #h is equivalent to
-        def h_equiv(x, a, b, c, d, e, k_f):
-            return k_f*f(x, a, b, c)+ (1-k_f)*g(x, d, a, e)
+        def h_equiv(x, a, b, c, d, e, f_0, f_1):
+            return f_0*f(x, a, b, c)+ \\
+                   f_1*g(x, d, a, e)+
+                   (1-f_0-f_1)*p(x, b, a, c)
 
     **Arguments**
-        - **f** callable object f.
-        - **g** callable object g.
-        - **facname** name of the factor
+        - **facname** optional list of factor name of length=. If None is given
+          factor name is automatically chosen to be `f_0`, `f_1` etc.
+          Default None.
+        - **prefix** optional prefix list to prefix arguments of each function.
+          Default None.
 
-    .. note::
-        You are welcome to modify this so that it adds arbitary number of
-        function with correct normalization. Submit a Pull request
-        if you have done it.
 
     """
+    #FIXME: cache each part if called with same parameter
     cdef public object func_code
     cdef public object func_defaults
     cdef int arglen
-    cdef f
-    cdef g
-    cdef np.ndarray fpos
-    cdef np.ndarray gpos
-    cdef np.ndarray farg_buffer
-    cdef np.ndarray garg_buffer
+    cdef int normalarglen
+    cdef tuple allf
+    cdef readonly int numf
+    #cdef f
+    #cdef g
+    cdef list allpos
+    #cdef np.ndarray fpos
+    #cdef np.ndarray gpos
     cdef public int nparts
-    def __init__(self,f,g,facname='k_f'):
-        self.func_code, [self.fpos, self.gpos] = merge_func_code(f,g,skip_first=True)
-        self.func_code.append(facname)
+
+    def __init__(self, *arg ,facname=None, prefix=None):
+
+        self.func_code, self.allpos = merge_func_code(*arg,
+            prefix=prefix,skip_first=True)
+
+        if facname is not None and len(facname)!=len(arg)-1:
+            raise(RuntimeError('length of facname and arguments must satisfy len(facname)==len(arg)-1'))
+
+        self.normalarglen = self.func_code.co_argcount
+        #TODO check name collisions here
+
+        if facname is None:
+            #automatic naming
+            facname = ['f_%d'%i for i in range(len(arg)-1)]
+
+        for fname in facname:
+            self.func_code.append(fname)
+
         self.arglen = self.func_code.co_argcount
         self.func_defaults=None
-        self.f=f
-        self.g=g
-        self.nparts = 2
-        self.farg_buffer = np.empty(len(self.fpos))
-        self.garg_buffer = np.empty(len(self.gpos))
+        self.allf = arg
+        self.numf = len(arg)
+
 
     def __call__(self,*arg):
-        cdef double fac = arg[-1]
-        cdef tuple farg = construct_arg(arg,self.fpos)
-        cdef tuple garg = construct_arg(arg,self.gpos)
-        cdef double fv = self.f(*farg)
-        cdef double gv = self.g(*garg)
-        cdef double ret = fac*fv+(1.-fac)*gv
+        cdef ret = 0.
+        cdef tuple farg
+        cdef double allfac = 0.
+        cdef double fac = 0.
+        cdef int findex = 0
+
+        for findex in range(self.numf):
+            if findex!=self.numf-1: #not the last one
+                fac = arg[self.normalarglen+findex]
+                allfac += fac
+            else: #last one
+                fac = 1-allfac
+            farg = construct_arg(arg,self.allpos[findex])
+            ret += fac*self.allf[findex](*farg)
+        return ret
+
+    def parts(self):
+        return [self._part(i) for i in range(self.numf)]
+
+    def _part(self, int findex):
+        #FIXME make this faster. How does cython closure work?
+        def tmp(*arg):
+            if findex!=self.numf-1: #not the last one
+                fac = arg[self.normalarglen+findex]
+            else: #last one
+                fac = sum(arg[self.normalarglen:])
+            thispos = self.allpos[findex]
+            this_arg = construct_arg(arg, thispos)
+            return fac*self.allf[findex](*this_arg)
+
+        tmp.__name__ = getattr(self.allf[findex],'__name__','unnamedpart')
+        ret = FakeFunc(tmp)
+        ret.func_code = self.func_code
         return ret
 
     def eval_parts(self,*arg):
-        cdef double fac = arg[-1]
-        cdef tuple farg = construct_arg(arg,self.fpos)
-        cdef tuple garg = construct_arg(arg,self.gpos)
-        cdef double fv = fac*self.f(*farg)
-        cdef double gv = (1.-fac)*self.g(*garg)
-        return (fv,gv)
+
+        cdef tuple farg
+        cdef double allfac = 0.
+        cdef double fac = 0.
+        cdef int findex = 0
+        cdef list ret = []
+
+        for findex in range(self.numf):
+            if findex!=self.numf-1: #not the last one
+                fac = arg[self.normalarglen+findex]
+                allfac += fac
+            else: #last one
+                fac = 1-allfac
+            farg = construct_arg(arg,self.allpos[findex])
+            ret.append(fac*self.allf[findex](*farg))
+        return tuple(ret)
+
 
 cdef class Normalized:
     """

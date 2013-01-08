@@ -1,3 +1,8 @@
+__all__ = [
+    'gen_toy',
+    'gen_toyn',
+]
+
 import numpy as np
 from ._libstat import compute_cdf, invert_cdf, _vector_apply
 from util import describe
