@@ -15,6 +15,17 @@ Various functors for manipulating PDF such as Normalization and
 Convolution(with caching) and various builtin functions
 normally used in B physics is also provided.
 
+::
+
+    from probfit import UnbinnedLH, gaussian
+    from iminuit import Minuit
+    data = np.randn(10000)
+    ulh = UnbinnedLH(data)
+    m = Minuit(ulh, mean=0.1, sigma=1.1)
+    m.migrad()
+    ulh.draw(m)
+
+
 Requirement
 -----------
 
