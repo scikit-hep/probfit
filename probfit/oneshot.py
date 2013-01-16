@@ -3,11 +3,9 @@ from ._libstat import _vector_apply
 from iminuit import Minuit
 from matplotlib import pyplot as plt
 import numpy as np
-import numpy.random as npr
+
 import itertools as itt
 import collections
-from warnings import warn
-from .util import parse_arg, describe
 from .nputil import minmax
 
 

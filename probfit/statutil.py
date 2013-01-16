@@ -4,7 +4,7 @@ from _libstat import _vector_apply
 
 def fwhm_f(f, range, arg=None, bins=1000):
 
-    if arg is None: arg=tuple()
+    arg=tuple() if arg is None else arg
 
     x = np.linspace(range[0], range[1], bins)
     y = _vector_apply(f, x, arg)
@@ -15,7 +15,7 @@ def fwhm_f(f, range, arg=None, bins=1000):
     xl = 0
     xr = 0
 
-    il = first_neg(ls,'l')
+    il = first_neg(ls, 'l')
     #print il,x[il],ls[il],x[il+1],ls[il+1]
     xl = xintercept(x[il], ls[il], x[il+1], ls[il+1])
 
@@ -25,12 +25,15 @@ def fwhm_f(f, range, arg=None, bins=1000):
 
     return (xl, xr)
 
+
 def xintercept_tuple(t0, t1):
-    return xintercept(t0[0],t0[1],t1[0],t1[1])
+    return xintercept(t0[0], t0[1], t1[0], t1[1])
+
 
 def xintercept(x0, y0, x1, y1):
     m = (y1-y0)/(x1-x0)
     return -y0/m+x0
+
 
 def first_neg(y, direction='r'):
     if direction == 'l':

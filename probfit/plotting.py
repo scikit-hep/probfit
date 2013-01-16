@@ -8,6 +8,8 @@ import numpy as np
 from .nputil import mid, minmax, vector_apply
 from util import parse_arg, describe
 from math import sqrt, ceil, floor
+from warnings import warn
+
 
 def draw_simultaneous(self, minuit=None, args=None, errors=None):
     numf = len(self.allf)
@@ -20,7 +22,8 @@ def draw_simultaneous(self, minuit=None, args=None, errors=None):
         part_args, part_errors = self.args_and_error_for(i, minuit, args, errors)
         self.allf[i].draw(args=part_args, errors=part_errors)
 
-def _get_args_and_errors(self, minuit=None, args=None, errors=None ):
+
+def _get_args_and_errors(self, minuit=None, args=None, errors=None):
     """
     consitent algorithm to get argument and errors
     1) get it from minuit if minuit is avaialble
@@ -53,7 +56,7 @@ def _get_args_and_errors(self, minuit=None, args=None, errors=None ):
 def _param_text(parameters, arg, error):
     txt = u''
     for i, (k, v) in enumerate(zip(parameters, arg)):
-        txt += u'%s = %5.4g'%(k,v)
+        txt += u'%s = %5.4g'%(k, v)
         if error is not None:
             txt += u'±%5.4g'%error[k]
         txt += u'\n'
@@ -62,7 +65,7 @@ def _param_text(parameters, arg, error):
 
 #from UML
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
-            parmloc=(0.05,0.95), nfbins=500, print_par=False,
+            parmloc=(0.05, 0.95), nfbins=500, print_par=False,
             args=None, errors=None, parts=False):
 
     ax = plt.gca() if ax is None else ax
@@ -72,9 +75,10 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     n, e, patches = ax.hist(self.data, bins=bins, weights=self.weights,
                             histtype='step', range=bound, normed=True)
 
-    bound = (e[0],e[-1])
-    draw_arg = [('lw',2)]
-    if not parts: draw_arg.append(('color','r'))
+    bound = (e[0], e[-1])
+    draw_arg = [('lw', 2)]
+    if not parts:
+        draw_arg.append(('color', 'r'))
 
     draw_pdf(self.f, arg, bound, bins=nfbins, density=True,
                     **dict(draw_arg))
@@ -88,13 +92,14 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     ax.grid(True)
 
     txt = _param_text(describe(self), arg, error)
-    if print_par: print txt
+    if print_par:
+        print txt
     ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
 
 
 #from chi2 regression
-def draw_x2(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False,
+def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=False,
             args=None, errors=None):
 
     ax = plt.gca() if ax is None else ax
@@ -106,12 +111,12 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False,
     data_err = self.error
 
     if data_err is None:
-        plt.plot(x,y,'+')
+        plt.plot(x, y, '+')
     else:
-        plt.errorbar(x,y,data_err,fmt='.')
+        plt.errorbar(x, y, data_err, fmt='.')
 
-    draw_arg = [('lw',2)]
-    draw_arg.append(('color','r'))
+    draw_arg = [('lw', 2)]
+    draw_arg.append(('color', 'r'))
 
     draw_pdf_with_midpoints(self.f, arg, x, **dict(draw_arg))
 
@@ -122,14 +127,15 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False,
     chi2 = self(*arg)
     txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
 
-    if print_par: print txt
+    if print_par:
+        print txt
 
     ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
 
 
 #from binned chi2
-def draw_bx2(self, minuit=None, parmloc=(0.05,0.95), nfbins=500, ax=None,
+def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
              print_par=False, args=None, errors=None, parts=False):
 
     ax = ax=plt.gca() if ax is None else ax
@@ -144,12 +150,13 @@ def draw_bx2(self, minuit=None, parmloc=(0.05,0.95), nfbins=500, ax=None,
 
     scale = nfbins/self.bins #scale back to bins
 
-    draw_arg = [('lw',2)]
-    if not parts: draw_arg.append(('color','r'))
+    draw_arg = [('lw', 2)]
+
+    if not parts:
+        draw_arg.append(('color', 'r'))
 
     draw_pdf(self.f, arg, bins=nfbins, bound=bound, density=False,
              scale=scale, **dict(draw_arg))
-
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
@@ -165,15 +172,16 @@ def draw_bx2(self, minuit=None, parmloc=(0.05,0.95), nfbins=500, ax=None,
     chi2 = self(*arg)
     txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
 
-    if print_par: print txt
+    if print_par:
+        print txt
 
     ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
 
 
 #from binnedLH
-def draw_blh(self, minuit=None, parmloc=(0.05,0.95),
-                nfbins=1000, ax = None, print_par=False,
+def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
+                nfbins=1000, ax=None, print_par=False,
                 args=None, errors=None, parts=False):
     ax = ax=plt.gca() if ax is None else ax
 
@@ -192,13 +200,13 @@ def draw_blh(self, minuit=None, parmloc=(0.05,0.95),
         scale = 1./sum(self.h)/self.binwidth
         ax.errorbar(m, self.h*scale, err*scale, fmt='.')
 
-    draw_arg = [('lw',2)]
-    if not parts: draw_arg.append(('color','r'))
+    draw_arg = [('lw', 2)]
+    if not parts:
+        draw_arg.append(('color', 'r'))
     bound = (self.edges[0], self.edges[-1])
     scale = 1. if not self.extended else nfbins/self.bins #scale back to bins
     draw_pdf(self.f, arg, bins=nfbins, bound=bound, density=not self.extended,
              scale=scale, **dict(draw_arg))
-
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
@@ -211,7 +219,8 @@ def draw_blh(self, minuit=None, parmloc=(0.05,0.95),
 
     txt = _param_text(describe(self), arg, error)
 
-    if print_par: print txt
+    if print_par:
+        print txt
 
     ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
@@ -222,21 +231,22 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
     this need to be rewritten
     """
     #arg is either map or tuple
-    if isinstance(arg, dict): arg = parse_arg(f,arg,1)
+    if isinstance(arg, dict):
+        arg = parse_arg(f, arg, 1)
     x = (edges[:-1]+edges[1:])/2.0
     bw = np.diff(edges)
     yf = vector_apply(f, x, *arg)
     total = np.sum(data)
     if normed:
         plt.errorbar(x, data/bw/total, errors/bw/total, fmt='.b')
-        plt.plot(x,yf,'r',lw=2)
+        plt.plot(x, yf, 'r', lw=2)
     else:
-        plt.errorbar(x,data,errors,fmt='.b')
-        plt.plot(x,yf*bw,'r',lw=2)
+        plt.errorbar(x, data, errors, fmt='.b')
+        plt.plot(x, yf*bw, 'r', lw=2)
 
     #now draw the parts
     if parts:
-        if not hasattr(f,'nparts') or not hasattr(f,'eval_parts'):
+        if not hasattr(f, 'nparts') or not hasattr(f, 'eval_parts'):
             warn(RuntimeWarning('parts is set to True but function does '
                             'not have nparts or eval_parts method'))
         else:
@@ -244,14 +254,14 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
             nparts = f.nparts
             parts_val = list()
             for tx in x:
-                val = f.eval_parts(tx,*arg)
+                val = f.eval_parts(tx, *arg)
                 parts_val.append(val)
             py = zip(*parts_val)
             for y in py:
                 tmpy = np.array(y)
                 plt.plot(x, tmpy*scale, lw=2, alpha=0.5)
     plt.grid(True)
-    return x,yf,data
+    return x, yf, data
 
 
 def draw_pdf(f, arg, bound, bins=100, scale=1.0, density=True, **kwds):
@@ -268,15 +278,16 @@ def draw_pdf_with_edges(f, arg, edges, scale=1.0, density=True, **kwds):
 
 
 def draw_pdf_with_midpoints(f, arg, x, scale=1.0, **kwds):
-    if isinstance(arg, dict): arg = parse_arg(f, arg, 1)
+    if isinstance(arg, dict):
+        arg = parse_arg(f, arg, 1)
     yf = vector_apply(f, x, *arg)
     yf *= scale
     plt.plot(x, yf, **kwds)
-    return x,yf
+    return x, yf
 
 
 #draw comprison between function given args and data
-def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None,
+def draw_compare_hist(f, arg, data, bins=100, bound=None, weights=None,
                       normed=False, use_w2=False, parts=False):
     """
     draw histogram of data with poisson error bar and f(x,*arg).
@@ -303,13 +314,14 @@ def draw_compare_hist(f, arg, data, bins=100, bound=None,weights=None,
         - **parts** draw parts of pdf. (Works with AddPdf and Add2PdfNorm).
           Default False.
     """
-    if bound is None: bound = minmax(data)
-    h,e = np.histogram(data, bins=bins, range=bound, weights=weights)
+    if bound is None:
+        bound = minmax(data)
+    h, e = np.histogram(data, bins=bins, range=bound, weights=weights)
     err = None
     if weights is not None and use_w2:
-       err,_ = np.histogram(data, bins=bins, range=bound,
+        err, _ = np.histogram(data, bins=bins, range=bound,
                             weights=weights*weights)
-       err = np.sqrt(err)
+        err = np.sqrt(err)
     else:
         err = np.sqrt(h)
     return draw_compare(f, arg, e, h, err, normed, parts)

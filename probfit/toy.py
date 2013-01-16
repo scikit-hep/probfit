@@ -9,6 +9,8 @@ from util import describe
 import numpy.random as npr
 from matplotlib import pyplot as plt
 from probfit_warnings import SmallIntegralWarning
+from warnings import warn
+
 
 def gen_toyn(f, nsample, ntoy, bound, accuracy=10000, quiet=True, **kwd):
     """
@@ -21,7 +23,8 @@ def gen_toyn(f, nsample, ntoy, bound, accuracy=10000, quiet=True, **kwd):
     :param kwd:
     :return:
     """
-    return gen_toy(f, nsample*ntoy, bound, accuracy, quiet, **kwd).reshape((ntoy,nsample))
+    return gen_toy(f, nsample*ntoy, bound, accuracy, quiet, **kwd).reshape((ntoy, nsample))
+
 
 def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
     """
@@ -62,10 +65,10 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
         plt.figure()
         plt.title('comparison')
         numbin = 100
-        h,e = np.histogram(ret,bins=numbin)
+        h, e = np.histogram(ret, bins=numbin)
         mp = (e[1:]+e[:-1])/2.
         err = np.sqrt(h)
-        plt.errorbar(mp,h,err,fmt='.b')
+        plt.errorbar(mp, h, err, fmt='.b')
         bw = e[1] - e[0]
         y = pdf * len(ret) / cdfnorm * bw
         ylow = y + np.sqrt(y)
@@ -76,4 +79,3 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
         plt.xlim(bound)
         plt.ylim(ymin=0)
     return ret
-

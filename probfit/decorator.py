@@ -4,6 +4,8 @@
 #   return complicated_function(x,y,z)
 #
 from .functor import Normalized, Extended
+
+
 class normalized:
     """
     Normalized decorator
@@ -19,10 +21,10 @@ class normalized:
     """
 
     def __init__(self, bound, nint=1000):
-        self.bound  = bound
+        self.bound = bound
         self.nint = nint
 
-    def __call__(self,f):
+    def __call__(self, f):
         return Normalized(f, self.bound, self.nint)
 
 
@@ -41,5 +43,5 @@ class extended:
     def __init__(self, extname='N'):
         self.extname = extname
 
-    def __call__(self,f):
+    def __call__(self, f):
         return Extended(f, extname=self.extname)
