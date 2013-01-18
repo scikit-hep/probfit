@@ -24,6 +24,9 @@ cdef class Polynomial:
         User can supply order as integer in which case it uses (c_0....c_n+1)
         default or the list of coefficient name which the first one will be the
         lowest order and the last one will be the highest order
+
+        .. plot:: pyplots/pdf/polynomial.py
+
         """
         varnames = None
         argcount = 0
@@ -56,21 +59,23 @@ cdef class Polynomial:
         return ret
 
 
-cpdef double doublegaussian(double x, double mean, double sigmal, double sigmar):
+cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_R):
     """
     Unnormalized double gaussian
 
     .. math::
-        f(x;mean,\sigma_l,\sigma_r) =
+        f(x;mean,\sigma_L,\sigma_R) =
         \\begin{cases}
-            \exp \left[ -\\frac{1}{2} \left(\\frac{x-mean}{\sigma_l}\\right)^2 \\right], & \mbox{if } x < mean \\\\
-            \exp \left[ -\\frac{1}{2} \left( -\\frac{x-mean}{\sigma_r}\\right)^2 \\right], & \mbox{if } x >= mean
+            \exp \left[ -\\frac{1}{2} \left(\\frac{x-mean}{\sigma_L}\\right)^2 \\right], & \mbox{if } x < mean \\\\
+            \exp \left[ -\\frac{1}{2} \left( -\\frac{x-mean}{\sigma_R}\\right)^2 \\right], & \mbox{if } x >= mean
         \end{cases}
+
+    .. plot:: pyplots/pdf/doublegaussian.py
 
     """
     cdef double ret = 0.
     cdef double sigma = 0.
-    sigma = sigmal if x < mean else sigmar
+    sigma = sigma_L if x < mean else sigma_R
     if sigma < smallestdiv:
         ret = badvalue
     else:
@@ -86,6 +91,8 @@ cpdef double ugaussian(double x, double mean, double sigma):
 
     .. math::
         f(x; mean, \sigma) = \exp \left[ -\\frac{1}{2} \\left( \\frac{x-mean}{\sigma} \\right)^2 \\right]
+
+    .. plot:: pyplots/pdf/ugaussian.py
 
     """
     cdef double ret = 0
@@ -105,6 +112,9 @@ cpdef double gaussian(double x, double mean, double sigma):
     .. math::
         f(x; mean, \sigma) = \\frac{1}{\sqrt{2\pi}\sigma}
         \exp \left[  -\\frac{1}{2} \left(\\frac{x-mean}{\sigma}\\right)^2 \\right]
+
+    .. plot:: pyplots/pdf/gaussian.py
+
     """
     cdef double badvalue = 1e-300
     cdef double ret = 0
@@ -117,7 +127,7 @@ cpdef double gaussian(double x, double mean, double sigma):
     return ret
 
 
-cpdef double crystalball(double x,double alpha,double n,double mean,double sigma):
+cpdef double crystalball(double x, double alpha, double n, double mean, double sigma):
     """
     Unnormalized crystal ball function
 
@@ -135,6 +145,9 @@ cpdef double crystalball(double x,double alpha,double n,double mean,double sigma
 
     .. note::
         http://en.wikipedia.org/wiki/Crystal_Ball_function
+
+    .. plot:: pyplots/pdf/crystalball.py
+
     """
     cdef double d = 0.
     cdef double ret = 0
@@ -169,6 +182,8 @@ cpdef double argus(double x, double c, double chi, double p):
 
     .. note::
         http://en.wikipedia.org/wiki/ARGUS_distribution
+    
+    .. plot:: pyplots/pdf/argus.py
     """
     if c<smallestdiv:
         return badvalue
@@ -183,7 +198,7 @@ cpdef double argus(double x, double c, double chi, double p):
     return ret
 
 
-cpdef double cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L, double alpha_R):
+cpdef double cruijff(double x, double m_0, double sigma_L, double sigma_R, double alpha_L, double alpha_R):
     """
     Unnormalized cruijff function
 
@@ -196,11 +211,13 @@ cpdef double cruijff(double x, double m0, double sigma_L, double sigma_R, double
             & \mbox{if } x<m_0 \\\\
         \end{cases}
 
+    .. plot:: pyplots/pdf/cruijff.py
+
     """
-    cdef double dm2 = (x-m0)*(x-m0)
+    cdef double dm2 = (x-m_0)*(x-m_0)
     cdef double demon=0.
     cdef double ret=0.
-    if x<m0:
+    if x<m_0:
         denom = 2*sigma_L*sigma_L+alpha_L*dm2
         if denom<smallestdiv:
             return 0.
@@ -218,6 +235,8 @@ cpdef double linear(double x, double m, double c):
 
     .. math::
         f(x;m,c) = mx+c
+
+    .. plot:: pyplots/pdf/linear.py
     """
     cdef double ret = m*x+c
     return ret
@@ -229,6 +248,9 @@ cpdef double poly2(double x, double a, double b, double c):
 
     .. math::
         f(x;a,b,c) = ax^2+bx+c
+
+    .. plot:: pyplots/pdf/poly2.py
+
     """
     cdef double ret = a*x*x+b*x+c
     return ret
@@ -240,6 +262,8 @@ cpdef double poly3(double x, double a, double b, double c, double d):
 
     .. math::
         f(x; a,b,c,d) =ax^3+bx^2+cx+d
+
+    .. plot:: pyplots/pdf/poly3.py
 
     """
     cdef double x2 = x*x
@@ -262,6 +286,9 @@ cpdef double novosibirsk(double x, double width, double peak, double tail):
         - width = :math:`\sigma`
         - peak = :math:`m_0`
         - tail = :math:`\Lambda`
+
+    .. plot:: pyplots/pdf/novosibirsk.py
+
     """
     #credit roofit implementation
     cdef double qa
@@ -310,6 +337,8 @@ cpdef double rtv_breitwigner(double x, double m, double gamma):
     .. seealso::
         :func:`cauchy`
 
+    .. plot:: pyplots/pdf/cauchy_bw.py
+
     """
     cdef double mm = m*m
     cdef double xm = x*x-mm
@@ -328,6 +357,9 @@ cpdef double cauchy(double x, double m, double gamma):
 
     .. seealso::
         :func:`breitwigner`
+
+    .. plot:: pyplots/pdf/cauchy_bw.py
+
     """
     cdef double xmg = (x-m)/gamma
     return 1/(pi*gamma*(1+xmg*xmg))
