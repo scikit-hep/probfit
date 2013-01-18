@@ -231,8 +231,7 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
     this need to be rewritten
     """
     #arg is either map or tuple
-    if isinstance(arg, dict):
-        arg = parse_arg(f, arg, 1)
+    arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
     x = (edges[:-1]+edges[1:])/2.0
     bw = np.diff(edges)
     yf = vector_apply(f, x, *arg)
@@ -264,23 +263,33 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
     return x, yf, data
 
 
-def draw_pdf(f, arg, bound, bins=100, scale=1.0, density=True, **kwds):
+def draw_normed_pdf(f, arg, bound, bins=100, scale=1.0, density=True, **kwds):
+        return draw_pdf(f, arg, bound, bins=100, scale=1.0, density=True,
+                        normed_pdf=True, **kwds)
+
+
+def draw_pdf(f, arg, bound, bins=100, scale=1.0, density=True,
+             normed_pdf=False, **kwds):
     edges = np.linspace(bound[0], bound[1], bins)
-    return draw_pdf_with_edges(f, arg, edges, scale=scale,
-                                density=density, **kwds)
+    return draw_pdf_with_edges(f, arg, edges, scale=scale, density=density,
+                               normed_pdf=normed_pdf, **kwds)
 
 
-def draw_pdf_with_edges(f, arg, edges, scale=1.0, density=True, **kwds):
+def draw_pdf_with_edges(f, arg, edges, scale=1.0, density=True,
+                        normed_pdf=False, **kwds):
     x = (edges[:-1]+edges[1:])/2.0
     bw = np.diff(edges)
     scale *= bw if not density else 1.
-    return draw_pdf_with_midpoints(f, arg, x, scale=scale, **kwds)
+    return draw_pdf_with_midpoints(f, arg, x, scale=scale,
+                                   normed_pdf=normed_pdf, **kwds)
 
 
-def draw_pdf_with_midpoints(f, arg, x, scale=1.0, **kwds):
-    if isinstance(arg, dict):
-        arg = parse_arg(f, arg, 1)
+def draw_pdf_with_midpoints(f, arg, x, scale=1.0, normed_pdf=False, **kwds):
+    arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
     yf = vector_apply(f, x, *arg)
+    if normed_pdf:
+        normed_factor = sum(yf) # assume equal binwidth
+        yf /= normed_factor
     yf *= scale
     plt.plot(x, yf, **kwds)
     return x, yf
@@ -314,8 +323,7 @@ def draw_compare_hist(f, arg, data, bins=100, bound=None, weights=None,
         - **parts** draw parts of pdf. (Works with AddPdf and Add2PdfNorm).
           Default False.
     """
-    if bound is None:
-        bound = minmax(data)
+    bound = minmax(data) if bound is None else bound
     h, e = np.histogram(data, bins=bins, range=bound, weights=weights)
     err = None
     if weights is not None and use_w2:

@@ -1,4 +1,4 @@
-cpdef double doublegaussian(double x, double mean, double sigmal, double sigmar)
+cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_R)
 
 cpdef double ugaussian(double x, double mean, double sigma)
 

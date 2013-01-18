@@ -617,7 +617,7 @@ cdef class BinnedChi2:
             raise ValueError('some bins are too small to do a chi2 fit. change your range')
 
         self.bins = bins
-        self.ndof = self.bins-1-len(describe(self))#fix this taking care of fixed parameter
+        self.ndof = self.bins-1-len(describe(self)) # fix this taking care of fixed parameter
 
 
     #lazy mid point implementation

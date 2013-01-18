@@ -201,6 +201,7 @@ cdef class Extended:
         self.func_code = FakeFuncCode(f,append=extname)
         #print self.func_code.__dict__
         self.func_defaults=None
+    
     def __call__(self,*arg):
         cdef double N = arg[-1]
         cdef double fval = self.f(*arg[:-1])
@@ -276,10 +277,8 @@ cdef class AddPdf:
             ret+=tmp
         return ret
 
-
     def parts(self):
         return [self._part(i) for i in range(self.numf)]
-
 
     def _part(self, int findex):
 
@@ -292,7 +291,6 @@ cdef class AddPdf:
         ret = FakeFunc(tmp)
         ret.func_code = self.func_code
         return ret
-
 
     def eval_parts(self,*arg):
         cdef tuple this_arg
@@ -407,7 +405,7 @@ cdef class AddPdfNorm:
             if findex!=self.numf-1: #not the last one
                 fac = arg[self.normalarglen+findex]
             else: #last one
-                fac = sum(arg[self.normalarglen:])
+                fac = 1. - sum(arg[self.normalarglen:])
             thispos = self.allpos[findex]
             this_arg = construct_arg(arg, thispos)
             return fac*self.allf[findex](*this_arg)
