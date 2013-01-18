@@ -107,5 +107,6 @@ You may find these functions useful in interactive environment.
 
 .. autosummary::
     ~probfit.nputil.vector_apply
+    ~probfit.plotting.draw_pdf
     ~probfit.plotting.draw_compare_hist
 

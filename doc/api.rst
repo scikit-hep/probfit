@@ -24,6 +24,7 @@ Unbinned Likelihood
 **Example**
 
     .. plot:: pyplots/costfunc/ulh.py
+        :class: lightbox
 
 Binned Likelihood
 ^^^^^^^^^^^^^^^^^
@@ -37,6 +38,7 @@ Binned Likelihood
 **Example**
 
     .. plot:: pyplots/costfunc/blh.py
+        :class: lightbox
 
 :math:`\chi^2` Regression
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,8 +51,8 @@ Binned Likelihood
 
 **Example**
 
-
     .. plot:: pyplots/costfunc/x2r.py
+        :class: lightbox
 
 Binned :math:`\chi^2`
 ^^^^^^^^^^^^^^^^^^^^^
@@ -65,6 +67,7 @@ Binned :math:`\chi^2`
 
 
     .. plot:: pyplots/costfunc/bx2.py
+        :class: lightbox
 
 Simultaneous Fit
 ^^^^^^^^^^^^^^^^
@@ -108,6 +111,7 @@ AddPdf
 **Example**
 
     .. plot:: pyplots/functor/addpdf.py
+        :class: lightbox
 
 AddPdfNorm
 ^^^^^^^^^^^
@@ -116,6 +120,7 @@ AddPdfNorm
 **Example**
 
     .. plot:: pyplots/functor/addpdfnorm.py
+        :class: lightbox
 
 rename
 ^^^^^^
@@ -143,6 +148,9 @@ gaussian
 ^^^^^^^^
 .. autofunction:: gaussian
 
+.. plot:: pyplots/pdf/gaussian.py
+    :class: lightbox
+
 cauchy
 ^^^^^^
 .. autofunction:: cauchy
@@ -155,43 +163,73 @@ crystalball
 ^^^^^^^^^^^
 .. autofunction:: crystalball
 
+.. plot:: pyplots/pdf/crystalball.py
+    :class: lightbox
+
 cruijff
 ^^^^^^^
 .. autofunction:: cruijff
+
+.. plot:: pyplots/pdf/cruijff.py
+    :class: lightbox
 
 doublegaussian
 ^^^^^^^^^^^^^^
 .. autofunction:: doublegaussian
 
+.. plot:: pyplots/pdf/doublegaussian.py
+    :class: lightbox
+
 novosibirsk
 ^^^^^^^^^^^
 .. autofunction:: novosibirsk
+
+.. plot:: pyplots/pdf/novosibirsk.py
+    :class: lightbox
 
 argus
 ^^^^^
 .. autofunction:: argus
 
+.. plot:: pyplots/pdf/argus.py
+    :class: lightbox
+
 linear
 ^^^^^^
 .. autofunction:: linear
 
+.. plot:: pyplots/pdf/linear.py
+    :class: lightbox
+
 poly2
 ^^^^^
 .. autofunction:: poly2
+.. plot:: pyplots/pdf/poly2.py
+    :class: lightbox
 
 poly3
 ^^^^^
 .. autofunction:: poly3
 
+.. plot:: pyplots/pdf/poly3.py
+    :class: lightbox
+
 Polynomial
 ^^^^^^^^^^
 .. autoclass:: Polynomial
+
+.. plot:: pyplots/pdf/polynomial.py
+    :class: lightbox
 
 Useful Utility Function
 -----------------------
 vector_apply
 ^^^^^^^^^^^^
 .. autofunction:: probfit.nputil.vector_apply
+
+draw_pdf
+^^^^^^^^
+.. autofunction:: probfit.plotting.draw_pdf
 
 draw_compare_hist
 ^^^^^^^^^^^^^^^^^

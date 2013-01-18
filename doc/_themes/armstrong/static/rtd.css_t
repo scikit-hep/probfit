@@ -66,6 +66,9 @@ div.documentwrapper {
     background-color: {{ theme_light_color }};
 }
 
+.lightbox{
+    height: 240px;
+}
 
 /* HEADINGS --------------------------------------------------------------- */
 

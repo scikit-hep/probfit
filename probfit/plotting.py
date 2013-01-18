@@ -270,6 +270,33 @@ def draw_normed_pdf(f, arg, bound, bins=100, scale=1.0, density=True, **kwds):
 
 def draw_pdf(f, arg, bound, bins=100, scale=1.0, density=True,
              normed_pdf=False, **kwds):
+    """
+    draw pdf with given argument and bounds.
+
+    **Arguments**
+
+        * **f** your pdf. The first argument is assumed to be independent
+          variable
+
+        * **arg** argument can be tuple or list
+
+        * **bound** tuple(xmin,xmax)
+
+        * **bins** number of bins to plot pdf. Default 100.
+
+        * **scale** multiply pdf by given number. Default 1.0.
+
+        * **density** plot density instead of expected count in each bin
+          (pdf*bin width). Default True.
+
+        * **normed_pdf** Normalize pdf in given bound. Default False
+
+        * The rest of keyword argument will be pass to pyplot.plot
+
+    **Returns**
+    
+        x, y of what's being plot
+    """
     edges = np.linspace(bound[0], bound[1], bins)
     return draw_pdf_with_edges(f, arg, edges, scale=scale, density=density,
                                normed_pdf=normed_pdf, **kwds)
