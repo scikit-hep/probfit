@@ -184,6 +184,7 @@ div.body a.headerlink:hover {
 
 div.related ul {
     height: 2.5em;
+    padding-right: 140px;
 }
 
 div.related ul li {

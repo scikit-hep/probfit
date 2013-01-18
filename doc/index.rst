@@ -1,14 +1,5 @@
-Welcome to probfit's documentation!
-====================================
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-
-   api
-
-Introduction
-------------
+probfit
+=======
 
 *probfit* is a set of functions that helps you construct a complex fit. It's
 intended to be used with `iminuit <http://iminuit.github.com/iminuit/>`_. The
@@ -16,6 +7,12 @@ tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression,
 Binned :math:`\chi^2` estimator and Simultaneous fit estimator. Normalization and
 Convolution with cache are also included. Various builtin function that's
 normally used in B physics is also provided.
+
+.. toctree::
+    :maxdepth: 4
+    :hidden:
+    
+    api.rst
 
 Download & Install
 ------------------
