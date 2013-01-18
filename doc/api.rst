@@ -21,6 +21,10 @@ Unbinned Likelihood
     .. automethod:: draw
     .. automethod:: show
 
+**Example**
+
+    .. plot:: pyplots/costfunc/ulh.py
+
 Binned Likelihood
 ^^^^^^^^^^^^^^^^^
 
@@ -29,6 +33,10 @@ Binned Likelihood
     .. automethod:: __call__
     .. automethod:: draw
     .. automethod:: show
+
+**Example**
+
+    .. plot:: pyplots/costfunc/blh.py
 
 :math:`\chi^2` Regression
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -39,6 +47,11 @@ Binned Likelihood
     .. automethod:: draw
     .. automethod:: show
 
+**Example**
+
+
+    .. plot:: pyplots/costfunc/x2r.py
+
 Binned :math:`\chi^2`
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -48,8 +61,13 @@ Binned :math:`\chi^2`
     .. automethod:: draw
     .. automethod:: show
 
-Binned SimultaneousFit
-^^^^^^^^^^^^^^^^^^^^^^
+**Example**
+
+
+    .. plot:: pyplots/costfunc/bx2.py
+
+Simultaneous Fit
+^^^^^^^^^^^^^^^^
 
 .. autoclass:: SimultaneousFit
 
@@ -57,6 +75,10 @@ Binned SimultaneousFit
     .. automethod:: args_and_error_for
     .. automethod:: draw
     .. automethod:: show
+
+**Example**
+
+    .. plot:: pyplots/costfunc/simul.py
 
 .. _functor:
 
@@ -83,9 +105,17 @@ AddPdf
 ^^^^^^
 .. autoclass:: AddPdf
 
+**Example**
+
+    .. plot:: pyplots/functor/addpdf.py
+
 AddPdfNorm
 ^^^^^^^^^^^
 .. autoclass:: AddPdfNorm
+
+**Example**
+
+    .. plot:: pyplots/functor/addpdfnorm.py
 
 rename
 ^^^^^^

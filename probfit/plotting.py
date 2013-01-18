@@ -86,7 +86,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
-            for p in f_parts():
+            for scale, p in f_parts():
                 draw_pdf(p, arg, bound, bins=nfbins, density=True)
 
     ax.grid(True)
