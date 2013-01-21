@@ -36,7 +36,7 @@ Requirement
 Tutorial
 --------
 
-open tutorial.ipynb in ipython notebook. You can `view it online <http://nbviewer.ipython.org/urls/raw.github.com/piti118/probfit/master/tutorial/tutorial.ipynb>`_ too.
+open tutorial.ipynb in ipython notebook. You can `view it online <http://nbviewer.ipython.org/urls/raw.github.com/iminuit/probfit/master/tutorial/tutorial.ipynb>`_ too.
 
 
 Documentation
