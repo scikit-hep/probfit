@@ -245,12 +245,11 @@ def draw_compare(f, arg, edges, data, errors=None, normed=False, parts=False):
 
     #now draw the parts
     if parts:
-        if not hasattr(f, 'nparts') or not hasattr(f, 'eval_parts'):
+        if not hasattr(f, 'eval_parts'):
             warn(RuntimeWarning('parts is set to True but function does '
-                            'not have nparts or eval_parts method'))
+                            'not have eval_parts method'))
         else:
             scale = bw if not normed else 1.
-            nparts = f.nparts
             parts_val = list()
             for tx in x:
                 val = f.eval_parts(tx, *arg)
