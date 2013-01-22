@@ -29,7 +29,7 @@ def rename(f, newarg):
     """
     return FakeFunc(f, newarg)
 
-def merge_func_code(*arg, prefix=None, skip_first=False):
+def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None):
     """
     merge function arguments.::
 
@@ -52,20 +52,26 @@ def merge_func_code(*arg, prefix=None, skip_first=False):
           of each function. This should normally be true when prefix is not
           None.
 
+        - **factor_list** option list of functions. For function that skip_first
+          should not be applied. The choice of prefix applice to factor_list
+          will be in the same order as prefix. Default None
+
     **Return**
 
         tuple(Merged Func Code, position array)
 
         position array **p[i][j]** indicates where in the argument list to
-        obtain argument **j** for functin **i**
+        obtain argument **j** for functin **i**. If fact
 
     .. seealso::
 
         functor.construct_arg
     """
-    assert(prefix is None or len(prefix)==len(arg))
+    if prefix is not None and len(prefix)!=len(arg):
+        raise ValueError('prefix should have the same length as number of ',
+                         'functions. Expect %d(%r)' % (len(arg), arg))
     all_arg = []
-
+   
     for i,f in enumerate(arg):
         tmp = []
         first = skip_first
@@ -76,6 +82,17 @@ def merge_func_code(*arg, prefix=None, skip_first=False):
             first = False
             tmp.append(newv)
         all_arg.append(tmp)
+
+    if factor_list is not None:
+        for i,f in enumerate(factor_list):
+            tmp = []
+            for vn in describe(f):
+                newv = vn
+                if prefix is not None:
+                    newv = prefix[i]+newv
+                first = False
+                tmp.append(newv)
+            all_arg.append(tmp)
 
     #now merge it
     #FIXME: do something smarter

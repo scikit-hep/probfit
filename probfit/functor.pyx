@@ -241,40 +241,82 @@ cdef class AddPdf:
     cdef public object func_defaults
     cdef int arglen
     cdef list allpos
-    cdef tuple allf
-    cdef readonly int numf
-    cdef np.ndarray cache
-    cdef list argcache
-    cdef public int hit
-    cdef public int nparts
+    cdef list factpos
 
-    def __init__(self,*arg,prefix=None):
-        self.func_code, self.allpos = merge_func_code(*arg,prefix=prefix,skip_first=True)
+    cdef tuple allf
+    cdef tuple factors
+
+    cdef readonly int numf
+
+    cdef np.ndarray cache
+    cdef np.ndarray factor_cache
+    cdef list argcache
+    cdef list factor_argcache
+
+    cdef public int hit
+
+    cdef list allfactors
+
+    def __init__(self, *arg, prefix=None, factors=None):
+        if factors is not None and len(factors)!=len(arg):
+            raise ValueError('factor is specified but has different length'
+                             ' from arg.')
+        allf = list(arg)
+        if factors is not None:
+            allf += factors
+
+        self.func_code, allpos = merge_func_code(*arg, prefix=prefix, 
+                                                 skip_first=True, 
+                                                 factor_list=factors)
+
+        funcpos = allpos[:len(arg)]
+        factpos = allpos[len(arg):]
+
         self.func_defaults=None
         self.arglen = self.func_code.co_argcount
-        self.allf = arg
+        self.allf = arg # f function
+        self.factors = tuple(factors) if factors is not None else None# factor function
+        self.allpos = allpos # position for f arg
+        self.factpos = factpos # position for factor arg 
         self.numf = len(self.allf)
-        self.argcache=[None]*self.numf
+        self.argcache = [None]*self.numf
+        self.factor_argcache = [None]*self.numf
         self.cache = np.zeros(self.numf)
+        self.factor_cache = np.zeros(self.numf)
         self.hit = 0
 
-    def __call__(self,*arg):
+    def __call__(self, *arg):
         cdef tuple this_arg
         cdef double ret = 0.
         cdef double tmp = 0.
+        cdef double tmp_factor = 0.
         cdef int i
         cdef np.ndarray thispos
         for i in range(self.numf):
             thispos = self.allpos[i]
-            this_arg = construct_arg(arg,thispos)
-            if self.argcache[i] is not None and fast_tuple_equal(this_arg,self.argcache[i],0):
+            this_arg = construct_arg(arg, thispos)
+
+            if self.argcache[i] is not None and fast_tuple_equal(this_arg, self.argcache[i], 0):
                 tmp = self.cache[i]
                 self.hit+=1
             else:
                 tmp = self.allf[i](*this_arg)
                 self.argcache[i]=this_arg
                 self.cache[i]=tmp
-            ret+=tmp
+
+            if self.factors is not None: # calculate factor
+                factor_arg = construct_arg(arg, self.factpos[i])
+                if self.factor_argcache[i] is not None and fast_tuple_equal(factor_arg, self.factor_argcache[i], 0):
+                    tmp_factor = self.factor_cache[i]
+                    self.hit+=1
+                else:
+                    tmp_factor = self.factors[i](*factor_arg)
+                    self.factor_argcache[i] = factor_arg
+                    self.factor_cache[i] = tmp_factor
+
+                ret += tmp_factor*tmp
+            else:
+                ret += tmp
         return ret
 
     def parts(self):
@@ -285,7 +327,13 @@ cdef class AddPdf:
         def tmp(*arg):
             thispos = self.allpos[findex]
             this_arg = construct_arg(arg, thispos)
-            return self.allf[findex](*this_arg)
+            ret = self.allf[findex](*this_arg)
+            if self.factors is not None:
+                facpos = self.factpos[findex]
+                facarg = construct_arg(arg, facpos)
+                fac = self.factors[findex](*facarg)
+                ret *= fac
+            return ret
 
         tmp.__name__ = getattr(self.allf[findex],'__name__','unnamedpart')
         ret = FakeFunc(tmp)
@@ -300,17 +348,10 @@ cdef class AddPdf:
         cdef np.ndarray thispos
         ret = list()
         for i in range(self.numf):
-            thispos = self.allpos[i]
-            this_arg = construct_arg(arg,thispos)
-            if self.argcache[i] is not None and fast_tuple_equal(this_arg,self.argcache[i],0):
-                tmp = self.cache[i]
-                self.hit+=1
-            else:
-                tmp = self.allf[i](*this_arg)
-                self.argcache[i]=this_arg
-                self.cache[i]=tmp
+            tmp = self._part(i)(*arg)
             ret.append(tmp)
         return tuple(ret)
+
 
 cdef class AddPdfNorm:
     """
@@ -353,7 +394,6 @@ cdef class AddPdfNorm:
     cdef list allpos
     #cdef np.ndarray fpos
     #cdef np.ndarray gpos
-    cdef public int nparts
 
     def __init__(self, *arg ,facname=None, prefix=None):
 

@@ -159,15 +159,17 @@ def test_merge_func_code():
     def f(x, y, z): return x+y+z
     def g(x, a, b): return x+a+b
     def h(x, c, d): return x+c+d
+    def k_1(y, z) : return y+z
+    def k_2(i, j) : return i+j
 
     funccode, [pf, pg, ph] = merge_func_code(f, g, h)
     assert_equal(funccode.co_varnames, ('x', 'y', 'z', 'a', 'b', 'c', 'd'))
     exp_pf = [0, 1, 2]
     for i in range(len(pf)): assert_almost_equal(pf[i], exp_pf[i])
     exp_pg = [0, 3, 4]
-    for i in range(len(pf)): assert_almost_equal(pg[i], exp_pg[i])
+    for i in range(len(pg)): assert_almost_equal(pg[i], exp_pg[i])
     exp_ph = [0, 5, 6]
-    for i in range(len(pf)): assert_almost_equal(ph[i], exp_ph[i])
+    for i in range(len(ph)): assert_almost_equal(ph[i], exp_ph[i])
 
     funccode, [pf, pg, ph] = merge_func_code(
                                 f, g, h,
@@ -178,10 +180,25 @@ def test_merge_func_code():
     exp_pf = [0, 1, 2]
     for i in range(len(pf)): assert_almost_equal(pf[i], exp_pf[i])
     exp_pg = [0, 3, 4]
-    for i in range(len(pf)): assert_almost_equal(pg[i], exp_pg[i])
+    for i in range(len(pg)): assert_almost_equal(pg[i], exp_pg[i])
     exp_ph = [0, 5, 6]
-    for i in range(len(pf)): assert_almost_equal(ph[i], exp_ph[i])
+    for i in range(len(ph)): assert_almost_equal(ph[i], exp_ph[i])
 
+    funccode, [pf, pg, pk_1, pk_2] = merge_func_code(
+                                f, g,
+                                prefix=['f_', 'g_'],
+                                skip_first=True,
+                                factor_list=[k_1, k_2])
+    assert_equal(funccode.co_varnames, ('x', 'f_y', 'f_z',
+                                        'g_a', 'g_b', 'g_i', 'g_j'))
+    exp_pf = [0, 1, 2]
+    for i in range(len(pf)): assert_almost_equal(pf[i], exp_pf[i])
+    exp_pg = [0, 3, 4]
+    for i in range(len(pg)): assert_almost_equal(pg[i], exp_pg[i])
+    exp_pk_1 = [1, 2]
+    for i in range(len(pk_1)): assert_almost_equal(pk_1[i], exp_pk_1[i])
+    exp_pk_2 = [5, 6]
+    for i in range(len(pk_1)): assert_almost_equal(pk_2[i], exp_pk_2[i])
 
 def test_fast_tuple_equal():
     a = (1., 2., 3.)

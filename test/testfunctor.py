@@ -46,11 +46,28 @@ def test_add_pdf():
     def h(x,c,a): return 3*(x+c+a)
 
     A = AddPdf(f,g,h)
-    assert_equal(tuple(describe(A)),('x','y','z','a','b','c'))
+    assert_equal(tuple(describe(A)), ('x','y','z','a','b','c'))
 
     ret = A(1,2,3,4,5,6,7)
     expected = f(1,2,3)+g(1,4,5)+h(1,6,4)
     assert_almost_equal(ret,expected)
+
+def test_add_pdf_factor():
+    def f(x,y,z): return x+y+z
+    def g(x,a,b): return 2*(x+a+b)
+    def k1(n1, n2): return 3*(n1+n2)
+    def k2(n1, y): return 4*(n1+y) 
+
+    A = AddPdf(f, g, prefix=['f', 'g'], factors=[k1, k2])
+    assert_equal(tuple(describe(A)),('x','fy','fz','ga','gb','fn1', 'fn2', 'gn1', 'gy'))
+
+    ret = A(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    expected = k1(6, 7)*f(1, 2, 3) + k2(8, 9)*g(1, 4, 5)
+    assert_almost_equal(ret,expected)
+
+    parts = A.eval_parts(1, 2, 3, 4, 5, 6, 7, 8, 9)
+    assert_almost_equal(parts[0], k1(6, 7)*f(1, 2, 3))
+    assert_almost_equal(parts[1], k2(8, 9)*g(1, 4, 5))
 
 
 def test_add_pdf_cache():
