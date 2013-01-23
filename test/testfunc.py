@@ -8,6 +8,12 @@ from probfit.functor import construct_arg, fast_tuple_equal
 from probfit.funcutil import merge_func_code
 from nose.tools import *
 
+def f(x, y, z): return x+y+z
+def f2(x, z, a): return x+z+a
+def g(x, a, b): return x+a+b
+def h(x, c, d): return x+c+d
+def k_1(y, z) : return y+z
+def k_2(i, j) : return i+j
 
 def iterable_equal(x, y):
     assert_equal(list(x), list(y))
@@ -156,11 +162,6 @@ def test_construct_arg():
 
 
 def test_merge_func_code():
-    def f(x, y, z): return x+y+z
-    def g(x, a, b): return x+a+b
-    def h(x, c, d): return x+c+d
-    def k_1(y, z) : return y+z
-    def k_2(i, j) : return i+j
 
     funccode, [pf, pg, ph] = merge_func_code(f, g, h)
     assert_equal(funccode.co_varnames, ('x', 'y', 'z', 'a', 'b', 'c', 'd'))
@@ -171,6 +172,8 @@ def test_merge_func_code():
     exp_ph = [0, 5, 6]
     for i in range(len(ph)): assert_almost_equal(ph[i], exp_ph[i])
 
+
+def test_merge_func_code_prefix():
     funccode, [pf, pg, ph] = merge_func_code(
                                 f, g, h,
                                 prefix=['f_', 'g_', 'h_'],
@@ -184,6 +187,8 @@ def test_merge_func_code():
     exp_ph = [0, 5, 6]
     for i in range(len(ph)): assert_almost_equal(ph[i], exp_ph[i])
 
+
+def test_merge_func_code_factor_list():
     funccode, [pf, pg, pk_1, pk_2] = merge_func_code(
                                 f, g,
                                 prefix=['f_', 'g_'],
@@ -199,6 +204,16 @@ def test_merge_func_code():
     for i in range(len(pk_1)): assert_almost_equal(pk_1[i], exp_pk_1[i])
     exp_pk_2 = [5, 6]
     for i in range(len(pk_1)): assert_almost_equal(pk_2[i], exp_pk_2[i])
+
+
+def test_merge_func_code_skip_prefix():
+    funccode, pos = merge_func_code(
+                                f, f2,
+                                prefix=['f_', 'g_'],
+                                skip_first=True,
+                                skip_prefix=['z'])
+    assert_equal(funccode.co_varnames, ('x', 'f_y', 'z', 'g_a'))
+
 
 def test_fast_tuple_equal():
     a = (1., 2., 3.)

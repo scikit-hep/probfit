@@ -27,7 +27,7 @@ cdef class SimultaneousFit:
     cdef np.ndarray factors
     cdef readonly object prefix
     #FIXME: cache each part if called with same parameter
-    def __init__(self, *arg, factors=None, prefix=None):
+    def __init__(self, *arg, factors=None, prefix=None, skip_prefix=None):
         """
         __init__(self, *arg, factors=None, prefix=None):
 
@@ -40,9 +40,13 @@ cdef class SimultaneousFit:
             - **prefix** Optional list of prefix. Add prefix to variablename of
               each cost function so that you don't accidentally merge them.
               Default None.
+            - **skip_prefix** list of variable names that prefix should not be
+              applied to. Useful if you want to prefix them and shared some
+              of them.
         """
         self.allf = list(arg)
-        func_code, allpos = merge_func_code(*arg, prefix=prefix)
+        func_code, allpos = merge_func_code(*arg, prefix=prefix,
+                                            skip_prefix=skip_prefix)
         self.numf = len(arg)
         self.func_code = func_code
         self.func_defaults = None

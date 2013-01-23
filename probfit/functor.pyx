@@ -235,6 +235,19 @@ cdef class AddPdf:
                 def h2_equiv(x, f_a, f_b, f_c, g_d, g_a, g_e):
                     return f(x, f_a, f_b, f_c) + g(x, g_d, g_a, g_e)
 
+        - **factors** list of callable factor function if given Add pdf
+          will simulate the pdf of the form::
+
+                factor[0]*f + factor[1]*g
+
+          Note that all argument for callable factors will be prefixed(if 
+          given) as opposed to skipping the first one for pdf list. If None
+          is given, all factors are assume to be constant 1. Default None.
+
+        - **skip_prefix** list of variable that should not be prefixed.
+          Default None. This is useful when you want to mix prefixing
+          and sharing some of variable.
+
     """
     #FIXME: cache each part if called with same parameter
     cdef public object func_code
@@ -257,7 +270,7 @@ cdef class AddPdf:
 
     cdef list allfactors
 
-    def __init__(self, *arg, prefix=None, factors=None):
+    def __init__(self, *arg, prefix=None, factors=None, skip_prefix=None):
         if factors is not None and len(factors)!=len(arg):
             raise ValueError('factor is specified but has different length'
                              ' from arg.')
@@ -267,7 +280,8 @@ cdef class AddPdf:
 
         self.func_code, allpos = merge_func_code(*arg, prefix=prefix, 
                                                  skip_first=True, 
-                                                 factor_list=factors)
+                                                 factor_list=factors,
+                                                 skip_prefix=skip_prefix)
 
         funcpos = allpos[:len(arg)]
         factpos = allpos[len(arg):]
@@ -377,8 +391,12 @@ cdef class AddPdfNorm:
         - **facname** optional list of factor name of length=. If None is given
           factor name is automatically chosen to be `f_0`, `f_1` etc.
           Default None.
+
         - **prefix** optional prefix list to prefix arguments of each function.
           Default None.
+
+        - **skip_prefix** optional list of variable that prefix will not be
+          applied to. Default None(empty).
 
 
     """
@@ -395,10 +413,10 @@ cdef class AddPdfNorm:
     #cdef np.ndarray fpos
     #cdef np.ndarray gpos
 
-    def __init__(self, *arg ,facname=None, prefix=None):
+    def __init__(self, *arg ,facname=None, prefix=None, skip_prefix=None):
 
         self.func_code, self.allpos = merge_func_code(*arg,
-            prefix=prefix,skip_first=True)
+            prefix=prefix, skip_first=True, skip_prefix=skip_prefix)
 
         if facname is not None and len(facname)!=len(arg)-1:
             raise(RuntimeError('length of facname and arguments must satisfy len(facname)==len(arg)-1'))

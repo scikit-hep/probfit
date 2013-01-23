@@ -29,7 +29,8 @@ def rename(f, newarg):
     """
     return FakeFunc(f, newarg)
 
-def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None):
+def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None,
+                    skip_prefix=None): # this needs a seiours refactor
     """
     merge function arguments.::
 
@@ -56,6 +57,9 @@ def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None):
           should not be applied. The choice of prefix applice to factor_list
           will be in the same order as prefix. Default None
 
+        - **skip_prefix** list of variable names that prefix should not be
+          applied to.
+
     **Return**
 
         tuple(Merged Func Code, position array)
@@ -71,13 +75,13 @@ def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None):
         raise ValueError('prefix should have the same length as number of ',
                          'functions. Expect %d(%r)' % (len(arg), arg))
     all_arg = []
-   
+    skip_prefix = set([]) if skip_prefix is None else set(skip_prefix)
     for i,f in enumerate(arg):
         tmp = []
         first = skip_first
         for vn in describe(f):
             newv = vn
-            if not first and prefix is not None:
+            if not first and prefix is not None and newv not in skip_prefix:
                 newv = prefix[i]+newv
             first = False
             tmp.append(newv)
@@ -88,7 +92,7 @@ def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None):
             tmp = []
             for vn in describe(f):
                 newv = vn
-                if prefix is not None:
+                if prefix is not None and newv not in skip_prefix:
                     newv = prefix[i]+newv
                 first = False
                 tmp.append(newv)
