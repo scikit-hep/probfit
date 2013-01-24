@@ -11,7 +11,7 @@ from math import sqrt, ceil, floor
 from warnings import warn
 
 
-def draw_simultaneous(self, minuit=None, args=None, errors=None):
+def draw_simultaneous(self, minuit=None, args=None, errors=None, **kwds):
     numf = len(self.allf)
     numraw = sqrt(numf)
     numcol = ceil(numraw)
@@ -20,7 +20,7 @@ def draw_simultaneous(self, minuit=None, args=None, errors=None):
     for i in range(numf):
         plt.subplot(numrow, numcol, i+1)
         part_args, part_errors = self.args_and_error_for(i, minuit, args, errors)
-        self.allf[i].draw(args=part_args, errors=part_errors)
+        self.allf[i].draw(args=part_args, errors=part_errors, **kwds)
 
 
 def _get_args_and_errors(self, minuit=None, args=None, errors=None):

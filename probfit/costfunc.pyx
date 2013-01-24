@@ -110,8 +110,9 @@ cdef class SimultaneousFit:
         plt.show()
 
 
-    def draw(self, minuit=None, args=None, errors=None):
-        plotting.draw_simultaneous(self, minuit=minuit, args=args, errors=errors)
+    def draw(self, minuit=None, args=None, errors=None, **kwds):
+        plotting.draw_simultaneous(self, minuit=minuit, args=args,
+                                   errors=errors, **kwds)
 
 
 cdef class UnbinnedLH:
