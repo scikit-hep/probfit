@@ -29,7 +29,7 @@ normally used in B physics is also provided.
 Requirement
 -----------
 
-- iminuit https://iminuit.github.com/iminuit/
+- iminuit http://iminuit.github.com/iminuit/
 - numpy http://www.numpy.org/
 - matplotlib http://matplotlib.org/
 
