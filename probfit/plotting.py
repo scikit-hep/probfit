@@ -65,7 +65,7 @@ def _param_text(parameters, arg, error):
 
 #from UML
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
-            parmloc=(0.05, 0.95), nfbins=500, print_par=False,
+            parmloc=(0.05, 0.95), nfbins=500, print_par=True,
             args=None, errors=None, parts=False):
 
     ax = plt.gca() if ax is None else ax
@@ -73,33 +73,33 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
     n, e, patches = ax.hist(self.data, bins=bins, weights=self.weights,
-                            histtype='step', range=bound, normed=True)
+                            histtype='step', range=bound,
+                            normed=not self.extended)
 
-    bound = (e[0], e[-1])
+    #bound = (e[0], e[-1])
     draw_arg = [('lw', 2)]
     if not parts:
         draw_arg.append(('color', 'r'))
 
-    draw_pdf(self.f, arg, bound, bins=nfbins, density=True,
+    draw_pdf_with_edges(self.f, arg, e, density=not self.extended,
                     **dict(draw_arg))
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
             for p in f_parts():
-                draw_pdf(p, arg, bound, bins=nfbins, density=True)
+                draw_pdf_with_edges(p, arg, e, density=not self.extended)
 
     ax.grid(True)
 
     txt = _param_text(describe(self), arg, error)
     if print_par:
-        print txt
-    ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
-            transform=ax.transAxes)
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+                transform=ax.transAxes)
 
 
 #from chi2 regression
-def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=False,
+def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
             args=None, errors=None):
 
     ax = plt.gca() if ax is None else ax
@@ -128,15 +128,13 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=False,
     txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
 
     if print_par:
-        print txt
-
-    ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
 
 
 #from binned chi2
 def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
-             print_par=False, args=None, errors=None, parts=False):
+             print_par=True, args=None, errors=None, parts=False):
 
     ax = ax=plt.gca() if ax is None else ax
 
@@ -173,15 +171,13 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
     txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
 
     if print_par:
-        print txt
-
-    ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
-            transform=ax.transAxes)
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+                transform=ax.transAxes)
 
 
 #from binnedLH
 def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
-                nfbins=1000, ax=None, print_par=False,
+                nfbins=1000, ax=None, print_par=True,
                 args=None, errors=None, parts=False):
     ax = ax=plt.gca() if ax is None else ax
 
@@ -220,9 +216,7 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     txt = _param_text(describe(self), arg, error)
 
     if print_par:
-        print txt
-
-    ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
 
 
@@ -313,10 +307,12 @@ def draw_pdf_with_edges(f, arg, edges, scale=1.0, density=True,
 def draw_pdf_with_midpoints(f, arg, x, scale=1.0, normed_pdf=False, **kwds):
     arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
     yf = vector_apply(f, x, *arg)
+
     if normed_pdf:
         normed_factor = sum(yf) # assume equal binwidth
         yf /= normed_factor
     yf *= scale
+
     plt.plot(x, yf, **kwds)
     return x, yf
 

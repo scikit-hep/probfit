@@ -1,4 +1,5 @@
 import unittest
+from iminuit import Minuit
 from probfit import *
 from probfit.pdf import  gaussian
 from probfit.functor import Extended
@@ -90,6 +91,14 @@ class TestOneshot(unittest.TestCase):
                         mean=4.5, sigma=1.5, print_level=0)
         assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
         assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
+
+    def test_extended_ulh(self):
+        eg = Extended(gaussian)
+        lh = UnbinnedLH(eg, self.data, extended=True, extended_bound=(-20,20))
+        m = Minuit(lh, mean=4.5, sigma=1.5, N=19000., 
+                   pedantic=False, print_level=0)
+        m.migrad()
+        assert_almost_equal(m.values['N'],20000, delta=sqrt(20000.))
 
 if __name__ == '__main__':
     unittest.main()

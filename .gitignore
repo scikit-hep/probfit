@@ -16,5 +16,6 @@ actual
 dist
 .coverage
 cover
+Untitled*.*
 
 !/tutorial/*.ipynb

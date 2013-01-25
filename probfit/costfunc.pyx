@@ -6,7 +6,7 @@ from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, log1p, sqrt
 import plotting
 from matplotlib import pyplot as plt
 from _libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f,\
-                      csum, compute_bin_lh_f
+                      csum, compute_bin_lh_f, integrate1d
 from funcutil import FakeFuncCode, merge_func_code
 from nputil import float2double, mid, minmax
 from functor cimport construct_arg
@@ -123,8 +123,11 @@ cdef class UnbinnedLH:
     cdef readonly int data_len
     cdef readonly badvalue
     cdef readonly tuple last_arg
-
-    def __init__(self, f, data , weights=None, badvalue=-100000):
+    cdef readonly bint extended
+    cdef readonly tuple extended_bound
+    cdef readonly int extended_nint
+    def __init__(self, f, data , weights=None, extended=False,
+                 extended_bound=None, extended_nint=1000, badvalue=-100000):
         """
         __init__(self, f, data , weights=None, badvalue=-100000)
 
@@ -133,7 +136,6 @@ cdef class UnbinnedLH:
 
         .. math::
             \\textrm{UnbinnedLH} = \sum_{x \in \\textrm{data}} - \log f(x, arg \ldots)
-
         **Arguments**
 
             - **f** callable object. PDF that describe the data. The parameters
@@ -155,7 +157,16 @@ cdef class UnbinnedLH:
               or your PDF parameter has gone into unphysical region and return
               negative probability density. This should be a large negative
               number so that iminuit will avoid those points. Default -100000.
+            - **extended** Set to True for extended fit. Default False. If Set
+              to True the following term is added to resulting likelihood
 
+              .. math::
+                \\textrm{ext_term} = \\int_{\\textrm{extended_bound}}f(args, \\ldots)
+
+            - **extended_bound** Bound for calculating extended term.
+              Default None.
+            - **extended_nint** number of trapezoid pieces to sum up as 
+              integral for extende Term. Default 1000.
         .. note::
             There is a notable lack of **sum_w2** for unbinned likelihood. I
             feel like the solutions are quite sketchy. There are multiple ways
@@ -170,7 +181,11 @@ cdef class UnbinnedLH:
         self.data = float2double(data)
         self.data_len = len(data)
         self.badvalue = badvalue
-
+        self.extended = extended
+        self.extended_bound = extended_bound
+        self.extended_nint = extended_nint
+        if extended and extended_bound is None:
+            raise ValueError('extended_bound must be given for extended fit.')
 
     def __call__(self,*arg):
         """
@@ -178,12 +193,18 @@ cdef class UnbinnedLH:
         Position argument will be passed to pdf with independent vairable
         from `data` is given as the frist argument.
         """
+        cdef double nll = 0.
+        cdef double extended_term = 0.
         self.last_arg = arg
-        return compute_nll(self.f, self.data, self.weights, arg, self.badvalue)
-
+        nll = compute_nll(self.f, self.data, self.weights, arg, self.badvalue)
+        if self.extended:
+            extended_term = integrate1d(self.f, self.extended_bound,
+                                        self.extended_nint, arg)
+            nll += extended_term
+        return nll
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
-            parmloc=(0.05,0.95), nfbins=200, print_par=False, args=None,
+            parmloc=(0.05,0.95), nfbins=200, print_par=True, args=None,
             errors=None, parts=False):
         """
         Draw comparison between histogram of data and pdf.
@@ -212,7 +233,7 @@ cdef class UnbinnedLH:
             - **nfbins** how many point pdf should be evaluated. Default 200.
 
             - **print_par** print parameters and error on the plot. Default
-              False.
+              True.
 
             - **args** Optional. If minuit is not given, parameter value is
               determined from args. This can be dictionary of the form
@@ -397,7 +418,7 @@ cdef class BinnedLH:
 
 
     def draw(self, minuit=None, ax = None,
-            parmloc=(0.05,0.95), nfbins=200, print_par=False,
+            parmloc=(0.05,0.95), nfbins=200, print_par=True,
             args=None, errors=None, parts=False):
         """
         Draw comparison between histogram of data and pdf.
@@ -419,7 +440,7 @@ cdef class BinnedLH:
             - **nfbins** how many point pdf should be evaluated. Default 200.
 
             - **print_par** print parameters and error on the plot.
-              Default False.
+              Default True.
         """
         return plotting.draw_blh(self, minuit=minuit,
             ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
@@ -505,7 +526,7 @@ cdef class Chi2Regression:
         return 1.0
 
 
-    def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=False,
+    def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=True,
              args=None, errors=None):
         """
         Draw comparison between points (**x**,**y**) and the function **f**.
@@ -525,7 +546,7 @@ cdef class Chi2Regression:
               directy to legend loc named parameter. Default (0.05,0.95).
 
             - **print_par** print parameters and error on the plot.
-              Default False.
+              Default True.
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
                 print_par=print_par, args=args, errors=errors)
@@ -636,7 +657,7 @@ cdef class BinnedChi2:
 
 
     def draw(self, minuit=None, ax = None, parmloc=(0.05,0.95), nfbins=200,
-             print_par=False, args=None, errors=None, parts=False):
+             print_par=True, args=None, errors=None, parts=False):
         """
         Draw comparison histogram of data and the function **f**.
 
@@ -657,7 +678,7 @@ cdef class BinnedChi2:
             - **nfbins** number of points to calculate f
 
             - **print_par** print parameters and error on the plot.
-              Default False.
+              Default True.
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
             parmloc=parmloc, nfbins=nfbins, print_par=print_par,
