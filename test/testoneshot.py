@@ -100,5 +100,14 @@ class TestOneshot(unittest.TestCase):
         m.migrad()
         assert_almost_equal(m.values['N'],20000, delta=sqrt(20000.))
 
+
+    def test_extended_ulh_2(self):
+        eg = Extended(gaussian)
+        lh = UnbinnedLH(eg, self.data, extended=True)
+        m = Minuit(lh, mean=4.5, sigma=1.5, N=19000., 
+                   pedantic=False, print_level=0)
+        m.migrad()
+        assert_almost_equal(m.values['N'],20000, delta=sqrt(20000.))
+
 if __name__ == '__main__':
     unittest.main()

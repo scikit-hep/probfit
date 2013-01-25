@@ -165,7 +165,7 @@ cdef class UnbinnedLH:
                 \\textrm{ext_term} = \\int_{x \in \\textrm{extended_bound}}f(x, args, \\ldots) \\textrm{d} x
 
             - **extended_bound** Bound for calculating extended term.
-              Default None.
+              Default None(minimum and maximum of data will be used).
             - **extended_nint** number of trapezoid pieces to sum up as 
               integral for extende Term. Default 1000.
         .. note::
@@ -186,7 +186,7 @@ cdef class UnbinnedLH:
         self.extended_bound = extended_bound
         self.extended_nint = extended_nint
         if extended and extended_bound is None:
-            raise ValueError('extended_bound must be given for extended fit.')
+            self.extended_bound = minmax(data)
 
     def __call__(self,*arg):
         """
