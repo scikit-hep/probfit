@@ -158,10 +158,11 @@ cdef class UnbinnedLH:
               negative probability density. This should be a large negative
               number so that iminuit will avoid those points. Default -100000.
             - **extended** Set to True for extended fit. Default False. If Set
-              to True the following term is added to resulting likelihood
+              to True the following term is added to resulting negative log
+              likelihood
 
               .. math::
-                \\textrm{ext_term} = \\int_{\\textrm{extended_bound}}f(args, \\ldots)
+                \\textrm{ext_term} = \\int_{x \in \\textrm{extended_bound}}f(x, args, \\ldots) \\textrm{d} x
 
             - **extended_bound** Bound for calculating extended term.
               Default None.
