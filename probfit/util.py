@@ -20,5 +20,8 @@ def remove_prefix(s, prefix):
     if s.startswith(prefix+'_'):
         l = len(prefix)+1
         return s[l:]
+    elif s.startswith(prefix):
+        l = len(prefix)
+        return s[l:]
     else:
         return s

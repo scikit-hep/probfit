@@ -1,7 +1,7 @@
 #cython: embedsignature=True
 cimport cython
-from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GET_ITEM,\
-                     PyObject, PyTuple_SetItem, PyTuple_SET_ITEM,\
+from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GetItem,\
+                     PyObject, PyTuple_SetItem, PyTuple_SetItem,\
                      PyTuple_New, Py_INCREF
 
 import numpy as np
@@ -15,16 +15,16 @@ from util import describe
 
 cpdef tuple construct_arg(tuple arg, np.ndarray[np.int_t] fpos):
     cdef int size = fpos.shape[0]
-    cdef int i,itmp
+    cdef int i, itmp
     cdef np.int_t* fposdata = <np.int_t*>fpos.data
     cdef tuple ret = PyTuple_New(size)
     cdef object tmpo
     for i in range(size):
         itmp = fposdata[i]
-        tmpo = <object>PyTuple_GET_ITEM(arg, itmp)
+        tmpo = <object>PyTuple_GetItem(arg, itmp)
         Py_INCREF(tmpo)
         #Py_INCREF(tmpo) #first one for the case second one for the steal
-        PyTuple_SET_ITEM(ret, i, tmpo)
+        PyTuple_SetItem(ret, i, tmpo)
     return ret
 
 #TODO: optimize this may be check id() instead of actual comparison?

@@ -205,3 +205,20 @@ def test_draw_simultaneous():
     ulh2 = UnbinnedLH(g2, shifted)
     sim = SimultaneousFit(ulh1,ulh2)
     sim.draw(args=(0, 1, 3))
+
+@image_comparison('draw_simultaneous_prefix.png')
+def test_draw_simultaneous_prefix():
+    npr.seed(0)
+    data = npr.randn(10000)
+    shifted = data+3.
+    plt.figure()
+    g1 = rename(gaussian,['x', 'lmu', 'sigma'])
+    g2 = rename(gaussian,['x', 'rmu', 'sigma'])
+    ulh1 = UnbinnedLH(g1, data)
+    ulh2 = UnbinnedLH(g2, shifted)
+    sim = SimultaneousFit(ulh1,ulh2, prefix=['g1_','g2_'])
+    m = Minuit(sim, g1_lmu=0., g1_sigma=1., g2_rmu=0., g2_sigma=1.,
+               print_level=0)
+    m.migrad()
+    sim.draw(m)
+
