@@ -71,7 +71,9 @@ cdef class HistogramPdf:
 
         HistogramPdf(bin_contents, bin_edges, xname='x')
         """
-        self.hy= hy
+        # Normalize, so the integral is unity
+        yint= hy*(binedges[1:]-binedges[:-1])
+        self.hy= hy/yint.sum()
         self.binedges= binedges
         if len(binedges)!= len(hy)+1:
             raise ValueError('binedges must be exactly one entry more than hy')
