@@ -57,6 +57,36 @@ cdef class Polynomial:
         return ret
 
 
+cdef class HistogramPdf:
+    cdef np.ndarray hy
+    cdef np.ndarray binedges
+    cdef public object func_code
+    cdef public object func_defaults
+    def __init__(self, hy, binedges, xname='x'):
+        """           
+        A histogram PDF. User supplies a template histogram with bin contents and bin
+        edges. The histogram does not have to be normalized. The resulting PDF is normalized.
+        """
+        # Normalize, so the integral is unity
+        yint= hy*(binedges[1:]-binedges[:-1])
+        self.hy= hy.astype(float)/float(yint.sum())
+        self.binedges= binedges
+        if len(binedges)!= len(hy)+1:
+            raise ValueError('binedges must be exactly one entry more than hy')
+        # Only one variable. The PDF shape is fixed
+        varnames= [xname] 
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+
+    def __call__(self, *arg):
+        cdef double x = arg[0]
+        [i]= np.digitize([x], self.binedges)
+        if i >0 and i<=len(self.hy):
+            return self.hy[i-1]
+        else:
+            return 0.0
+
+
 cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_R):
     """
     Unnormalized double gaussian
