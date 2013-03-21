@@ -63,17 +63,13 @@ cdef class HistogramPdf:
     cdef public object func_code
     cdef public object func_defaults
     def __init__(self, hy, binedges, xname='x'):
-        """
-        .. math::
-           
-        A histogram PDF. User supplies a template histogram with bin edges, 
-        bin content values and their errors.
-
-        HistogramPdf(bin_contents, bin_edges, xname='x')
+        """           
+        A histogram PDF. User supplies a template histogram with bin contents and bin
+        edges. The histogram does not have to be normalized. The resulting PDF is normalized.
         """
         # Normalize, so the integral is unity
         yint= hy*(binedges[1:]-binedges[:-1])
-        self.hy= hy/yint.sum()
+        self.hy= hy.astype(float)/float(yint.sum())
         self.binedges= binedges
         if len(binedges)!= len(hy)+1:
             raise ValueError('binedges must be exactly one entry more than hy')
@@ -88,7 +84,7 @@ cdef class HistogramPdf:
         if i >0 and i<=len(self.hy):
             return self.hy[i-1]
         else:
-            return 0
+            return 0.0
 
 
 cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_R):
