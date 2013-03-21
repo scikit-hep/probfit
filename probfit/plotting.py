@@ -146,7 +146,7 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
 
     bound = (self.edges[0], self.edges[-1])
 
-    scale = nfbins/self.bins #scale back to bins
+    scale = nfbins/float(self.bins) #scale back to bins
 
     draw_arg = [('lw', 2)]
 
@@ -200,7 +200,10 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     if not parts:
         draw_arg.append(('color', 'r'))
     bound = (self.edges[0], self.edges[-1])
-    scale = 1. if not self.extended else nfbins/self.bins #scale back to bins
+    
+    #scale back to bins
+    scale = 1. if not self.extended else nfbins/float(self.bins) 
+    
     draw_pdf(self.f, arg, bins=nfbins, bound=bound, density=not self.extended,
              scale=scale, **dict(draw_arg))
 
@@ -300,6 +303,7 @@ def draw_pdf_with_edges(f, arg, edges, scale=1.0, density=True,
     x = (edges[:-1]+edges[1:])/2.0
     bw = np.diff(edges)
     scale *= bw if not density else 1.
+
     return draw_pdf_with_midpoints(f, arg, x, scale=scale,
                                    normed_pdf=normed_pdf, **kwds)
 
