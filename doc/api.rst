@@ -221,6 +221,13 @@ Polynomial
 .. plot:: pyplots/pdf/polynomial.py
     :class: lightbox
 
+HistogramPdf
+^^^^^^^^^^^^
+.. autoclass:: HistogramPdf
+
+.. plot:: pyplots/pdf/histogrampdf.py
+    :class: lightbox
+
 Useful Utility Function
 -----------------------
 vector_apply

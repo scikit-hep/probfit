@@ -104,6 +104,14 @@ def test_cauchy():
     assert_almost_equal(cauchy(1, 1, 2.), 0.15915494309189535)
     assert_almost_equal(cauchy(1, 2, 4.), 0.07489644380795074)
 
+def test_HistogramPdf():
+    be= np.array([0,1,3,4])
+    hy= np.array([10,30,50])
+    f= HistogramPdf(hy,be)
+    assert_almost_equal(f(0.5), 10.0/120.0)
+    assert_almost_equal(f(1.2), 30.0/120.0)
+    assert_almost_equal(f(2.9), 30.0/120.0)
+    assert_almost_equal(f(3.6), 50.0/120.0)
 
 def test__vector_apply():
     def f(x, y):
