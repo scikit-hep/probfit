@@ -19,7 +19,8 @@ cpdef double compute_bin_lh_f(f,
                     np.ndarray[np.double_t] w2,
                     double N, #sum of h
                     tuple arg, double badvalue,
-                    bint extend, bint use_sumw2) except *
+                    bint extend, bint use_sumw2,
+                    int nint_subdiv) except *
 
 cpdef double compute_nll(f,np.ndarray data,w,arg,double badvalue) except *
 
@@ -36,9 +37,12 @@ cpdef double compute_chi2_f(f,
                     tuple arg) except *
 
 cpdef double compute_bin_chi2_f(f,
-                np.ndarray[np.double_t] x,np.ndarray[np.double_t] y,
-                np.ndarray[np.double_t]error,np.ndarray[np.double_t] binwidth,
-                np.ndarray[np.double_t]weights,tuple arg) except *
+                    np.ndarray[np.double_t] edges,
+                    np.ndarray[np.double_t] y,
+                    np.ndarray[np.double_t] error,
+                    np.ndarray[np.double_t] weights,
+                    tuple arg,
+                    int nint_subdiv) except *
 
 cpdef compute_cdf(np.ndarray[np.double_t] pdf, np.ndarray[np.double_t] x)
 

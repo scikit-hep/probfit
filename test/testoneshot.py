@@ -30,6 +30,7 @@ class TestOneshot(unittest.TestCase):
         egauss = Extended(gaussian)
         fit,m = fit_binx2(egauss, self.data, bins=100, bound=(1.,9.),
             quiet=True, mean=4., sigma=1., N=10000., print_level=0)
+        assert(m.migrad_ok())
         assert_almost_equal(m.values['mean'], 5., delta=3*m.errors['mean'])
         assert_almost_equal(m.values['sigma'], 2., delta=3*m.errors['sigma'])
 
@@ -37,6 +38,7 @@ class TestOneshot(unittest.TestCase):
         ngauss=Normalized(gaussian,(1.,9.))
         fit,m = fit_binlh(ngauss, self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.5, print_level=0)
+        assert(m.migrad_ok())
         assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
         assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
 
@@ -45,6 +47,7 @@ class TestOneshot(unittest.TestCase):
         fit,m = fit_binlh(egauss,self.data, bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1., N=10000.,
             print_level=0, extended=True)
+        assert(m.migrad_ok())
         assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
         assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
         assert_almost_equal(m.values['N'],20000,delta=3*m.errors['N'])
@@ -53,7 +56,8 @@ class TestOneshot(unittest.TestCase):
         egauss = Extended(gaussian)
         fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
-            print_level=-1, extended=True)
+            print_level=0, extended=True)
+        assert(m.migrad_ok())
         assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
         assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
         assert_almost_equal(m.values['N'],2000,delta=3*m.errors['N'])
@@ -62,10 +66,11 @@ class TestOneshot(unittest.TestCase):
         egauss = Extended(gaussian)
         fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
-            print_level=-1, extended=True)
+            print_level=0, extended=True)
         assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
         assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
         assert_almost_equal(m.values['N'],2000,delta=3*m.errors['N'])
+        assert(m.migrad_ok())
 
         fit2,m2 = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
@@ -73,8 +78,11 @@ class TestOneshot(unittest.TestCase):
         #assert_almost_equal(m2.values['mean'],5.,delta=3*m2.errors['mean'])
         assert_almost_equal(m2.values['sigma'],2.,delta=3*m2.errors['sigma'])
         assert_almost_equal(m2.values['N'], 2000., delta=3*m2.errors['N'])
+        assert(m2.migrad_ok())
+
         m.minos()
         m2.minos()
+
         #now error should scale correctly
         assert_almost_equal( m.errors['mean']/sqrt(10),
                                 m2.errors['mean'],
@@ -89,6 +97,7 @@ class TestOneshot(unittest.TestCase):
     def test_uml(self):
         fit,m = fit_uml(gaussian, self.data, quiet=True,
                         mean=4.5, sigma=1.5, print_level=0)
+        assert(m.migrad_ok())
         assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
         assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
 
@@ -99,7 +108,7 @@ class TestOneshot(unittest.TestCase):
                    pedantic=False, print_level=0)
         m.migrad()
         assert_almost_equal(m.values['N'],20000, delta=sqrt(20000.))
-
+        assert(m.migrad_ok())
 
     def test_extended_ulh_2(self):
         eg = Extended(gaussian)
@@ -107,6 +116,7 @@ class TestOneshot(unittest.TestCase):
         m = Minuit(lh, mean=4.5, sigma=1.5, N=19000., 
                    pedantic=False, print_level=0)
         m.migrad()
+        assert(m.migrad_ok())
         assert_almost_equal(m.values['N'],20000, delta=sqrt(20000.))
 
 if __name__ == '__main__':

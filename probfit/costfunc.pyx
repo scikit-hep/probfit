@@ -285,8 +285,9 @@ cdef class BinnedLH:
     cdef readonly int ndof
     cdef readonly bint extended
     cdef readonly bint use_w2
+    cdef int nint_subdiv
     def __init__(self, f, data, bins=40, weights=None, bound=None,
-            badvalue=1000000, extended=False, use_w2=False):
+            badvalue=1000000, extended=False, use_w2=False, nint_subdiv=5):
         """
         __init__(self, f, data, bins=40, weights=None, bound=None,
             badvalue=1000000, extended=False, use_w2=False)
@@ -373,9 +374,14 @@ cdef class BinnedLH:
             - **use_w2** Scale -log likelihood so that to the original
               unweighted statistics. Default False.
 
+            - **nint_subdiv** controls how BinnedLH do the integral to find
+              expect number of event in each bin. The number represent the 
+              number of subdivisions in each bin to do trapezoid sum.
+              Default 5.
+
         """
         self.f = f
-        self.func_code = FakeFuncCode(f,dock=True)
+        self.func_code = FakeFuncCode(f, dock=True)
         self.use_w2 = use_w2
         self.extended = extended
 
@@ -383,7 +389,7 @@ cdef class BinnedLH:
 
         self.mymin, self.mymax = bound
 
-        h,self.edges = np.histogram(data, bins, range=bound, weights=weights)
+        h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
         self.h = float2double(h)
         self.N = csum(self.h)
@@ -402,6 +408,8 @@ cdef class BinnedLH:
         self.badvalue = badvalue
         self.ndof = self.bins-(self.func_code.co_argcount-1)
 
+        self.nint_subdiv = nint_subdiv
+
 
     def __call__(self,*arg):
         """
@@ -415,7 +423,8 @@ cdef class BinnedLH:
                                 self.w2,
                                 self.N, #sum of h
                                 arg, self.badvalue,
-                                self.extended, self.use_w2)
+                                self.extended, self.use_w2,
+                                self.nint_subdiv)
         return ret
 
 
@@ -580,8 +589,9 @@ cdef class BinnedChi2:
     cdef readonly double mymax
     cdef readonly tuple last_arg
     cdef readonly int ndof
+    cdef int nint_subdiv
     def __init__(self, f, data, bins=40, weights=None, bound=None,
-                 sumw2=False):
+                 sumw2=False, nint_subdiv=5):
         """
         __init__(self, f, data, bins=40, weights=None, bound=None,
                  sumw2=False):
@@ -619,6 +629,11 @@ cdef class BinnedChi2:
 
             - **sumw2** scale the error using
               :math:`\sqrt{\sum_{j \in \\textrm{bin}_i} w_j^2}`.
+
+            - **nint_subdiv** controls how BinnedLH do the integral to find
+              expect number of event in each bin. The number represent the 
+              number of subdivisions in each bin to do trapezoid sum.
+              Default 5.
         """
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)
@@ -626,7 +641,7 @@ cdef class BinnedChi2:
             bound = minmax(data)
         self.mymin,self.mymax = bound
 
-        h,self.edges = np.histogram(data,bins,range=bound,weights=weights)
+        h, self.edges = np.histogram(data,bins,range=bound,weights=weights)
 
         self.h = float2double(h)
         self.midpoints = mid(self.edges)
@@ -646,7 +661,7 @@ cdef class BinnedChi2:
 
         self.bins = bins
         self.ndof = self.bins-1-len(describe(self)) # fix this taking care of fixed parameter
-
+        self.nint_subdiv = nint_subdiv
 
     #lazy mid point implementation
     def __call__(self,*arg):
@@ -654,8 +669,8 @@ cdef class BinnedChi2:
         Calculate :math:`\chi^2` given positional arguments
         """
         self.last_arg = arg
-        return compute_bin_chi2_f(self.f, self.midpoints, self.h, self.err,
-                                  self.binwidth, None, arg)
+        return compute_bin_chi2_f(self.f,  self.edges, self.h, self.err,
+                                  None, arg, self.nint_subdiv)
 
 
     def draw(self, minuit=None, ax = None, parmloc=(0.05,0.95), nfbins=200,
