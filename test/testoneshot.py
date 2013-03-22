@@ -11,7 +11,10 @@ from iminuit.iminuit_warnings import InitialParamWarning
 import warnings
 
 def assert_almost_equal(x,y,delta=1e-7):
-    assert(y-delta < x < y+delta)
+    if y-delta < x < y+delta:
+        pass
+    else:
+        raise AssertionError('%10f and %10f differ more than %e'%(x,y,delta))
 
 class TestOneshot(unittest.TestCase):
 
@@ -36,7 +39,7 @@ class TestOneshot(unittest.TestCase):
 
     def test_binlh(self):
         ngauss=Normalized(gaussian,(1.,9.))
-        fit,m = fit_binlh(ngauss, self.data,bins=1000, bound=(1.,9.), quiet=True,
+        fit,m = fit_binlh(ngauss, self.data,bins=100, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.5, print_level=0)
         assert(m.migrad_ok())
         assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
@@ -44,7 +47,7 @@ class TestOneshot(unittest.TestCase):
 
     def test_extended_binlh(self):
         egauss = Extended(gaussian)
-        fit,m = fit_binlh(egauss,self.data, bins=1000, bound=(1.,9.), quiet=True,
+        fit,m = fit_binlh(egauss,self.data, bins=100, bound=(1.,9.), quiet=True,
             mean=4., sigma=1., N=10000.,
             print_level=0, extended=True)
         assert(m.migrad_ok())
@@ -54,30 +57,30 @@ class TestOneshot(unittest.TestCase):
 
     def test_extended_binlh_ww(self):
         egauss = Extended(gaussian)
-        fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
+        fit,m = fit_binlh(egauss,self.data,bins=100, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=0, extended=True)
         assert(m.migrad_ok())
-        assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
-        assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
-        assert_almost_equal(m.values['N'],2000,delta=3*m.errors['N'])
+        assert_almost_equal(m.values['mean'],5.,delta=m.errors['mean'])
+        assert_almost_equal(m.values['sigma'],2.,delta=m.errors['sigma'])
+        assert_almost_equal(m.values['N'],2000,delta=m.errors['N'])
 
     def test_extended_binlh_ww_w2(self):
         egauss = Extended(gaussian)
-        fit,m = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
+        fit,m = fit_binlh(egauss,self.data,bins=100, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=0, extended=True)
-        assert_almost_equal(m.values['mean'],5.,delta=3*m.errors['mean'])
-        assert_almost_equal(m.values['sigma'],2.,delta=3*m.errors['sigma'])
-        assert_almost_equal(m.values['N'],2000,delta=3*m.errors['N'])
+        assert_almost_equal(m.values['mean'],5.,delta=m.errors['mean'])
+        assert_almost_equal(m.values['sigma'],2.,delta=m.errors['sigma'])
+        assert_almost_equal(m.values['N'],2000,delta=m.errors['N'])
         assert(m.migrad_ok())
 
-        fit2,m2 = fit_binlh(egauss,self.data,bins=1000, bound=(1.,9.), quiet=True,
+        fit2,m2 = fit_binlh(egauss,self.data,bins=100, bound=(1.,9.), quiet=True,
             mean=4., sigma=1.,N=1000., weights=self.wdown,
             print_level=-1, extended=True, use_w2=True)
-        #assert_almost_equal(m2.values['mean'],5.,delta=3*m2.errors['mean'])
-        assert_almost_equal(m2.values['sigma'],2.,delta=3*m2.errors['sigma'])
-        assert_almost_equal(m2.values['N'], 2000., delta=3*m2.errors['N'])
+        assert_almost_equal(m2.values['mean'],5.,delta=2*m2.errors['mean'])
+        assert_almost_equal(m2.values['sigma'],2.,delta=2*m2.errors['sigma'])
+        assert_almost_equal(m2.values['N'], 2000., delta=2*m2.errors['N'])
         assert(m2.migrad_ok())
 
         m.minos()

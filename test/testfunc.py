@@ -133,7 +133,7 @@ def test_integrate1d():
     y = 3.
     integral = integrate1d(f, bound, 1000, tuple([y]))
     analytic = intf(bound[1], y) - intf(bound[0], y)
-    assert_almost_equal(integral, 12.000004509013694)
+    assert_almost_equal(integral, analytic)
 
 
 def test_csum():

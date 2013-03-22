@@ -128,7 +128,7 @@ cdef class UnbinnedLH:
     cdef readonly tuple extended_bound
     cdef readonly int extended_nint
     def __init__(self, f, data , weights=None, extended=False,
-                 extended_bound=None, extended_nint=1000, badvalue=-100000):
+                 extended_bound=None, extended_nint=100, badvalue=-100000):
         """
         __init__(self, f, data , weights=None, badvalue=-100000)
 
@@ -167,8 +167,8 @@ cdef class UnbinnedLH:
 
             - **extended_bound** Bound for calculating extended term.
               Default None(minimum and maximum of data will be used).
-            - **extended_nint** number of trapezoid pieces to sum up as 
-              integral for extende Term. Default 1000.
+            - **extended_nint** number pieces to sum up as 
+              integral for extended Term(using simpson3/8). Default 100.
         .. note::
             There is a notable lack of **sum_w2** for unbinned likelihood. I
             feel like the solutions are quite sketchy. There are multiple ways
@@ -293,7 +293,7 @@ cdef class BinnedLH:
     cdef readonly bint use_w2
     cdef int nint_subdiv
     def __init__(self, f, data, bins=40, weights=None, bound=None,
-            badvalue=1000000, extended=False, use_w2=False, nint_subdiv=5):
+            badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1):
         """
         Create a Poisson Binned Likelihood object from given PDF **f** and
         **data** (raw points not histogram). Constant term and expected minimum
@@ -380,8 +380,8 @@ cdef class BinnedLH:
 
             - **nint_subdiv** controls how BinnedLH do the integral to find
               expect number of event in each bin. The number represent the 
-              number of subdivisions in each bin to do trapezoid sum.
-              Default 5.
+              number of subdivisions in each bin to do simpson3/8 rule.
+              Default 1.
 
         """
         self.f = f
@@ -595,7 +595,7 @@ cdef class BinnedChi2:
     cdef readonly int ndof
     cdef int nint_subdiv
     def __init__(self, f, data, bins=40, weights=None, bound=None,
-                 sumw2=False, nint_subdiv=5):
+                 sumw2=False, nint_subdiv=1):
         """
         __init__(self, f, data, bins=40, weights=None, bound=None,
                  sumw2=False):
@@ -636,8 +636,8 @@ cdef class BinnedChi2:
 
             - **nint_subdiv** controls how BinnedChi2 do the integral to find
               expect number of event in each bin. The number represent the 
-              number of subdivisions in each bin to do trapezoid sum.
-              Default 5.
+              number of subdivisions in each bin to do simpson3/8.
+              Default 1.
         """
         self.f = f
         self.func_code = FakeFuncCode(f,dock=True)

@@ -18,5 +18,7 @@ dist
 cover
 Untitled*.*
 *~
+*.orig
+probfit/*.html
 
 !/tutorial/*.ipynb
