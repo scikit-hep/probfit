@@ -1,0 +1,17 @@
+#25 Use simpson3/8 rule instead of trapezoid for integral -- PO
+
+#23 UnbinnedLH draw now show raw yield instead of density -- CC
+
+#23 Add Errorbar option for drawing UnbinnedLH -- CC
+
+#21 Add nint_subdiv to control how BinnedLH and 
+    BinnedChi2 calculate integral -- PO
+
+#19 Fix plotting normlization(to zero) -- PO
+
+#16 Add a pdf class HistogramPdf -- CC
+
+#14 Fix AddPdfNorm calculating wrong factor for the last part -- PO
+
+--------- 1.0.4 ---------
+
