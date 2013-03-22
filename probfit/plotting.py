@@ -66,29 +66,48 @@ def _param_text(parameters, arg, error):
 #from UML
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
             parmloc=(0.05, 0.95), nfbins=500, print_par=True,
-            args=None, errors=None, parts=False):
+            args=None, errors=None, parts=False, show_errbars=None):
 
     ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
-    n, e, patches = ax.hist(self.data, bins=bins, weights=self.weights,
-                            histtype='step', range=bound,
-                            normed=not self.extended)
+    n,e=None,None
+    if show_errbars==None:
+        n, e, patches = ax.hist(self.data, bins=bins, weights=self.weights,
+                                histtype='step', range=bound)
+    elif show_errbars=='normal' or show_errbars=='poisson':
+        n,e = np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
+        pp= ax.errorbar(mid(e), n, np.sqrt(n), fmt='b.', capsize=0)
+        if show_errbars=='poisson':
+             warn(RuntimeWarning('poisson is not implemented. Fall back to \'normal\''))
+            
+    elif show_errbars=='sumw2':
+        n,e = np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
+        weights= None
+        if self.weights!= None:
+            weights= self.weights**2
+        w2,e= np.histogram(self.data, bins=bins, range=bound, weights=weights)
+        pp= ax.errorbar(mid(e), n, np.sqrt(w2), fmt='b.', capsize=0)
+    else:
+        raise ValueError('Unknown show_errbars value '+show_errbars)
+
+    dataint= (n*np.diff(e)).sum()
 
     #bound = (e[0], e[-1])
     draw_arg = [('lw', 2)]
     if not parts:
         draw_arg.append(('color', 'r'))
 
-    draw_pdf_with_edges(self.f, arg, e, density=not self.extended,
-                    **dict(draw_arg))
+    scale= dataint if not self.extended else 1.0
+    draw_pdf_with_edges(self.f, arg, e, density=not self.extended, scale=scale,
+                        **dict(draw_arg))
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
             for p in f_parts():
-                draw_pdf_with_edges(p, arg, e, density=not self.extended)
+                draw_pdf_with_edges(p, arg, e, scale=scale, density=not self.extended)
 
     ax.grid(True)
 
@@ -136,7 +155,7 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
 def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
              print_par=True, args=None, errors=None, parts=False):
 
-    ax = ax=plt.gca() if ax is None else ax
+    ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
@@ -179,7 +198,7 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
 def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
                 nfbins=1000, ax=None, print_par=True,
                 args=None, errors=None, parts=False):
-    ax = ax=plt.gca() if ax is None else ax
+    ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
