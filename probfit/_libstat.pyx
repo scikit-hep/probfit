@@ -2,7 +2,6 @@
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp,pow,fabs,log,tgamma,lgamma,log1p,sqrt
-from nputil import mid
 from warnings import warn
 from probfit_warnings import LogWarning
 np.import_array()
@@ -30,11 +29,7 @@ cpdef double csum(np.ndarray x):
 
 cpdef double integrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg) except *:
     cdef np.ndarray[np.double_t] y = _vector_apply(f,edges,arg)
-    cdef np.ndarray[np.double_t] m = mid(edges)
-    cdef np.ndarray[np.double_t] ym = _vector_apply(f,m,arg)
-
-    return csum(y*bw)/3.0 - bw*(y[0]+y[-1])/6.0 + 2*csum(ym*bw)/3.0 # Simpson's rule 
-    #return csum(y*bw)-0.5*(y[0]+y[-1])*bw#trapezoid
+    return csum(y*bw)-0.5*(y[0]+y[-1])*bw#trapezoid
 
 
 #to do runge kutta or something smarter
