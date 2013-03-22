@@ -36,7 +36,7 @@ cpdef double integrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg) ex
 cpdef double integrate1d(f, tuple bound, int nint, tuple arg=None) except*:
     if arg is None: arg = tuple()
     cdef double ret = 0
-    cdef np.ndarray[np.double_t] edges = np.linspace(bound[0],bound[1],nint)
+    cdef np.ndarray[np.double_t] edges = np.linspace(bound[0], bound[1], nint+1)
     #cdef np.ndarray[np.double_t] bw = edges[1:]-edges[:-1]
     cdef double bw = edges[1]-edges[0]
     return integrate1d_with_edges(f,edges,bw,arg)
@@ -73,7 +73,7 @@ cpdef double compute_bin_lh_f(f,
                     np.ndarray[np.double_t] w2,
                     double N, #sum of h
                     tuple arg, double badvalue,
-                    bint extend, bint use_sumw2) except *:
+                    bint extend, bint use_sumw2, int nint_subdiv) except *:
     """
     Calculate binned likelihood. The behavior depends whether extended
     likelihood and whether use_sumw2 is requested
@@ -93,12 +93,15 @@ cpdef double compute_bin_lh_f(f,
     cdef int i
     cdef int n = len(edges)
 
-    cdef np.ndarray[np.double_t] fedges = _vector_apply(f,edges,arg)
-    cdef np.ndarray[np.double_t] midvalues = (fedges[1:]+fedges[:-1])/2
+    #cdef np.ndarray[np.double_t] fedges = _vector_apply(f,edges,arg)
+    #cdef np.ndarray[np.double_t] midvalues = (fedges[1:]+fedges[:-1])/2 # fix here to do a better integral
+    
+    #cpdef double integrate1d(f, tuple bound, int nint, tuple arg=None)
+    #for i in range(n-1):
+
     cdef double ret = 0.
     cdef double bw = 0.
-    #TODO: change this. This is super inefficient.
-    #cdef double E = integrate1d(f,(edges[0],edges[-1]),10000,arg)
+    
     cdef double factor=0.
     cdef double th=0.
     cdef double tw=0.
@@ -107,10 +110,10 @@ cpdef double compute_bin_lh_f(f,
         #ret -= h[i]*log(midvalues[i])#non zero subtraction
         bw = edges[i+1]-edges[i]
         th = h[i]
-        tm = midvalues[i]
+        tm = integrate1d(f, (edges[i],edges[i+1]), nint_subdiv, arg)
         if not extend:
             if not use_sumw2:
-                ret -= xlogyx(th,tm*N*bw)+(th-tm*bw*N)
+                ret -= xlogyx(th,tm*N)+(th-tm*N)
                 #h[i]*log(midvalues[i]/nh[i]) #subtracting h[i]*log(h[i]/(N*bw))
                 #the second term is added for added precision near the minimum
             else:
@@ -118,17 +121,17 @@ cpdef double compute_bin_lh_f(f,
                 tw = w2[i]
                 #tw = sqrt(tw)
                 factor = th/tw
-                ret -= factor*(wlogyx(th,tm*N*bw,th)+(th-tm*bw*N))
+                ret -= factor*(wlogyx(th,tm*N,th)+(th-tm*N))
         else:
             #print 'h',h[i],'midvalues',midvalues[i]*bw
             if not use_sumw2:
-                ret -= xlogyx(th,tm*bw)+(th-tm*bw)
+                ret -= xlogyx(th,tm)+(th-tm)
             else:
                 if w2[i]<1e-200: continue
                 tw = w2[i]
                 #tw = sqrt(tw)
                 factor = th/tw
-                ret -= factor*(wlogyx(th,tm*bw,th)+(th-tm*bw))
+                ret -= factor*(wlogyx(th,tm,th)+(th-tm))
 
     return ret
 
@@ -194,21 +197,24 @@ cpdef double compute_chi2_f(f,
 
 
 cpdef double compute_bin_chi2_f(f,
-                np.ndarray[np.double_t] x, np.ndarray[np.double_t] y,
-                np.ndarray[np.double_t]error, np.ndarray[np.double_t] binwidth,
-                np.ndarray[np.double_t]weights, tuple arg) except *:
+                    np.ndarray[np.double_t] edges,
+                    np.ndarray[np.double_t] y,
+                    np.ndarray[np.double_t] error,
+                    np.ndarray[np.double_t] weights,
+                    tuple arg,
+                    int nint_subdiv) except *:
     cdef int usew = 1 if weights is not None else 0
     cdef int usee = 1 if error is not None else 0
     cdef int i
-    cdef int datalen = len(x)
+    cdef int datalen = len(edges)-1 
     cdef double diff
     cdef double fx
     cdef double ret = 0.
     cdef double err
     cdef double bw
+
     for i in range(datalen):
-        bw = binwidth[i]
-        fx = f(x[i],*arg)*bw
+        fx = integrate1d(f, (edges[i],edges[i+1]), nint_subdiv, arg)
         diff = fx-y[i]
         if usee==1:
             err = error[i]
