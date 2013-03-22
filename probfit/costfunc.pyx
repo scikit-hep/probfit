@@ -245,9 +245,9 @@ cdef class UnbinnedLH:
               parameter errors are determined from **errors**. Default None.
 
             - **show_errbars** Optional. Default None. No error bars are drawn
-               'normal' : error bar = sqrt(n or sum of weight), 
-               'sumw2' : error bar = sqrt(sum of weight squared)
-               'poisson' : asymmetric error bar based on Poisson PDF (not 
+                - 'normal' : error bar = sqrt(n or sum of weight), 
+                - 'sumw2' : error bar = sqrt(sum of weight squared)
+                - 'poisson' : asymmetric error bar based on Poisson PDF (not 
                 implemented yet)
 
         """
