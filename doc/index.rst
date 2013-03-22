@@ -95,6 +95,8 @@ and send us pull request.
     poly2
     poly3
     novosibirsk
+    HistogramPdf
+    Polynomial
 
 
 Useful utility
