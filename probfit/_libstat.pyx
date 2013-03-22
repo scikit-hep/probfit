@@ -93,12 +93,6 @@ cpdef double compute_bin_lh_f(f,
     cdef int i
     cdef int n = len(edges)
 
-    #cdef np.ndarray[np.double_t] fedges = _vector_apply(f,edges,arg)
-    #cdef np.ndarray[np.double_t] midvalues = (fedges[1:]+fedges[:-1])/2 # fix here to do a better integral
-    
-    #cpdef double integrate1d(f, tuple bound, int nint, tuple arg=None)
-    #for i in range(n-1):
-
     cdef double ret = 0.
     cdef double bw = 0.
     

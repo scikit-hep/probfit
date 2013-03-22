@@ -13,7 +13,10 @@ import numpy as np
 from iminuit import Minuit
 
 def assert_almost_equal(x,y,delta=1e-7):
-    assert(y-delta < x < y+delta)
+    if y-delta < x < y+delta:
+        pass
+    else:
+        raise AssertionError('x = %f and y = %f differs more than %g'%(x,y,delta))
 
 class TestFit(unittest.TestCase):
 
@@ -39,7 +42,7 @@ class TestFit(unittest.TestCase):
         assert_equal(list(describe(f)), ['x','mean','sigma'])
         lh = BinnedLH(gaussian, self.data, bound=[-3,3])
         assert_equal(list(describe(lh)), ['mean','sigma'])
-        assert_almost_equal(lh(0,1), 20.446130781601543)
+        assert_almost_equal(lh(0,1), 20.446130781601543, 1)
         m = Minuit(lh)
         assert_equal(m.errordef, 0.5)
 
@@ -49,7 +52,7 @@ class TestFit(unittest.TestCase):
         assert_equal(list(describe(f)), ['x','mean','sigma'])
         lh = BinnedChi2(gaussian, self.data, bound=[-3,3])
         assert_equal(list(describe(lh)), ['mean','sigma'])
-        assert_almost_equal(lh(0,1), 19951.005399882044)
+        assert_almost_equal(lh(0,1), 19951.005399882044, 1)
         m = Minuit(lh)
         assert_equal(m.errordef, 1.0)
 
@@ -83,6 +86,7 @@ class TestFit(unittest.TestCase):
         assert_equal(describe(sim),['lmu', 'sigma', 'rmu'])
         m = Minuit(sim,sigma=1.2, pedantic=False, print_level=0)
         m.migrad()
+        assert(m.migrad_ok())
         assert_almost_equal(m.values['lmu'], 0., delta=2*m.errors['lmu'])
         assert_almost_equal(m.values['rmu'], 3., delta=2*m.errors['rmu'])
         assert_almost_equal(m.values['sigma'], 1., delta=2*m.errors['sigma'])
