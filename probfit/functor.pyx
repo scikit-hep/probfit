@@ -509,7 +509,7 @@ cdef class Normalized:
     **Arguments**
         - **f** function to normalized.
         - **bound** bound of the normalization.
-        - **nint** optional number of pieces to integrate. Default 1000.
+        - **nint** optional number of pieces to integrate. Default 300.
         - **warnfloat** optinal number of times it should warn if integral
           of the given function is really small. This usually indicate
           you bound doesn't make sense with given parameters.
@@ -564,7 +564,7 @@ cdef class Normalized:
     cdef int warnfloat
     cdef int floatwarned
     cdef public int hit
-    def __init__(self,f,bound,nint=1000,warnfloat=1):
+    def __init__(self,f,bound,nint=300,warnfloat=1):
         self.f = f
         self.norm_cache= 1.
         self.last_arg = None
