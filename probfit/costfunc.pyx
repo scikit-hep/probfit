@@ -289,8 +289,6 @@ cdef class BinnedLH:
     def __init__(self, f, data, bins=40, weights=None, bound=None,
             badvalue=1000000, extended=False, use_w2=False, nint_subdiv=5):
         """
-        __init__(self, f, data, bins=40, weights=None, bound=None,
-            badvalue=1000000, extended=False, use_w2=False)
         Create a Poisson Binned Likelihood object from given PDF **f** and
         **data** (raw points not histogram). Constant term and expected minimum
         are subtracted off (aka. log likelihood ratio). The exact calculation
@@ -630,7 +628,7 @@ cdef class BinnedChi2:
             - **sumw2** scale the error using
               :math:`\sqrt{\sum_{j \in \\textrm{bin}_i} w_j^2}`.
 
-            - **nint_subdiv** controls how BinnedLH do the integral to find
+            - **nint_subdiv** controls how BinnedChi2 do the integral to find
               expect number of event in each bin. The number represent the 
               number of subdivisions in each bin to do trapezoid sum.
               Default 5.
