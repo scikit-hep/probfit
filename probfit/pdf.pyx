@@ -95,7 +95,7 @@ cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_
         f(x;mean,\sigma_L,\sigma_R) =
         \\begin{cases}
             \exp \left[ -\\frac{1}{2} \left(\\frac{x-mean}{\sigma_L}\\right)^2 \\right], & \mbox{if } x < mean \\\\
-            \exp \left[ -\\frac{1}{2} \left( -\\frac{x-mean}{\sigma_R}\\right)^2 \\right], & \mbox{if } x >= mean
+            \exp \left[ -\\frac{1}{2} \left(\\frac{x-mean}{\sigma_R}\\right)^2 \\right], & \mbox{if } x >= mean
         \end{cases}
 
     """
