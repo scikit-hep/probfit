@@ -1,3 +1,5 @@
+#29 probfit integrate1d now use integrate method is available -- PO
+
 #25 Use simpson3/8 rule instead of trapezoid for integral -- PO
 
 #23 UnbinnedLH draw now show raw yield instead of density -- CC
