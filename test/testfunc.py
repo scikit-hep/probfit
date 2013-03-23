@@ -74,6 +74,9 @@ def test_cruijff():
 def test_linear():
     assert_equal(describe(linear), ['x', 'm', 'c'])
     assert_almost_equal(linear(1, 2, 3), 5)
+    assert(hasattr(linear,'integrate'))
+    integral = linear.integrate((0.,1.), 1, 1,1)
+    assert_equal(integral, 1.5)
 
 #cpdef double poly2(double x, double a, double b, double c)
 def test_poly2():
@@ -84,6 +87,13 @@ def test_poly2():
 def test_poly2():
     assert_equal(describe(poly3), ['x', 'a', 'b', 'c', 'd'])
     assert_almost_equal(poly3(2, 3, 4, 5, 6), 56.)
+
+def test_polynomial():
+    p = Polynomial(1)
+    assert_equal(describe(p),['x','c_0','c_1'])
+    assert_equal(p(2,2,1), 4)
+    integral = p.integrate((0,1), 1, 2, 1)
+    assert_equal(integral,2.)
 
 #cpdef double novosibirsk(double x, double width, double peak, double tail)
 def test_novosibirsk():
@@ -135,6 +145,17 @@ def test_integrate1d():
     analytic = intf(bound[1], y) - intf(bound[0], y)
     assert_almost_equal(integral, analytic)
 
+def test_integrate1d_analytic():
+    class temp:
+        def __call__(self, x, m , c):
+            return m*x**2 + c
+        def integrate(self, bound, nint, m, c):
+            a,b = bound
+            return b-a #(wrong on purpose)
+    bound = (0.,10.)
+    f = temp()
+    integral = integrate1d(f, bound, 10, (2.,3.))
+    assert_equal(integral, bound[1]-bound[0])
 
 def test_csum():
     x = np.array([1, 2, 3], dtype=np.double)
