@@ -37,6 +37,8 @@ cpdef double integrate1d_with_edges(f, np.ndarray edges, double bw, tuple arg) e
 #TODO: do something smarter like dynamic edge based on derivative or so
 cpdef double integrate1d(f, tuple bound, int nint, tuple arg=None) except*:
     if arg is None: arg = tuple()
+    if hasattr(f, 'integrate'):
+        return f.integrate(bound, nint, *arg)
     cdef double ret = 0
     cdef np.ndarray[np.double_t] edges = np.linspace(bound[0], bound[1], nint+1)
     #cdef np.ndarray[np.double_t] bw = edges[1:]-edges[:-1]
