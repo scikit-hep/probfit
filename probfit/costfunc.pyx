@@ -206,8 +206,9 @@ cdef class UnbinnedLH:
         return nll
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
-            parmloc=(0.05,0.95), nfbins=200, print_par=True, args=None,
-            errors=None, parts=False, show_errbars=None):
+             parmloc=(0.05,0.95), nfbins=200, print_par=True, args=None,
+             errors=None, parts=False, show_errbars=False, errbar_algo='normal',
+             draw_diff=False):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -244,16 +245,21 @@ cdef class UnbinnedLH:
             - **errors** Optional dictionary of errors. If minuit is not given,
               parameter errors are determined from **errors**. Default None.
 
-            - **show_errbars** Optional. Default None. No error bars are drawn
-               'normal' : error bar = sqrt(n or sum of weight), 
-               'sumw2' : error bar = sqrt(sum of weight squared)
-               'poisson' : asymmetric error bar based on Poisson PDF (not 
-                implemented yet)
+            - **show_errbars** Show error bars. Default False
+
+            - **errbar_algo** How error bars are calculated. Default 'normal'
+               'normal' : error = sqrt( sum of weight )
+               'sumw2'  : error = sqrt( sum of weight**2 )
+
+            - **draw_diff** If True, draw difference between data and PDF
+               Default False.
+               If draw_diff=='norm', draw difference normalized by error
 
         """
         return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
             bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts, show_errbars=show_errbars)
+            args=args, errors=errors, parts=parts, show_errbars=show_errbars,
+            errbar_algo=errbar_algo, draw_diff=draw_diff)
 
 
     def default_errordef(self):
