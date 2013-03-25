@@ -440,7 +440,7 @@ cdef class BinnedLH:
 
     def draw(self, minuit=None, ax = None,
             parmloc=(0.05,0.95), nfbins=200, print_par=True,
-            args=None, errors=None, parts=False):
+            args=None, errors=None, parts=False, draw_diff=False):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -462,10 +462,14 @@ cdef class BinnedLH:
 
             - **print_par** print parameters and error on the plot.
               Default True.
+
+            - **draw_diff** If True, draw difference between data and PDF
+               Default False.
+               If draw_diff=='norm', draw difference normalized by error
         """
         return plotting.draw_blh(self, minuit=minuit,
             ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts)
+            args=args, errors=errors, parts=parts, draw_diff=draw_diff)
 
 
     def default_errordef(self):

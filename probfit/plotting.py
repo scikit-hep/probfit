@@ -208,7 +208,7 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
 #from binnedLH
 def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
                 nfbins=1000, ax=None, print_par=True,
-                args=None, errors=None, parts=False):
+                args=None, errors=None, parts=False, draw_diff=False):
     ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
@@ -220,29 +220,45 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     else:
         err = np.sqrt(self.h)
 
-    if self.extended:
-        ax.errorbar(m, self.h, err, fmt='.')
-    else:
+    n= self.h
+    scale=1.0
+    if not self.extended:
         scale = 1./sum(self.h)/self.binwidth
-        ax.errorbar(m, self.h*scale, err*scale, fmt='.')
+        n*= scale
+        err*= scale
+
+    #if self.extended:
+    #    ax.errorbar(m, self.h, err, fmt='.')
+    #else:
+    #    scale = 1./sum(self.h)/self.binwidth
+    #    ax.errorbar(m, self.h*scale, err*scale, fmt='.')
+
+    if draw_diff:
+        arg = parse_arg(self.f, arg, 1) if isinstance(arg, dict) else arg
+        yf = vector_apply(self.f, m, *arg)
+        yf*= (scale*np.diff(self.edges) if self.extended else scale)
+        n = n- yf
+        if draw_diff=='norm':
+            n/= err
+            err/= err
+    ax.errorbar(m, n, err, fmt='.')
 
     draw_arg = [('lw', 2)]
     if not parts:
         draw_arg.append(('color', 'r'))
     bound = (self.edges[0], self.edges[-1])
     
-    #scale back to bins
-    scale = 1. if not self.extended else nfbins/float(self.bins) 
-    
-    draw_pdf(self.f, arg, bins=nfbins, bound=bound, density=not self.extended,
-             scale=scale, **dict(draw_arg))
-
-    if parts:
-        f_parts = getattr(self.f, 'parts', None)
-        if f_parts is not None:
-            for p in f_parts():
-                draw_pdf(p, arg, bins=nfbins, bound=bound,
-                         density=not self.extended, scale=scale)
+    if not draw_diff:
+        #scale back to bins
+        scale = 1. if not self.extended else nfbins/float(self.bins) 
+        draw_pdf(self.f, arg, bins=nfbins, bound=bound, density=not self.extended,
+                 scale=scale, **dict(draw_arg))
+        if parts:
+            f_parts = getattr(self.f, 'parts', None)
+            if f_parts is not None:
+                for p in f_parts():
+                    draw_pdf(p, arg, bins=nfbins, bound=bound,
+                             density=not self.extended, scale=scale)
 
     ax.grid(True)
 
