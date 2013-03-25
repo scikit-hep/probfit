@@ -23,7 +23,8 @@ cdef class Polynomial:
 
         User can supply order as integer in which case it uses (c_0....c_n+1)
         default or the list of coefficient name which the first one will be the
-        lowest order and the last one will be the highest order
+        lowest order and the last one will be the highest order. (order=1 is
+        a linear function)
 
         """
         varnames = None
@@ -34,11 +35,21 @@ cdef class Polynomial:
             varnames = ['c_%d'%i for i in range(order+1)]
         else: #use supply list of coeffnames #to do check if it's list of string
             if len(order)<=0: raise ValueError('need at least one coefficient')
-            self.order=len(order)-1 #yep -1 think about it
+            self.order = len(order)-1 #yep -1 think about it
             varnames = order
         varnames.insert(0,xname) #insert x in front
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
+
+    def integrate(self, tuple bound, int nint_subdiv, *arg):
+        cdef double a, b
+        a, b = bound
+        cdef double ret = 0.
+        for i in range(self.order):
+            ai1 = pow(a,i+1)
+            bi1 = pow(b,i+1)
+            ret += 1./(i+1) * arg[i] * (bi1-ai1)
+        return ret
 
     def __call__(self,*arg):
         cdef double x = arg[0]
@@ -246,7 +257,7 @@ cpdef double cruijff(double x, double m_0, double sigma_L, double sigma_R, doubl
         return exp(-dm2/denom)
 
 
-cpdef double linear(double x, double m, double c):
+cdef class _Linear:
     """
     Linear function.
 
@@ -254,8 +265,25 @@ cpdef double linear(double x, double m, double c):
         f(x;m,c) = mx+c
 
     """
-    cdef double ret = m*x+c
-    return ret
+    cdef public object func_code
+    cdef public object func_defaults
+    @cython.embedsignature(True)
+    def __init__(self):
+        #unfortunately cython doesn't support docstring for builtin class
+        #http://docs.cython.org/src/userguide/special_methods.html
+        self.func_code = MinimalFuncCode(['x','m','c'])
+        self.func_defaults = None
+
+    def __call__(self, double x, double m, double c):
+        cdef double ret = m*x+c
+        return ret
+
+    cpdef double integrate(self, tuple bound, int nint_subdiv, double m, double c):
+        cdef double a, b
+        a, b = bound
+        return 0.5*m*(b**2-a**2)+c*(b-a)
+
+linear = _Linear()
 
 
 cpdef double poly2(double x, double a, double b, double c):

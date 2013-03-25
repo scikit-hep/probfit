@@ -10,7 +10,7 @@ cpdef double argus(double x, double c, double chi, double p)
 
 cpdef double cruijff(double x, double m0, double sigma_L, double sigma_R, double alpha_L, double alpha_R)
 
-cpdef double linear(double x, double m, double c)
+#cpdef double linear(double x, double m, double c)
 
 cpdef double poly2(double x, double a, double b, double c)
 
