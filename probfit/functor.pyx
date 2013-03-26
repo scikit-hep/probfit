@@ -603,15 +603,15 @@ cdef class Normalized:
         #print arg
         cdef double n
         cdef double x
-        n = self._compute_normalization(*arg)
+        n = self._compute_normalization(arg[self.ndep:])
         x = self.f(*arg)
         if self.floatwarned < self.warnfloat  and n < 1e-100:
             warn(SmallIntegralWarning(str(arg)))
             self.floatwarned+=1
         return x/n
 
-    def _compute_normalization(self, *arg):
-        cdef tuple targ = arg[self.ndep:]
+    cpdef _compute_normalization(self, tuple arg):
+        cdef tuple targ = arg
         #if targ == self.last_arg:#cache hit
         if self.last_arg is not None and fast_tuple_equal(targ,self.last_arg,0):
             #targ == self.last_arg:#cache hit
@@ -624,4 +624,12 @@ cdef class Normalized:
             self.norm_cache = integrate1d_with_edges(self.f, self.edges,
                                                     self.binwidth, targ)
         return self.norm_cache
+
+    def integrate(self, tuple bound, int bint, *arg):
+        n = self._compute_normalization(arg)
+        X = integrate1d(self.f, bound, bint, arg)
+        if self.floatwarned < self.warnfloat  and n < 1e-100:
+            warn(SmallIntegralWarning(str(arg)))
+            self.floatwarned+=1
+        return X/n
 
