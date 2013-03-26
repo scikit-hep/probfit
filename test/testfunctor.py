@@ -18,6 +18,7 @@ def test_Normalized():
     norm = integrate1d(f,(-1.,1.),1000,(0.,1.))
     assert_almost_equal(g(1.,0.,1.),f(1.,0.,1.)/norm)
 
+
 def test_normalized_decorator():
     @normalized((-1,1))
     def f(x, mean, sigma):
@@ -25,6 +26,7 @@ def test_normalized_decorator():
     g = Normalized(ugaussian,(-1,1))
     assert_equal(describe(f), ['x','mean','sigma'])
     assert_almost_equal(g(1,0,1),f(1,0,1))
+
 
 def test_Normalized_cache_hit():
     def f(x,y,z) : return 1.*(x+y+z)
@@ -40,6 +42,7 @@ def test_Normalized_cache_hit():
     ng(1.,2.,3.)
     assert_equal(ng.hit,1)
 
+
 def test_add_pdf():
     def f(x,y,z): return x+y+z
     def g(x,a,b): return 2*(x+a+b)
@@ -51,6 +54,13 @@ def test_add_pdf():
     ret = A(1,2,3,4,5,6,7)
     expected = f(1,2,3)+g(1,4,5)+h(1,6,4)
     assert_almost_equal(ret,expected)
+
+    #wrong integral on purpose
+    f.integrate = lambda bound, nint, y, z : 1. #unbound method works too
+    g.integrate = lambda bound, nint, a, b : 2.
+    h.integrate = lambda bound, nint, c, a : 3.
+
+    assert_equal(integrate1d(A, (-10.,10.), 100, (1.,2.,3.,4.,5.)), 6.)
 
 def test_add_pdf_factor():
     def f(x,y,z): return x+y+z
@@ -95,6 +105,17 @@ def test_extended():
     assert_equal(tuple(describe(g)), ('x','y','z','N'))
     assert_equal(g(1,2,3,4), 4*(f(1,2,3)))
 
+    #extended should use analytical when available
+    def ana_int(x,y): return y*x**2
+    ana_int_int = lambda b,n,y: 999. #wrong on purpose
+    ana_int.integrate = ana_int_int
+    g = Extended(ana_int)
+    assert_almost_equal(g.integrate((0,1),100,5.,2.), 999.*2.)
+
+    #and not fail when it's not available
+    def no_ana_int(x,y): return y*x**2
+    g = Extended(no_ana_int)
+    assert_almost_equal(g.integrate((0,1),100,5.,2.), (1.**3)/3.*5.*2.)
 
 def test_extended_decorator():
     def f(x,y,z): return x+2*y+3*z
@@ -123,6 +144,21 @@ def test_addpdfnorm():
 
     assert_almost_equal(q(1,2,3,4,5,0.1,0.2),
             0.1*f(1,2,3)+0.2*g(1,3,4)+0.7*p(1,2,5))
+
+def test_addpdfnorm_analytical_integrate():
+    def f(x,y,z): return x+2*y+3*z
+    def g(x,z,p): return 4*x+5*z+6*z
+    def p(x,y,q): return 7*x+8*y+9*q
+    f.integrate = lambda bound, nint, y, z: 1.
+    g.integrate = lambda bound, nint, z, p: 2.
+    p.integrate = lambda bound, nint, y, q: 3.
+    
+    q = AddPdfNorm(f,g,p)
+    assert_equal(describe(q),['x', 'y', 'z', 'p', 'q', 'f_0', 'f_1'])
+
+    integral = integrate1d(q, (-10.,10.), 100, (1.,2.,3.,4.,0.1,0.2))
+    assert_almost_equal(integral, 0.1*1.+0.2*2.+0.7*3.)
+    
 
 def test_convolution():
     f = gaussian

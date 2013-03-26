@@ -7,8 +7,10 @@ from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GetItem,\
 import numpy as np
 cimport numpy as np
 from warnings import warn
-from probfit_warnings import SmallIntegralWarning
-from _libstat cimport integrate1d_with_edges, _vector_apply
+from probfit_warnings import SmallIntegralWarning,\
+                             SharedExtendeeExtenderParameter
+from _libstat cimport integrate1d_with_edges, _vector_apply,\
+                      has_ana_integral, integrate1d
 from funcutil import FakeFuncCode, merge_func_code, FakeFunc
 from util import describe
 
@@ -98,6 +100,7 @@ cdef class Convolve:#with gy cache
         integration here we will be off by a little bit.
 
     """
+    #TODO: make this use analytical integral
     cdef int numbins
     cdef tuple gbound
     cdef double bw
@@ -194,18 +197,25 @@ cdef class Extended:
     cdef f
     cdef public func_code
     cdef public func_defaults
-    def __init__(self,f,extname='N'):
+
+    def __init__(self, f, extname='N'):
         self.f = f
         if extname in describe(f):
             raise ValueError('%s is already taken pick something else for extname')
         self.func_code = FakeFuncCode(f,append=extname)
         #print self.func_code.__dict__
         self.func_defaults=None
-    
-    def __call__(self,*arg):
+
+    def __call__(self, *arg):
         cdef double N = arg[-1]
         cdef double fval = self.f(*arg[:-1])
         return N*fval
+
+    def integrate(self, tuple bound, int nint, *arg):
+        cdef double N = arg[-1]
+        cdef double ana = integrate1d(self.f, bound, nint, arg[:-1])
+        return N*ana
+
 
 cdef class AddPdf:
     """
@@ -366,6 +376,33 @@ cdef class AddPdf:
             ret.append(tmp)
         return tuple(ret)
 
+    def integrate(self, tuple bound, int nint, *arg):
+        cdef int findex
+        cdef tuple this_arg
+        cdef double ret = 0.
+        cdef double thisint = 0.
+        cdef double fac = 0.
+        cdef np.ndarray[np.int_t] fpos
+        cdef np.ndarray[np.int_t] facpos
+
+        for findex in range(self.numf):
+            fpos = self.allpos[findex]
+
+            #docking off x and shift due to no x in arg
+            this_arg = construct_arg(arg, fpos[1:]-1)
+            thisf = self.allf[findex]
+            fac = 1.
+        
+            if self.factors is not None:
+                facpos = self.factpos[findex]
+                # -1 accounting for no dependent variable in this arg
+                facarg = construct_arg(arg, facpos-1) 
+                fac = self.factors[findex](*facarg)
+            
+            thisint = integrate1d(thisf, bound, nint, this_arg)
+            ret += fac*thisint
+        
+        return ret
 
 cdef class AddPdfNorm:
     """
@@ -491,6 +528,29 @@ cdef class AddPdfNorm:
             ret.append(fac*self.allf[findex](*farg))
         return tuple(ret)
 
+    def integrate(self, tuple bound, int nint, *arg):
+        cdef int findex
+        cdef double allfac = 0.
+        cdef double fac = 0.
+        cdef double thisint = 0.
+        cdef double ret = 0.
+        cdef np.ndarray[np.int_t] fpos
+        for findex in range(self.numf):
+            if findex!=self.numf-1: #not the last one
+                # -1 since this arg has no x
+                fac = arg[self.normalarglen+findex-1]
+                allfac += fac
+            else: #last one
+                fac = 1-allfac
+            fpos = self.allpos[findex]
+            # docking off x and shift due to no x in arg
+            farg = construct_arg(arg, fpos[1:]-1)
+            f = self.allf[findex]
+
+            thisint = integrate1d(f, bound, nint, farg)
+            ret += thisint*fac
+        return ret
+
 
 cdef class Normalized:
     """
@@ -588,15 +648,15 @@ cdef class Normalized:
         #print arg
         cdef double n
         cdef double x
-        n = self._compute_normalization(*arg)
+        n = self._compute_normalization(arg[self.ndep:])
         x = self.f(*arg)
         if self.floatwarned < self.warnfloat  and n < 1e-100:
             warn(SmallIntegralWarning(str(arg)))
             self.floatwarned+=1
         return x/n
 
-    def _compute_normalization(self, *arg):
-        cdef tuple targ = arg[self.ndep:]
+    cpdef _compute_normalization(self, tuple arg):
+        cdef tuple targ = arg
         #if targ == self.last_arg:#cache hit
         if self.last_arg is not None and fast_tuple_equal(targ,self.last_arg,0):
             #targ == self.last_arg:#cache hit
@@ -609,4 +669,12 @@ cdef class Normalized:
             self.norm_cache = integrate1d_with_edges(self.f, self.edges,
                                                     self.binwidth, targ)
         return self.norm_cache
+
+    def integrate(self, tuple bound, int bint, *arg):
+        n = self._compute_normalization(arg)
+        X = integrate1d(self.f, bound, bint, arg)
+        if self.floatwarned < self.warnfloat  and n < 1e-100:
+            warn(SmallIntegralWarning(str(arg)))
+            self.floatwarned+=1
+        return X/n
 
