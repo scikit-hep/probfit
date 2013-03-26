@@ -7,8 +7,10 @@ from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GetItem,\
 import numpy as np
 cimport numpy as np
 from warnings import warn
-from probfit_warnings import SmallIntegralWarning
-from _libstat cimport integrate1d_with_edges, _vector_apply
+from probfit_warnings import SmallIntegralWarning,\
+                             SharedExtendeeExtenderParameter
+from _libstat cimport integrate1d_with_edges, _vector_apply,\
+                      has_ana_integral, integrate1d
 from funcutil import FakeFuncCode, merge_func_code, FakeFunc
 from util import describe
 
@@ -98,6 +100,7 @@ cdef class Convolve:#with gy cache
         integration here we will be off by a little bit.
 
     """
+    #TODO: make this use analytical integral
     cdef int numbins
     cdef tuple gbound
     cdef double bw
@@ -194,18 +197,30 @@ cdef class Extended:
     cdef f
     cdef public func_code
     cdef public func_defaults
-    def __init__(self,f,extname='N'):
+
+    def __init__(self, f, extname='N'):
         self.f = f
         if extname in describe(f):
             raise ValueError('%s is already taken pick something else for extname')
         self.func_code = FakeFuncCode(f,append=extname)
         #print self.func_code.__dict__
         self.func_defaults=None
-    
-    def __call__(self,*arg):
+
+        #otherwise integral is bad
+        #we could allow it by setting it to none though.
+        #but this most likely means a typo
+        assert(extname not in describe(f)) 
+
+    def __call__(self, *arg):
         cdef double N = arg[-1]
         cdef double fval = self.f(*arg[:-1])
         return N*fval
+
+    def integrate(self, tuple bound, int nint, *arg):
+        cdef double N = arg[-1]
+        cdef double ana = integrate1d(self.f, bound, nint, arg[:-1])
+        return N*ana
+
 
 cdef class AddPdf:
     """
