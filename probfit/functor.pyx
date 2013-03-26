@@ -206,11 +206,6 @@ cdef class Extended:
         #print self.func_code.__dict__
         self.func_defaults=None
 
-        #otherwise integral is bad
-        #we could allow it by setting it to none though.
-        #but this most likely means a typo
-        assert(extname not in describe(f)) 
-
     def __call__(self, *arg):
         cdef double N = arg[-1]
         cdef double fval = self.f(*arg[:-1])
@@ -381,6 +376,33 @@ cdef class AddPdf:
             ret.append(tmp)
         return tuple(ret)
 
+    def integrate(self, tuple bound, int nint, *arg):
+        cdef int findex
+        cdef tuple this_arg
+        cdef double ret = 0.
+        cdef double thisint = 0.
+        cdef double fac = 0.
+        cdef np.ndarray[np.int_t] fpos
+        cdef np.ndarray[np.int_t] facpos
+
+        for findex in range(self.numf):
+            fpos = self.allpos[findex]
+
+            #docking off x and shift due to no x in arg
+            this_arg = construct_arg(arg, fpos[1:]-1)
+            thisf = self.allf[findex]
+            fac = 1.
+        
+            if self.factors is not None:
+                facpos = self.factpos[findex]
+                # -1 accounting for no dependent variable in this arg
+                facarg = construct_arg(arg, facpos-1) 
+                fac = self.factors[findex](*facarg)
+            
+            thisint = integrate1d(thisf, bound, nint, this_arg)
+            ret += fac*thisint
+        
+        return ret
 
 cdef class AddPdfNorm:
     """
@@ -505,6 +527,29 @@ cdef class AddPdfNorm:
             farg = construct_arg(arg,self.allpos[findex])
             ret.append(fac*self.allf[findex](*farg))
         return tuple(ret)
+
+    def integrate(self, tuple bound, int nint, *arg):
+        cdef int findex
+        cdef double allfac = 0.
+        cdef double fac = 0.
+        cdef double thisint = 0.
+        cdef double ret = 0.
+        cdef np.ndarray[np.int_t] fpos
+        for findex in range(self.numf):
+            if findex!=self.numf-1: #not the last one
+                # -1 since this arg has no x
+                fac = arg[self.normalarglen+findex-1]
+                allfac += fac
+            else: #last one
+                fac = 1-allfac
+            fpos = self.allpos[findex]
+            # docking off x and shift due to no x in arg
+            farg = construct_arg(arg, fpos[1:]-1)
+            f = self.allf[findex]
+
+            thisint = integrate1d(f, bound, nint, farg)
+            ret += thisint*fac
+        return ret
 
 
 cdef class Normalized:

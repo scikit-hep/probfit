@@ -55,6 +55,12 @@ def test_add_pdf():
     expected = f(1,2,3)+g(1,4,5)+h(1,6,4)
     assert_almost_equal(ret,expected)
 
+    #wrong integral on purpose
+    f.integrate = lambda bound, nint, y, z : 1. #unbound method works too
+    g.integrate = lambda bound, nint, a, b : 2.
+    h.integrate = lambda bound, nint, c, a : 3.
+
+    assert_equal(integrate1d(A, (-10.,10.), 100, (1.,2.,3.,4.,5.)), 6.)
 
 def test_add_pdf_factor():
     def f(x,y,z): return x+y+z
@@ -138,6 +144,21 @@ def test_addpdfnorm():
 
     assert_almost_equal(q(1,2,3,4,5,0.1,0.2),
             0.1*f(1,2,3)+0.2*g(1,3,4)+0.7*p(1,2,5))
+
+def test_addpdfnorm_analytical_integrate():
+    def f(x,y,z): return x+2*y+3*z
+    def g(x,z,p): return 4*x+5*z+6*z
+    def p(x,y,q): return 7*x+8*y+9*q
+    f.integrate = lambda bound, nint, y, z: 1.
+    g.integrate = lambda bound, nint, z, p: 2.
+    p.integrate = lambda bound, nint, y, q: 3.
+    
+    q = AddPdfNorm(f,g,p)
+    assert_equal(describe(q),['x', 'y', 'z', 'p', 'q', 'f_0', 'f_1'])
+
+    integral = integrate1d(q, (-10.,10.), 100, (1.,2.,3.,4.,0.1,0.2))
+    assert_almost_equal(integral, 0.1*1.+0.2*2.+0.7*3.)
+    
 
 def test_convolution():
     f = gaussian
