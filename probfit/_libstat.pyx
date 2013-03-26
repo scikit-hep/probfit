@@ -47,6 +47,9 @@ cdef double simpson38(f, np.ndarray edges, double bw, tuple arg):
 
 #TODO: do something smarter like dynamic edge based on derivative or so
 cpdef double integrate1d(f, tuple bound, int nint, tuple arg=None) except*:
+    """
+    compute 1d integral
+    """
     if arg is None: arg = tuple()
     if has_ana_integral(f):
         return f.integrate(bound, nint, *arg)
