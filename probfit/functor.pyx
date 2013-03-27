@@ -650,6 +650,8 @@ cdef class Normalized:
         cdef double x
         n = self._compute_normalization(arg[self.ndep:])
         x = self.f(*arg)
+        print 'n=', n
+        print 'x=', x
         if self.floatwarned < self.warnfloat  and n < 1e-100:
             warn(SmallIntegralWarning(str(arg)))
             self.floatwarned+=1
