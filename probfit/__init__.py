@@ -26,6 +26,7 @@ __all__ = [
     'gaussian',
     'gen_toy',
     'gen_toyn',
+    'integrate1d',
     'linear',
     'merge_func_code',
     'normalized',
@@ -53,6 +54,6 @@ from .statutil import *
 from .plotting import *
 from .funcutil import *
 from .decorator import *
-
+from ._libstat import integrate1d
 from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm
 from .info import __version__

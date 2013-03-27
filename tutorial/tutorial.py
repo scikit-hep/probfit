@@ -139,13 +139,19 @@ cost = BinnedLH(myPDF,data)
 
 #Let's fit
 minimizer = iminuit.Minuit(cost,sigma=3.) #notice here that we give initial value to sigma
+#but most of the time we want to see it before fitting
+cost.draw(minimizer)
 
-#up parameter determine where it determine uncertainty
-#1(default) for chi^2 and 0.5 for likelihood
-minimizer.set_up(0.5)
+# <codecell>
+
 minimizer.migrad() #very stable minimization algorithm
 #like in all binned fit with long zero tail. It will have to do something about the zero bin
 #dist_fit handle them gracefully but will give you a head up
+
+# <codecell>
+
+#you can see if your fit make any sense too
+cost.draw(minimizer)#uncertainty is given by symetric poisson
 
 # <codecell>
 
@@ -160,11 +166,6 @@ minimizer.print_fmin()
 #and correlation matrix
 #will not display well in firefox(tell them to fix writing-mode:)
 minimizer.print_matrix()
-
-# <codecell>
-
-#you can see if your fit make any sense too
-cost.draw(minimizer)#uncertainty is given by symetric poisson
 
 # <codecell>
 
@@ -208,7 +209,7 @@ def myPDF(x,mu,sigma):
 
 # <codecell>
 
-#binned chi^2 fit only makes sense for extended fit
+#binned chi^2 fit only makes sense(for now) for extended fit
 extended_pdf = Extended(myPDF)
 
 # <codecell>
@@ -307,7 +308,7 @@ ublh = UnbinnedLH(gaussian,data)
 minimizer = iminuit.Minuit(ublh,sigma=2.)
 minimizer.set_up(0.5)#remember this is likelihood
 minimizer.migrad()#yes amazingly fast
-ublh.show(minimizer)
+ublh.draw(minimizer, show_errbars='normal') # control how fit is displayed too
 
 # <markdowncell>
 
@@ -372,6 +373,32 @@ minimizer.migrad()#yes amazingly fast Normalize is written in cython
 ublh.show(minimizer)
 #crystalball function is nortorious for its sensitivity on n parameter
 #dist_fit give you a heads up where it might have float overflow
+
+# <markdowncell>
+
+# ##But what if I know analytical integral formula
+# probfit check for integrate method that can be called by integrate(bound, nint, *arg) to
+# compute definite integral for given bound and nint(pieces of integral this is normally ignored)
+# and the rest will be passed as positional argument. Couple of probfit already have analytical formula written.
+
+# <codecell>
+
+from probfit import integrate1d
+def line(x, m, c):
+    return m*x+c
+
+#compute integral of line from x=(0,1) using 10 intevals with m=1. and c=2.
+#all probfit internal use this
+print integrate1d(line, (0,1), 10, (1.,2.) ) # no integrate method available probfit use simpson3/8
+
+#Let us illustrate the point by forcing it to have integral that's off by
+#factor of two
+def wrong_line_integral(bound, nint, m, c):
+    a, b = bound
+    return 2*(m*(b**2/2.-a**2/2.)+c*(b-a)) # I know this is wrong 
+line.integrate = wrong_line_integral
+# line.integrate = lambda bound, nint, m, c: blah blah # this works too
+print integrate1d(line, (0,1), 10, (1.,2.))
 
 # <headingcell level=2>
 

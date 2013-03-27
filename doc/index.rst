@@ -13,6 +13,7 @@ normally used in B physics is also provided.
     :hidden:
     
     api.rst
+    recipe.rst
 
 Download & Install
 ------------------
