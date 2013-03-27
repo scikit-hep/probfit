@@ -26,24 +26,38 @@ cpdef double csum(np.ndarray x):
         s+=xd[i]
     return s
 
+cpdef inline bint has_ana_integral(f):
+    integrate = getattr3(f, 'integrate', None)
+    return integrate is not None
+
 #currently bin width must be uniform to save tons of multiplications
 #based on simpson 3/8
 cpdef double integrate1d_with_edges(f, np.ndarray edges, double bw, tuple arg) except *:
+    if has_ana_integral(f):
+        # this is not exactly correct for non-uniform bin
+        return f.integrate((edges[0],edges[-1]), len(edges-1), *arg)
+    return  simpson38(f, edges, bw, arg)
+
+cdef double simpson38(f, np.ndarray edges, double bw, tuple arg):
     cdef np.ndarray[np.double_t] yedges = _vector_apply(f, edges, arg)
     cdef np.ndarray[np.double_t] left38 = _vector_apply(f, (2.*edges[1:]+edges[:-1])/3., arg)
     cdef np.ndarray[np.double_t] right38 = _vector_apply(f, (edges[1:]+2.*edges[:-1])/3., arg)
     return bw/8.*( csum(yedges)*2.+csum(left38+right38)*3. - (yedges[0]+yedges[-1]) ) #simpson3/8
 
+
 #TODO: do something smarter like dynamic edge based on derivative or so
 cpdef double integrate1d(f, tuple bound, int nint, tuple arg=None) except*:
+    """
+    compute 1d integral
+    """
     if arg is None: arg = tuple()
-    if hasattr(f, 'integrate'):
+    if has_ana_integral(f):
         return f.integrate(bound, nint, *arg)
     cdef double ret = 0
     cdef np.ndarray[np.double_t] edges = np.linspace(bound[0], bound[1], nint+1)
     #cdef np.ndarray[np.double_t] bw = edges[1:]-edges[:-1]
     cdef double bw = edges[1]-edges[0]
-    return integrate1d_with_edges(f, edges, bw, arg)
+    return simpson38(f, edges, bw, arg)
 
 
 #compute x*log(y/x) to a good precision especially when y~x

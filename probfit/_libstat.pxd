@@ -8,6 +8,8 @@ cpdef double xlogyx(double x,double y)
 
 cpdef double wlogyx(double w,double y, double x)
 
+cpdef bint has_ana_integral(f)
+
 cpdef double integrate1d(f, tuple bound, int nint, tuple arg=*) except *
 
 cpdef double integrate1d_with_edges(f,np.ndarray edges, double bw, tuple arg) except *
