@@ -207,8 +207,7 @@ cdef class UnbinnedLH:
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
              parmloc=(0.05,0.95), nfbins=200, print_par=True, args=None,
-             errors=None, parts=False, show_errbars=False, errbar_algo='normal',
-             draw_diff=False):
+             errors=None, parts=False, show_errbars=None):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -245,22 +244,65 @@ cdef class UnbinnedLH:
             - **errors** Optional dictionary of errors. If minuit is not given,
               parameter errors are determined from **errors**. Default None.
 
-            - **show_errbars** Show error bars. Default False
-
-            - **errbar_algo** How error bars are calculated. Default 'normal'
+            - **show_errbars** Show error bars. Default None
                'normal' : error = sqrt( sum of weight )
                'sumw2'  : error = sqrt( sum of weight**2 )
-
-            - **draw_diff** If True, draw difference between data and PDF
-               Default False.
-               If draw_diff=='norm', draw difference normalized by error
 
         """
         return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
             bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts, show_errbars=show_errbars,
-            errbar_algo=errbar_algo, draw_diff=draw_diff)
+            args=args, errors=errors, parts=parts, show_errbars=show_errbars)
 
+    def draw_residual(self, minuit=None, bins=100, ax=None, bound=None,
+                      parmloc=(0.05,0.95), print_par=True, args=None, errors=None,
+                      show_errbars=False, errbar_algo='normal', norm=False):
+        """
+        Draw difference between data and PDF
+
+        **Arguments**
+
+            - **minuit** Optional but recommended ``iminuit.Minuit`` object.
+              If minuit is not ``None``, the pdf will be drawn using minimum
+              value from minuit and parameters and error will be shown.
+              If minuit is ``None``, then pdf will be drawn using argument from
+              the last call to ``__call__``. Default ``None``
+
+            - **bins** number of bins for histogram. Default 100.
+
+            - **ax** matplotlib axes. If not given it will be drawn on current
+              axes ``gca()``.
+
+            - **bound** bound for histogram. If ``None`` is given the bound
+              will be automatically determined from the data.
+              If you given PDF that's normalied to a region but some data is
+              not within the bound the picture may look funny.
+
+            - **parmloc** location of parameter print out. This is passed
+              directy to legend loc named parameter. Default (0.05,0.95).
+
+            - **print_par** print parameters and error on the plot. Default
+              True.
+
+            - **args** Optional. If minuit is not given, parameter value is
+              determined from args. This can be dictionary of the form
+              `{'a':1.0, 'b':1.0}` or list of values. Default None.
+
+            - **errors** Optional dictionary of errors. If minuit is not given,
+              parameter errors are determined from **errors**. Default None.
+
+            - **show_errbars** Show error bars. Default False
+
+            - **errbar_algo** How the error bars are calculated
+               'normal' : error = sqrt( sum of weight )  [Default]
+               'sumw2'  : error = sqrt( sum of weight**2 )
+
+            - **norm** Normalzed by the error bar or not. Default False.
+
+        """
+        return plotting.draw_residual_ulh(self, minuit=minuit, bins=bins, ax=ax,
+                   bound=bound, parmloc=parmloc, print_par=print_par, args=args, 
+                   errors=errors, show_errbars=show_errbars, 
+                   errbar_algo=errbar_algo, norm=norm)
 
     def default_errordef(self):
         return 0.5
@@ -440,7 +482,7 @@ cdef class BinnedLH:
 
     def draw(self, minuit=None, ax = None,
             parmloc=(0.05,0.95), nfbins=200, print_par=True,
-            args=None, errors=None, parts=False, draw_diff=False):
+            args=None, errors=None, parts=False):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -463,14 +505,40 @@ cdef class BinnedLH:
             - **print_par** print parameters and error on the plot.
               Default True.
 
-            - **draw_diff** If True, draw difference between data and PDF
-               Default False.
-               If draw_diff=='norm', draw difference normalized by error
         """
         return plotting.draw_blh(self, minuit=minuit,
             ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts, draw_diff=draw_diff)
+            args=args, errors=errors, parts=parts)
 
+    def draw_residual(self, minuit=None, ax = None,
+                      parmloc=(0.05,0.95), print_par=True,
+                      args=None, errors=None, norm=False):
+        """
+        Draw difference between data and pdf.
+
+        **Arguments**
+
+            - **minuit** Optional but recommended ``iminuit.Minuit`` object.
+              If minuit is not ``None``, the pdf will be drawn using minimum
+              value from minuit and parameters and error will be shown.
+              If minuit is ``None``, then pdf will be drawn using argument from
+              the last call to ``__call__``. Default ``None``
+
+            - **ax** matplotlib axes. If not given it will be drawn on current
+              axes ``gca()``.
+
+            - **parmloc** location of parameter print out. This is passed
+              directy to legend loc named parameter. Default (0.05,0.95).
+
+            - **print_par** print parameters and error on the plot.
+              Default True.
+
+            - **norm** If True, draw difference normalized by error
+               Default False.
+        """
+        return plotting.draw_residual_blh(self, minuit=minuit,
+            ax=ax, parmloc=parmloc, print_par=print_par,
+            args=args, errors=errors, norm=norm)
 
     def default_errordef(self):
         return 0.5

@@ -308,7 +308,16 @@ ublh = UnbinnedLH(gaussian,data)
 minimizer = iminuit.Minuit(ublh,sigma=2.)
 minimizer.set_up(0.5)#remember this is likelihood
 minimizer.migrad()#yes amazingly fast
-ublh.draw(minimizer, show_errbars=True, errbar_algo='normal') # control how fit is displayed too
+ublh.draw(minimizer, show_errbars='normal') # control how fit is displayed too
+
+# <codecell>
+
+# Draw the difference between data and PDF
+plt.figure(figsize=(13,4))
+plt.subplot(121)
+ublh.draw_residual(minimizer)
+plt.subplot(122)
+ublh.draw_residual(minimizer, show_errbars=True, errbar_algo='sumw2', norm=True)
 
 # <markdowncell>
 
