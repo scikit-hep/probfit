@@ -308,7 +308,7 @@ ublh = UnbinnedLH(gaussian,data)
 minimizer = iminuit.Minuit(ublh,sigma=2.)
 minimizer.set_up(0.5)#remember this is likelihood
 minimizer.migrad()#yes amazingly fast
-ublh.draw(minimizer, show_errbars='normal') # control how fit is displayed too
+ublh.draw(minimizer, show_errbars=True, errbar_algo='normal') # control how fit is displayed too
 
 # <markdowncell>
 

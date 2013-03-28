@@ -1,4 +1,6 @@
-#29 probfit integrate1d now use integrate method is available -- PO
+#30 AddPdf, Normalized, Extended, AddPdfNorm cascades analytical integral -- PO
+
+#29 probfit integrate1d now use integrate method if available -- PO
 
 #25 Use simpson3/8 rule instead of trapezoid for integral -- PO
 

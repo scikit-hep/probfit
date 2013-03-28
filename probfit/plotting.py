@@ -238,13 +238,12 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     if draw_diff:
         arg = parse_arg(self.f, arg, 1) if isinstance(arg, dict) else arg
         yf = vector_apply(self.f, m, *arg)
-        if self.extended:
-            yf*= np.diff(self.edges)
-        #yf*= (scale*np.diff(self.edges) if self.extended else scale)
+        yf*= (scale*np.diff(self.edges) if self.extended else scale)
         n = n- yf
         if draw_diff=='norm':
-            n/= err
-            err/= err
+            sel= err>0
+            n[sel]/= err[sel]
+            err[sel]/= err[sel]
     ax.errorbar(m, n, err, fmt='.')
 
     draw_arg = [('lw', 2)]
