@@ -45,7 +45,7 @@ cdef class Polynomial:
         cdef double a, b
         a, b = bound
         cdef double ret = 0.
-        for i in range(self.order):
+        for i in range(self.order+1):
             ai1 = pow(a,i+1)
             bi1 = pow(b,i+1)
             ret += 1./(i+1) * arg[i] * (bi1-ai1)
