@@ -89,6 +89,20 @@ cdef class HistogramPdf:
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
 
+    def integrate(self, tuple bound, int nint_subdiv=0, arg=None):
+        # nint_subdiv is irrelevant, ignored.
+        # bound usually is smaller than the histogram's bound.
+        # Find where they are:
+        edges= np.copy(self.binedges)
+        [ib0,ib1]= np.digitize([bound[0],bound[1]], edges)
+        ib0= max(ib0,0)
+        ib1= min(ib1, len(edges)-1)
+        edges[ib0-1]= max(edges[ib0-1],bound[0])
+        edges[ib1]= min(edges[ib1],bound[1])
+        ilo= max(0,ib0-1)
+        ihi= ib1+1 if edges[ib1-1]!=edges[ib1] else ib1
+        return (self.hy[ilo:ihi-1]*np.diff(edges[ilo:ihi])).sum()
+
     def __call__(self, *arg):
         cdef double x = arg[0]
         [i]= np.digitize([x], self.binedges)

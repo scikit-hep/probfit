@@ -103,6 +103,37 @@ def test_draw_ulh():
     ulh = UnbinnedLH(gaussian, data)
     ulh.draw(args=(0., 1.))
 
+@image_comparison('draw_ulh_extend.png')
+def test_draw_ulh_extend():
+    npr.seed(0)
+    data = npr.randn(1000)
+    plt.figure()
+    ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
+    ulh.draw(args=(0., 1., 1000))
+
+@image_comparison('draw_residual_ulh.png')
+def test_draw_residual_ulh():
+    npr.seed(0)
+    data = npr.randn(1000)
+    plt.figure()
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.))
+
+@image_comparison('draw_residual_ulh_norm.png')
+def test_draw_residual_ulh_norm():
+    npr.seed(0)
+    data = npr.randn(1000)
+    plt.figure()
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.), norm=True)
+
+@image_comparison('draw_ulh_extend_residual_norm.png')
+def test_draw_ulh_extend_residual_norm():
+    npr.seed(0)
+    data = npr.randn(1000)
+    plt.figure()
+    ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
+    ulh.draw_residual(args=(0., 1., 1000), norm=True)
 
 @image_comparison('draw_ulh_with_minuit.png')
 def test_draw_ulh_with_minuit():
@@ -131,6 +162,29 @@ def test_draw_blh_extend():
     blh = BinnedLH(Extended(gaussian), data, extended=True)
     blh.draw(args=(0., 1., 1000))
 
+@image_comparison('draw_residual_blh.png')
+def test_draw_residual_blh():
+    npr.seed(0)
+    data = npr.randn(1000)
+    plt.figure()
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.))
+
+@image_comparison('draw_residual_blh_norm.png')
+def test_draw_residual_blh_norm():
+    npr.seed(0)
+    data = npr.randn(1000)
+    plt.figure()
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.), norm=True)
+
+@image_comparison('draw_blh_extend_residual_norm.png')
+def test_draw_blh_extend_residual_norm():
+    npr.seed(0)
+    data = npr.randn(1000)
+    plt.figure()
+    blh = BinnedLH(Extended(gaussian), data, extended=True)
+    blh.draw_residual(args=(0., 1., 1000), norm=True)
 
 @image_comparison('draw_bx2.png')
 def test_draw_bx2():
