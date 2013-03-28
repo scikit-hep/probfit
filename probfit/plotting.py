@@ -224,17 +224,6 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     dataint= (n*np.diff(self.edges)).sum()
     scale= dataint if not self.extended else 1.0
 
-    #if not self.extended:
-    #    scale = 1./sum(self.h)/self.binwidth
-    #    n*= scale
-    #    err*= scale
-
-    #if self.extended:
-    #    ax.errorbar(m, self.h, err, fmt='.')
-    #else:
-    #    scale = 1./sum(self.h)/self.binwidth
-    #    ax.errorbar(m, self.h*scale, err*scale, fmt='.')
-
     if draw_diff:
         arg = parse_arg(self.f, arg, 1) if isinstance(arg, dict) else arg
         yf = vector_apply(self.f, m, *arg)
@@ -255,7 +244,6 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
         #scale back to bins
         if self.extended:
             scale= nfbins/float(self.bins) 
-        #scale = 1. if not self.extended else nfbins/float(self.bins) 
         draw_pdf(self.f, arg, bins=nfbins, bound=bound, density=not self.extended,
                  scale=scale, **dict(draw_arg))
         if parts:
