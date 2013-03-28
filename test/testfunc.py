@@ -124,13 +124,24 @@ def test_cauchy():
     assert_almost_equal(cauchy(1, 2, 4.), 0.07489644380795074)
 
 def test_HistogramPdf():
-    be= np.array([0,1,3,4])
-    hy= np.array([10,30,50])
+    be= np.array([0,1,3,4], dtype=float)
+    hy= np.array([10,30,50], dtype=float)
+    norm= float((hy*np.diff(be)).sum())
     f= HistogramPdf(hy,be)
-    assert_almost_equal(f(0.5), 10.0/120.0)
-    assert_almost_equal(f(1.2), 30.0/120.0)
-    assert_almost_equal(f(2.9), 30.0/120.0)
-    assert_almost_equal(f(3.6), 50.0/120.0)
+    assert_almost_equal(f(0.5), 10.0/norm)
+    assert_almost_equal(f(1.2), 30.0/norm)
+    assert_almost_equal(f(2.9), 30.0/norm)
+    assert_almost_equal(f(3.6), 50.0/norm)
+
+    assert(hasattr(f, 'integrate'))
+
+    integral= f.integrate((0,4))
+    assert_almost_equal(integral, 1.0)
+    integral= f.integrate((0.5, 3.4))
+    assert_almost_equal(integral, (10*0.5+30*2+50*0.4)/norm)
+    integral= f.integrate((1.2, 4.5))
+    assert_almost_equal(integral, (30*1.8+50*1)/norm)
+
 
 def test__vector_apply():
     def f(x, y):

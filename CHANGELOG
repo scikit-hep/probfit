@@ -1,3 +1,6 @@
+#33 Add draw_residual to (Un)binnedLH. BinnedLH draw show raw yield. Default 
+    UnbinnedLH draw shows error bars. Add HistogramPdf analytical integral.
+
 #30 AddPdf, Normalized, Extended, AddPdfNorm cascades analytical integral -- PO
 
 #29 probfit integrate1d now use integrate method if available -- PO

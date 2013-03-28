@@ -89,7 +89,7 @@ cdef class HistogramPdf:
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
 
-    def integrate(self, tuple bound, int nint_subdiv, *arg):
+    def integrate(self, tuple bound, int nint_subdiv=0, arg=None):
         # nint_subdiv is irrelevant, ignored.
         # bound usually is smaller than the histogram's bound.
         # Find where they are:

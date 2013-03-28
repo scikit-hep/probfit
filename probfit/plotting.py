@@ -114,7 +114,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
                 transform=ax.transAxes)
 
 def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
-                      parmloc=(0.05, 0.95), print_par=True,
+                      parmloc=(0.05, 0.95), print_par=False,
                       args=None, errors=None, show_errbars=True,
                       errbar_algo='normal', norm=False):
 
@@ -287,7 +287,7 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
             transform=ax.transAxes)
 
 def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
-                      ax=None, print_par=True, args=None, errors=None,
+                      ax=None, print_par=False, args=None, errors=None,
                       norm=False):
     ax = plt.gca() if ax is None else ax
 
