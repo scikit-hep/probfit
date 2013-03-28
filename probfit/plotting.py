@@ -66,7 +66,7 @@ def _param_text(parameters, arg, error):
 #from UML
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
              parmloc=(0.05, 0.95), nfbins=500, print_par=True,
-             args=None, errors=None, parts=False, show_errbars=None):
+             args=None, errors=None, parts=False, show_errbars='normal'):
 
     ax = plt.gca() if ax is None else ax
 
@@ -76,7 +76,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     dataint= (n*np.diff(e)).sum()
     scale= dataint if not self.extended else 1.0
 
-    if show_errbars==None:
+    if not show_errbars:
         pp= ax.hist(mid(e), bins=e, weights=n, histtype='step')
     else:
         w2= None
@@ -115,7 +115,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
 def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
                       parmloc=(0.05, 0.95), print_par=True,
-                      args=None, errors=None, show_errbars=False,
+                      args=None, errors=None, show_errbars=True,
                       errbar_algo='normal', norm=False):
 
     ax = plt.gca() if ax is None else ax
@@ -144,7 +144,7 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     if norm:
         sel= yerr>0
         n[sel]/= yerr[sel]
-        yerr[sel]/= yerr[sel]
+        yerr= np.ones(len(yerr))
 
     if show_errbars:
         pp= ax.errorbar(mid(e), n, yerr , fmt='b.', capsize=0)
@@ -311,7 +311,8 @@ def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
     if norm:
         sel= err>0
         n[sel]/= err[sel]
-        err[sel]/= err[sel]
+        err= np.ones(len(err))
+
     ax.errorbar(m, n, err, fmt='.')
 
     ax.plot([self.edges[0],self.edges[-1]],[0.,0.], 'r-')

@@ -207,7 +207,7 @@ cdef class UnbinnedLH:
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
              parmloc=(0.05,0.95), nfbins=200, print_par=True, args=None,
-             errors=None, parts=False, show_errbars=None):
+             errors=None, parts=False, show_errbars='normal'):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -244,9 +244,10 @@ cdef class UnbinnedLH:
             - **errors** Optional dictionary of errors. If minuit is not given,
               parameter errors are determined from **errors**. Default None.
 
-            - **show_errbars** Show error bars. Default None
+            - **show_errbars** Show error bars. Default 'normal'
                'normal' : error = sqrt( sum of weight )
                'sumw2'  : error = sqrt( sum of weight**2 )
+                None : no errorbars (shown as a step histogram)
 
         """
         return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
@@ -255,7 +256,7 @@ cdef class UnbinnedLH:
 
     def draw_residual(self, minuit=None, bins=100, ax=None, bound=None,
                       parmloc=(0.05,0.95), print_par=True, args=None, errors=None,
-                      show_errbars=False, errbar_algo='normal', norm=False):
+                      show_errbars=True, errbar_algo='normal', norm=False):
         """
         Draw difference between data and PDF
 
@@ -290,7 +291,7 @@ cdef class UnbinnedLH:
             - **errors** Optional dictionary of errors. If minuit is not given,
               parameter errors are determined from **errors**. Default None.
 
-            - **show_errbars** Show error bars. Default False
+            - **show_errbars** Show error bars. Default True
 
             - **errbar_algo** How the error bars are calculated
                'normal' : error = sqrt( sum of weight )  [Default]
