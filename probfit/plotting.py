@@ -65,41 +65,38 @@ def _param_text(parameters, arg, error):
 
 #from UML
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
-            parmloc=(0.05, 0.95), nfbins=500, print_par=True,
-            args=None, errors=None, parts=False, show_errbars=None):
+             parmloc=(0.05, 0.95), nfbins=500, print_par=True,
+             args=None, errors=None, parts=False, show_errbars='normal'):
 
     ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
-    n,e=None,None
-    if show_errbars==None:
-        n, e, patches = ax.hist(self.data, bins=bins, weights=self.weights,
-                                histtype='step', range=bound)
-    elif show_errbars=='normal' or show_errbars=='poisson':
-        n,e = np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
-        pp= ax.errorbar(mid(e), n, np.sqrt(n), fmt='b.', capsize=0)
-        if show_errbars=='poisson':
-             warn(RuntimeWarning('poisson is not implemented. Fall back to \'normal\''))
-            
-    elif show_errbars=='sumw2':
-        n,e = np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
-        weights= None
-        if self.weights!= None:
-            weights= self.weights**2
-        w2,e= np.histogram(self.data, bins=bins, range=bound, weights=weights)
-        pp= ax.errorbar(mid(e), n, np.sqrt(w2), fmt='b.', capsize=0)
-    else:
-        raise ValueError('Unknown show_errbars value '+show_errbars)
-
+    n,e= np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
     dataint= (n*np.diff(e)).sum()
+    scale= dataint if not self.extended else 1.0
+
+    if not show_errbars:
+        pp= ax.hist(mid(e), bins=e, weights=n, histtype='step')
+    else:
+        w2= None
+        if show_errbars=='normal':
+            w2=n
+        elif show_errbars=='sumw2':
+            weights= None
+            if self.weights!= None:
+                weights= self.weights**2
+            w2,e= np.histogram(self.data, bins=e, weights=weights)
+        else:
+            raise ValueError('show_errbars must be \'normal\' or \'sumw2\'')
+
+        pp= ax.errorbar(mid(e), n, np.sqrt(w2) , fmt='b.', capsize=0)
 
     #bound = (e[0], e[-1])
     draw_arg = [('lw', 2)]
     if not parts:
         draw_arg.append(('color', 'r'))
 
-    scale= dataint if not self.extended else 1.0
     draw_pdf_with_edges(self.f, arg, e, density=not self.extended, scale=scale,
                         **dict(draw_arg))
 
@@ -108,6 +105,55 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
         if f_parts is not None:
             for p in f_parts():
                 draw_pdf_with_edges(p, arg, e, scale=scale, density=not self.extended)
+
+    ax.grid(True)
+
+    txt = _param_text(describe(self), arg, error)
+    if print_par:
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+                transform=ax.transAxes)
+
+def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
+                      parmloc=(0.05, 0.95), print_par=False,
+                      args=None, errors=None, show_errbars=True,
+                      errbar_algo='normal', norm=False):
+
+    ax = plt.gca() if ax is None else ax
+
+    arg, error = _get_args_and_errors(self, minuit, args, errors)
+
+    n,e= np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
+    dataint= (n*np.diff(e)).sum()
+    scale= dataint if not self.extended else 1.0
+    w2= None
+    if errbar_algo=='normal':
+        w2=n
+    elif errbar_algo=='sumw2':
+        weights= None
+        if self.weights!= None:
+            weights= self.weights**2
+        w2,e= np.histogram(self.data, bins=e, weights=weights)
+    else:
+        raise ValueError('errbar_algo must be \'normal\' or \'sumw2\'')
+    yerr= np.sqrt(w2)
+
+    arg = parse_arg(self.f, arg, 1) if isinstance(arg, dict) else arg
+    yf = vector_apply(self.f, mid(e), *arg)
+    yf*= (scale*np.diff(e) if self.extended else scale)
+    n = n- yf
+    if norm:
+        sel= yerr>0
+        n[sel]/= yerr[sel]
+        yerr= np.ones(len(yerr))
+
+    if show_errbars:
+        pp= ax.errorbar(mid(e), n, yerr , fmt='b.', capsize=0)
+    else: # No errorbars
+        pp= ax.bar(e[:-1], n, width=np.diff(e))
+
+    #bound = (e[0], e[-1])
+    #draw_arg = [('lw', 2), ('color', 'r')]
+    ax.plot([e[0],e[-1]],[0.,0.], 'r-')
 
     ax.grid(True)
 
@@ -209,11 +255,11 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     else:
         err = np.sqrt(self.h)
 
-    if self.extended:
-        ax.errorbar(m, self.h, err, fmt='.')
-    else:
-        scale = 1./sum(self.h)/self.binwidth
-        ax.errorbar(m, self.h*scale, err*scale, fmt='.')
+    n= np.copy(self.h)
+    dataint= (n*np.diff(self.edges)).sum()
+    scale= dataint if not self.extended else 1.0
+
+    ax.errorbar(m, n, err, fmt='.')
 
     draw_arg = [('lw', 2)]
     if not parts:
@@ -221,17 +267,55 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     bound = (self.edges[0], self.edges[-1])
     
     #scale back to bins
-    scale = 1. if not self.extended else nfbins/float(self.bins) 
-    
+    if self.extended:
+        scale= nfbins/float(self.bins) 
     draw_pdf(self.f, arg, bins=nfbins, bound=bound, density=not self.extended,
              scale=scale, **dict(draw_arg))
-
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
             for p in f_parts():
                 draw_pdf(p, arg, bins=nfbins, bound=bound,
                          density=not self.extended, scale=scale)
+
+    ax.grid(True)
+
+    txt = _param_text(describe(self), arg, error)
+
+    if print_par:
+        ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
+            transform=ax.transAxes)
+
+def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
+                      ax=None, print_par=False, args=None, errors=None,
+                      norm=False):
+    ax = plt.gca() if ax is None else ax
+
+    arg, error = _get_args_and_errors(self, minuit, args, errors)
+
+    m = mid(self.edges)
+
+    if self.use_w2:
+        err = np.sqrt(self.w2)
+    else:
+        err = np.sqrt(self.h)
+
+    n= np.copy(self.h)
+    dataint= (n*np.diff(self.edges)).sum()
+    scale= dataint if not self.extended else 1.0
+
+    arg = parse_arg(self.f, arg, 1) if isinstance(arg, dict) else arg
+    yf = vector_apply(self.f, m, *arg)
+    yf*= (scale*np.diff(self.edges) if self.extended else scale)
+    n = n- yf
+    if norm:
+        sel= err>0
+        n[sel]/= err[sel]
+        err= np.ones(len(err))
+
+    ax.errorbar(m, n, err, fmt='.')
+
+    ax.plot([self.edges[0],self.edges[-1]],[0.,0.], 'r-')
 
     ax.grid(True)
 
