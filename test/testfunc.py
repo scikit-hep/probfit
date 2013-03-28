@@ -93,7 +93,16 @@ def test_polynomial():
     assert_equal(describe(p),['x','c_0','c_1'])
     assert_equal(p(2,2,1), 4)
     integral = p.integrate((0,1), 1, 2, 1)
-    assert_equal(integral,2.)
+    assert_equal(integral,2.5)
+
+    p = Polynomial(2)
+    assert_equal(describe(p),['x','c_0','c_1','c_2'])
+    assert_equal(p(2,3,4,5), 31)
+    integral = p.integrate((2,10), 10, 1, 2, 3)
+    analytical = 8+2/2.*(10**2-2**2)+3/3.*(10**3-2**3)    
+    assert_equal(integral,analytical)
+
+
 
 #cpdef double novosibirsk(double x, double width, double peak, double tail)
 def test_novosibirsk():
