@@ -97,14 +97,16 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     if not parts:
         draw_arg.append(('color', 'r'))
 
-    draw_pdf_with_edges(self.f, arg, e, density=not self.extended, scale=scale,
+    # Draw pdf with finer bins
+    ef= np.linspace(e[0],e[-1], nfbins+1)
+    draw_pdf_with_edges(self.f, arg, ef, density=not self.extended, scale=scale,
                         **dict(draw_arg))
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
             for p in f_parts():
-                draw_pdf_with_edges(p, arg, e, scale=scale, density=not self.extended)
+                draw_pdf_with_edges(p, arg, ef, scale=scale, density=not self.extended)
 
     ax.grid(True)
 
