@@ -65,7 +65,7 @@ def _param_text(parameters, arg, error):
 
 #from UML
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
-             parmloc=(0.05, 0.95), nfbins=500, print_par=True,
+             parmloc=(0.05, 0.95), nfbins=200, print_par=True,
              args=None, errors=None, parts=False, show_errbars='normal'):
 
     ax = plt.gca() if ax is None else ax
@@ -74,7 +74,6 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
     n,e= np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
     dataint= (n*np.diff(e)).sum()
-    scale= dataint if not self.extended else 1.0
 
     if not show_errbars:
         pp= ax.hist(mid(e), bins=e, weights=n, histtype='step')
@@ -99,6 +98,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
     # Draw pdf with finer bins
     ef= np.linspace(e[0],e[-1], nfbins+1)
+    scale= dataint if not self.extended else nfbins/float(bins)
     draw_pdf_with_edges(self.f, arg, ef, density=not self.extended, scale=scale,
                         **dict(draw_arg))
 
