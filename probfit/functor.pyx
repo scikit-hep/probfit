@@ -728,17 +728,16 @@ cdef class BlindFunc:
         self.toblind= toblind
         self.argpos= describe(f).index(toblind)
 
-    cpdef np.ndarray[np.double_t] __shift_arg__(self, tuple arg):
-    #def __shift_arg__(self, *arg):
-        cdef np.ndarray[np.double_t] newarg= np.asarray( arg , np.float )
-        newarg[self.argpos]*= self.signflip
-        newarg[self.argpos]+= self.shift
-        return newarg
+    #cpdef np.ndarray[np.double_t] __shift_arg__(self, tuple arg):
+    def __shift_arg__(self, arg):
+        a= np.asarray(arg, np.float)
+        a[self.argpos]= a[self.argpos]*self.signflip + self.shift
+        return tuple(x for x in a)
     
     def __call__(self, *arg):
-        cdef np.ndarray[np.double_t] newarg= self.__shift_arg__(arg)
+        newarg= self.__shift_arg__(arg)
         return self.f(*newarg)
 
     def integrate(self, tuple bound, int nint, *arg):
-        cdef np.ndarray[np.double_t] newarg= self.__shift_arg__(arg)
+        newarg= self.__shift_arg__(arg)
         return integrate1d(self.f, bound, nint, newarg)
