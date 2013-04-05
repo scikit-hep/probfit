@@ -3,6 +3,7 @@ __all__ = [
     'AddPdf',
     'BinnedChi2',
     'BinnedLH',
+    'BlindFunc',
     'Chi2Regression',
     'Convolve',
     'Extended',
@@ -55,5 +56,5 @@ from .plotting import *
 from .funcutil import *
 from .decorator import *
 from ._libstat import integrate1d
-from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm
+from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm, BlindFunc
 from .info import __version__
