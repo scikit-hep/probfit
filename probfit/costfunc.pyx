@@ -107,12 +107,19 @@ cdef class SimultaneousFit:
             :meth:`draw` for arguments.
 
         """
-        self.draw(m)
+        ret = self.draw(m)
         plt.show()
+        return ret
 
 
     def draw(self, minuit=None, args=None, errors=None, **kwds):
-        plotting.draw_simultaneous(self, minuit=minuit, args=args,
+        """
+        Draw each pdf along with data on plotting grid
+
+        return list of return values from each cost function
+
+        """
+        return plotting.draw_simultaneous(self, minuit=minuit, args=args,
                                    errors=errors, **kwds)
 
 
@@ -248,6 +255,10 @@ cdef class UnbinnedLH:
                'normal' : error = sqrt( sum of weight )
                'sumw2'  : error = sqrt( sum of weight**2 )
                 None : no errorbars (shown as a step histogram)
+        
+        **Returns**
+        
+        ((data_edges, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
 
         """
         return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
@@ -317,8 +328,9 @@ cdef class UnbinnedLH:
             :meth:`draw` for arguments.
 
         """
-        self.draw(*arg,**kwd)
+        ret = self.draw(*arg,**kwd)
         plt.show()
+        return ret
 
 
 cdef class BinnedLH:
@@ -506,6 +518,10 @@ cdef class BinnedLH:
             - **print_par** print parameters and error on the plot.
               Default True.
 
+        **Returns**
+        
+        ((data_edges, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
+
         """
         return plotting.draw_blh(self, minuit=minuit,
             ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
@@ -552,9 +568,9 @@ cdef class BinnedLH:
             :meth:`draw` for arguments.
 
         """
-        self.draw(*arg,**kwd)
+        ret = self.draw(*arg,**kwd)
         plt.show()
-
+        return ret
 
 #fit a line with given function using minimizing chi2
 cdef class Chi2Regression:
@@ -620,7 +636,7 @@ cdef class Chi2Regression:
 
 
     def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=True,
-             args=None, errors=None):
+             args=None, errors=None, parts=False):
         """
         Draw comparison between points (**x**,**y**) and the function **f**.
 
@@ -640,9 +656,15 @@ cdef class Chi2Regression:
 
             - **print_par** print parameters and error on the plot.
               Default True.
+
+            - **parts** draw components of PDF. Default False.
+
+        **Returns**
+        
+        ((data_x, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
-                print_par=print_par, args=args, errors=errors)
+                print_par=print_par, args=args, errors=errors, parts=parts)
 
 
     def show(self,*arg, **kwd):
@@ -653,8 +675,9 @@ cdef class Chi2Regression:
             :meth:`draw` for arguments.
 
         """
-        self.draw(*arg, **kwd)
+        ret = self.draw(*arg, **kwd)
         plt.show()
+        return ret
 
 
 cdef class BinnedChi2:
@@ -778,6 +801,10 @@ cdef class BinnedChi2:
 
             - **print_par** print parameters and error on the plot.
               Default True.
+
+        **Returns**
+        
+        ((data_edges, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
             parmloc=parmloc, nfbins=nfbins, print_par=print_par,
@@ -796,5 +823,6 @@ cdef class BinnedChi2:
             :meth:`draw` for arguments.
 
         """
-        self.draw(*arg,**kwd)
+        ret = self.draw(*arg,**kwd)
         plt.show()
+        return ret
