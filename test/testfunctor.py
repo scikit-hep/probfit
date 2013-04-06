@@ -3,6 +3,7 @@ from probfit import *
 from probfit._libstat import integrate1d
 from nose.tools import *
 from probfit.decorator import extended, normalized
+import numpy as np
 
 def test_describe_normal_function():
     def f(x,y,z):
@@ -181,3 +182,19 @@ def test_rename():
     g = rename(f,['x','a','b'])
     assert_equal(describe(g), ['x','a','b'])
 
+def test_blindfunc():
+    np.random.seed(0)
+    f= BlindFunc(gaussian, 'mean', 'abcd', width=1.5, signflip=True)
+    arg= f.__shift_arg__((1,1,1))
+    totest= [1., -1.1665264284482637, 1.]
+    assert_almost_equal(arg[0], totest[0])
+    assert_almost_equal(arg[1], totest[1])
+    assert_almost_equal(arg[2], totest[2])
+    assert_almost_equal(f.__call__(0.5,1.,1.), 0.0995003913596)
+    np.random.seed(575345)
+    f= BlindFunc(gaussian, 'mean', 'abcd', width=1.5, signflip=True)
+    arg= f.__shift_arg__((1,1,1))
+    assert_almost_equal(arg[0], totest[0])
+    assert_almost_equal(arg[1], totest[1])
+    assert_almost_equal(arg[2], totest[2])
+    assert_almost_equal(f.__call__(0.5,1.,1.), 0.0995003913596)

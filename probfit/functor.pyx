@@ -13,7 +13,7 @@ from _libstat cimport integrate1d_with_edges, _vector_apply,\
                       has_ana_integral, integrate1d
 from funcutil import FakeFuncCode, merge_func_code, FakeFunc
 from util import describe
-
+from random import Random
 
 cpdef tuple construct_arg(tuple arg, np.ndarray[np.int_t] fpos):
     cdef int size = fpos.shape[0]
@@ -678,3 +678,66 @@ cdef class Normalized:
             self.floatwarned+=1
         return X/n
 
+
+cdef class BlindFunc:
+    """
+    Transform a given parameter in the given **f** by a random shift
+    so that the analyst won't see the true fitted value.
+
+    ::
+
+        def f(x,mu,sigma):
+            return gaussian(x,mu,sigma)
+        g= BlindFunc(f, toblind='mu', seedstring= 'abcxyz', width=1, signflip=True)
+        describe(g) # ['x', 'mu', 'sigma']
+
+    **Arguments**
+        - **f** call object. A function or PDF.
+        - **toblind** the name of parameter to be blinded
+        - **seedstring** a string random number seed to control the random shift
+        - **width** a Gaussian width that controls the random shift
+        - **signflip** if True, sign of the parameter may be flipped
+              before being shifted.
+
+    """
+
+    cdef f
+    cdef public func_code
+    cdef public func_defaults
+    cdef int signflip
+    cdef int argpos
+    cdef double shift
+    cdef char* toblind
+
+    def __init__(self, f, toblind, seedstring, width=1, signflip=True):
+        self.f = f
+        if toblind not in describe(f):
+            raise ValueError('%s is not in a recognized parameter'%toblind)
+        self.func_code = FakeFuncCode(f)
+        self.func_defaults=None
+
+        mystery='ambpel4.b4G#4hwW%&eNrw56wJE56N%wwgwywJj%whw'
+        rnd1= Random(seedstring)
+        seed2= list(seedstring+mystery)
+        rnd1.shuffle(seed2, rnd1.random)
+        seed2= ''.join(seed2)
+        myRandom= Random(seed2)
+
+        self.signflip= myRandom.choice([-1,1])
+        self.shift= myRandom.gauss(0,width)
+        self.toblind= toblind
+        self.argpos= describe(f).index(toblind)
+
+    #cpdef np.ndarray[np.double_t] __shift_arg__(self, tuple arg):
+    def __shift_arg__(self, arg):
+        a= np.asarray(arg, np.float)
+        a[self.argpos]= a[self.argpos]*self.signflip + self.shift
+        return tuple(x for x in a)
+    
+    def __call__(self, *arg):
+        newarg= self.__shift_arg__(arg)
+        return self.f(*newarg)
+
+    def integrate(self, tuple bound, int nint, *arg):
+        newarg= self.__shift_arg__(arg)
+        return integrate1d(self.f, bound, nint, newarg)
