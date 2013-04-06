@@ -89,7 +89,7 @@ minimizer.print_fmin()
 
 #let's visualize our line
 chi2.draw(minimizer)
-#looks good
+#looks good;
 
 # <codecell>
 
@@ -140,7 +140,7 @@ cost = BinnedLH(myPDF,data)
 #Let's fit
 minimizer = iminuit.Minuit(cost,sigma=3.) #notice here that we give initial value to sigma
 #but most of the time we want to see it before fitting
-cost.draw(minimizer)
+cost.draw(minimizer);
 
 # <codecell>
 
@@ -151,7 +151,7 @@ minimizer.migrad() #very stable minimization algorithm
 # <codecell>
 
 #you can see if your fit make any sense too
-cost.draw(minimizer)#uncertainty is given by symetric poisson
+cost.draw(minimizer)#uncertainty is given by symetric poisson;
 
 # <codecell>
 
@@ -228,7 +228,7 @@ minimizer.migrad()
 
 # <codecell>
 
-chi2.draw(minimizer)
+chi2.draw(minimizer);
 
 # <codecell>
 
@@ -308,7 +308,7 @@ ublh = UnbinnedLH(gaussian,data)
 minimizer = iminuit.Minuit(ublh,sigma=2.)
 minimizer.set_up(0.5)#remember this is likelihood
 minimizer.migrad()#yes amazingly fast
-ublh.draw(minimizer, show_errbars='normal') # control how fit is displayed too
+ublh.draw(minimizer, show_errbars='normal') # control how fit is displayed too;
 
 # <codecell>
 
@@ -381,7 +381,7 @@ minimizer.set_up(0.5)#remember this is likelihood
 minimizer.migrad()#yes amazingly fast Normalize is written in cython
 ublh.show(minimizer)
 #crystalball function is nortorious for its sensitivity on n parameter
-#dist_fit give you a heads up where it might have float overflow
+#dist_fit give you a heads up where it might have float overflow;
 
 # <markdowncell>
 
@@ -425,7 +425,7 @@ minimizer.migrad()#yes amazingly fast but tons of read
 
 # <codecell>
 
-ublh.show(minimizer)#it bounds to fails
+ublh.show(minimizer)#it bounds to fails;
 
 # <codecell>
 
@@ -441,7 +441,7 @@ minimizer = iminuit.Minuit(ublh,
     alpha=1.,n=2.1,mean=1.2,sigma=0.3)
 minimizer.set_up(0.5)#remember this is likelihood
 minimizer.migrad()#yes amazingly fast. Normalize is written in cython
-ublh.show(minimizer)
+ublh.show(minimizer);
 
 # <markdowncell>
 
@@ -477,7 +477,9 @@ print besttry #and you can find which one give you minimal unbinned likelihood
 # <codecell>
 
 import numpy.random as npr
-from probfit import gen_toy, gaussian, Extended, describe, try_binlh, BinnedLH
+from probfit import gen_toy, gaussian, Extended, describe, try_binlh,\
+                    BinnedLH, rename, Polynomial, Extended, AddPdf                 
+
 import numpy as np
 import iminuit
 
@@ -491,47 +493,20 @@ hist((peak1,peak2,bg,all_data),bins=200,histtype='step',range=(-2,5));
 
 # <codecell>
 
-%load_ext cythonmagic
-
-# <codecell>
-
-%%cython
-cimport cython
-from probfit import Normalized, gaussian
-
-@cython.binding(True)
-def poly(double x,double a,double b, double c):
-    return a*x*x+b*x+c
-
 #remember linear function is not normalizable for -inf ... +inf
-nlin = Normalized(poly,(-1,5))
+npoly = Extended(Normalized(Polynomial(2),(-1,5)), extname='NBkg')
 
+g1 = Extended(rename(gaussian, ['x', 'mu1','sigma1']), extname='N1')
+g2 = Extended(rename(gaussian, ['x', 'mu2','sigma2']), extname='N2')
+print 'npoly', describe(npoly)
+print 'g1', describe(g1)
+print 'g2', describe(g2)
 #our extended PDF for 3 types of signal
-@cython.binding(True)
-def myPDF(double x, 
-    double a, double b, double c, double nbg,
-    double mu1, double sigma1, double nsig1,
-    double mu2, double sigma2, double nsig2):
-
-    cdef double NBG = nbg*nlin(x,a,b,c)
-    cdef double NSIG1 = nsig1*gaussian(x,mu1,sigma1) 
-    cdef double NSIG2 = nsig2*gaussian(x,mu2,sigma2)
-    return NBG + NSIG1 + NSIG2
+myPDF = AddPdf(npoly, g1, g2)
 
 # <codecell>
 
 print describe(myPDF)
-
-# <codecell>
-
-#lets use what we just learned
-#for complicated function good initial value(and initial step) is crucial
-#if it doesn't converge try play with initial value and initial stepsize(error_xxx)
-besttry = try_binlh(myPDF,all_data, 
-    a=1.,b=2.,c=4.,nbg=20000.,
-    mu1=0.1,sigma1=0.2,nsig1=3000.,
-    mu2=3.9,sigma2=0.1,nsig2=5000.,extended=True, bins=300, bound=(-1,5) )
-print besttry
 
 # <codecell>
 
@@ -540,7 +515,11 @@ binlh = BinnedLH(myPDF,all_data, bins=200, extended=True, bound=(-1,5))
 #use keyword expansion **besttry
 #need to put in initial step size for mu1 and mu2 
 #with error_mu* otherwise it won't converge(try it yourself)
-minimizer = iminuit.Minuit(binlh, error_mu1=0.1, error_mu2=0.1, **besttry)
+minimizer = iminuit.Minuit(binlh, error_mu1=0.1, error_mu2=0.1, 
+                c_0=1.,c_1=2.,c_2=4.,NBkg=20000.,
+                mu1=0.1,sigma1=0.2,N1=3000.,
+                mu2=3.9,sigma2=0.1,N2=5000.)
+binlh.draw(minimizer);
 
 # <codecell>
 
@@ -548,18 +527,42 @@ minimizer.migrad();
 
 # <codecell>
 
-binlh.show(minimizer)
-
-# <codecell>
-
-minimizer.print_fmin()
+binlh.show(minimizer, parts=True);
 
 # <markdowncell>
 
-# ##Advance: Custom cost function and Simultaneous Fit
+# ##Custom Drawing
+# The draw() and show() method we provide is intended to just give you a quick look at your fit.
+# To make a custom drawing you can use the return value of draw() and show()
+
+# <codecell>
+
+#just press tab and scroll to last line of doc and copy it
+((data_edges, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts) = binlh.draw(minimizer, parts=True);
+
+# <codecell>
+
+from probfit import mid
+figure(figsize=(10,8))
+errorbar(mid(data_edges), datay, errorp, fmt='.', capsize=0, color='LightGray',label='data')
+plot(total_pdf_x, total_pdf_y, color='blue', lw=2,label='Fitted')
+colors = ['orange','purple','DarkGreen']
+labels = ['Poly','Gauss1','Gauss2']
+for i,part in enumerate(parts):
+    x,y = part
+    plot(x,y, ls='--', color=colors[i], label=labels[i])
+grid(True)
+legend(loc='upper left')
+
+# <codecell>
+
+from probfit import mid
+
+# <markdowncell>
+
+# ##Simultaneous Fit
 # 
 # Sometimes, what we want to fit is the sum of likelihood /chi^2 of two PDF sharing some parameters.
-# dist_fit doesn't provied a built_in facility to do this but it can be built easily.
 # 
 # In this example, we will fit two gaussian distribution where we know that the width are the same
 # but the peak is at different places.
@@ -567,7 +570,8 @@ minimizer.print_fmin()
 # <codecell>
 
 import numpy.random as npr
-from probfit import UnbinnedLH, gaussian, describe, draw_compare_hist
+from probfit import UnbinnedLH, gaussian, describe,\
+                    draw_compare_hist, rename, SimultaneousFit
 import iminuit
 
 # <codecell>
@@ -582,30 +586,15 @@ hist([data1,data2],bins=100,histtype='step',label=['data1','data2']);
 
 #remember this is nothing special about builtin cost function
 #except some utility function like draw and show
-ulh1 = UnbinnedLH(gaussian,data1)
-ulh2 = UnbinnedLH(gaussian,data2)
+ulh1 = UnbinnedLH(rename(gaussian, ('x','mean2', 'sigma')),data1)
 print describe(ulh1)
+ulh2 = UnbinnedLH(gaussian,data2)
 print describe(ulh2)
+simlh = SimultaneousFit(ulh1,ulh2)
 
 # <codecell>
 
-#you can also use cython to do this
-class CustomCost:
-    def __init__(self,pdf1,data1,pdf2,data2):
-        self.ulh1 = UnbinnedLH(pdf1,data1)
-        self.ulh2 = UnbinnedLH(pdf2,data2)
-    #this is the important part you need __call__ to calculate your cost
-    #in our case it's sum of likelihood with sigma
-    def __call__(self,mu1,mu2,sigma):
-        return self.ulh1(mu1,sigma)+self.ulh2(mu2,sigma)
-
-# <codecell>
-
-simul_lh = CustomCost(gaussian,data1,gaussian,data2)
-
-# <codecell>
-
-minimizer = iminuit.Minuit(simul_lh,sigma=0.5)
+minimizer = iminuit.Minuit(simlh,sigma=0.5)
 minimizer.set_up(0.5)#remember it's likelihood
 minimizer.migrad();
 
@@ -617,9 +606,5 @@ results = minimizer.values
 
 # <codecell>
 
-draw_compare_hist(gaussian,[results['mu1'],results['sigma']],data1,normed=True);
-draw_compare_hist(gaussian,[results['mu2'],results['sigma']],data2,normed=True);
-
-# <codecell>
-
+simlh.draw(minimizer);
 
