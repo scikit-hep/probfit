@@ -2,7 +2,7 @@
 cimport cython
 from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GetItem,\
                      PyObject, PyTuple_SetItem, PyTuple_SetItem,\
-                     PyTuple_New, Py_INCREF
+                     PyTuple_New, Py_INCREF, PyFloat_FromDouble
 
 import numpy as np
 cimport numpy as np
@@ -678,7 +678,6 @@ cdef class Normalized:
             self.floatwarned+=1
         return X/n
 
-
 cdef class BlindFunc:
     """
     Transform a given parameter in the given **f** by a random shift
@@ -728,14 +727,28 @@ cdef class BlindFunc:
         self.toblind= toblind
         self.argpos= describe(f).index(toblind)
 
-    #cpdef np.ndarray[np.double_t] __shift_arg__(self, tuple arg):
-    def __shift_arg__(self, arg):
-        a= np.asarray(arg, np.float)
-        a[self.argpos]= a[self.argpos]*self.signflip + self.shift
-        return tuple(x for x in a)
-    
+    cpdef tuple __shift_arg__(self, tuple arg):
+        cdef int numarg = len(arg)
+        cdef tuple ret = PyTuple_New(numarg)
+        cdef int i
+        cdef object tmp, tmp2
+        cdef double ftmp
+        for i in range(numarg):
+            if i!=self.argpos:
+                tmp =  <object>PyTuple_GetItem(arg, i)
+                Py_INCREF(tmp) # get is borrow and set is steal
+                PyTuple_SetItem(ret, i, tmp)
+            else:
+                tmp =  <object>PyTuple_GetItem(arg, i)
+                ftmp = tmp
+                ftmp = ftmp*self.signflip + self.shift
+                tmp2 = PyFloat_FromDouble(ftmp)
+                Py_INCREF(tmp2)
+                PyTuple_SetItem(ret, i, tmp2)
+        return ret
+
     def __call__(self, *arg):
-        newarg= self.__shift_arg__(arg)
+        cdef tuple newarg = self.__shift_arg__(arg)
         return self.f(*newarg)
 
     def integrate(self, tuple bound, int nint, *arg):
