@@ -1,3 +1,7 @@
+#36 Custom Drawing from draw() return values -- PO
+
+#35 Add BlindFunc to blind the true value of parameters -- CC
+
 #33 Add draw_residual to (Un)binnedLH. BinnedLH draw show raw yield. Default 
     UnbinnedLH draw shows error bars. Add HistogramPdf analytical integral.
 
