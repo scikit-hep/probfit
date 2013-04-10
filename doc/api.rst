@@ -104,6 +104,10 @@ Convolve
 ^^^^^^^^
 .. autoclass:: Convolve
 
+BlindFunc
+^^^^^^^^^
+.. autoclass:: BlindFunc
+
 AddPdf
 ^^^^^^
 .. autoclass:: AddPdf
