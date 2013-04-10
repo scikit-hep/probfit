@@ -469,7 +469,7 @@ cdef class AddPdfNorm:
             self.func_code.append(fname)
 
         self.arglen = self.func_code.co_argcount
-        self.func_defaults=None
+        self.func_defaults = None
         self.allf = arg
         self.numf = len(arg)
 
@@ -682,6 +682,9 @@ cdef class BlindFunc:
     """
     Transform a given parameter in the given **f** by a random shift
     so that the analyst won't see the true fitted value.
+    
+    .. math::
+        BlindFunc(f, 'y', '123')(x, y , z) = f(x, y\pm \delta, z)
 
     ::
 
@@ -696,7 +699,7 @@ cdef class BlindFunc:
         - **seedstring** a string random number seed to control the random shift
         - **width** a Gaussian width that controls the random shift
         - **signflip** if True, sign of the parameter may be flipped
-              before being shifted.
+          before being shifted.
 
     """
 
@@ -713,19 +716,19 @@ cdef class BlindFunc:
         if toblind not in describe(f):
             raise ValueError('%s is not in a recognized parameter'%toblind)
         self.func_code = FakeFuncCode(f)
-        self.func_defaults=None
+        self.func_defaults = None
 
-        mystery='ambpel4.b4G#4hwW%&eNrw56wJE56N%wwgwywJj%whw'
-        rnd1= Random(seedstring)
-        seed2= list(seedstring+mystery)
+        mystery ='ambpel4.b4G#4hwW%&eNrw56wJE56N%wwgwywJj%whw'
+        rnd1 = Random(seedstring)
+        seed2 = list(seedstring+mystery)
         rnd1.shuffle(seed2, rnd1.random)
-        seed2= ''.join(seed2)
-        myRandom= Random(seed2)
+        seed2 = ''.join(seed2)
+        myRandom = Random(seed2)
 
-        self.signflip= myRandom.choice([-1,1])
-        self.shift= myRandom.gauss(0,width)
-        self.toblind= toblind
-        self.argpos= describe(f).index(toblind)
+        self.signflip = myRandom.choice([-1,1])
+        self.shift = myRandom.gauss(0, width)
+        self.toblind = toblind
+        self.argpos = describe(f).index(toblind)
 
     cpdef tuple __shift_arg__(self, tuple arg):
         cdef int numarg = len(arg)
@@ -737,9 +740,10 @@ cdef class BlindFunc:
             if i!=self.argpos:
                 tmp =  <object>PyTuple_GetItem(arg, i)
                 Py_INCREF(tmp) # get is borrow and set is steal
+                               # but <object> comes with inc ref + dec ref
                 PyTuple_SetItem(ret, i, tmp)
             else:
-                tmp =  <object>PyTuple_GetItem(arg, i)
+                tmp = <object>PyTuple_GetItem(arg, i)
                 ftmp = tmp
                 ftmp = ftmp*self.signflip + self.shift
                 tmp2 = PyFloat_FromDouble(ftmp)
@@ -752,5 +756,5 @@ cdef class BlindFunc:
         return self.f(*newarg)
 
     def integrate(self, tuple bound, int nint, *arg):
-        newarg= self.__shift_arg__(arg)
+        cdef tuple newarg = self.__shift_arg__(arg)
         return integrate1d(self.f, bound, nint, newarg)
