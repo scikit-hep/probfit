@@ -26,8 +26,8 @@ def draw_simultaneous(self, minuit=None, args=None, errors=None, **kwds):
 
 def _get_args_and_errors(self, minuit=None, args=None, errors=None):
     """
-    consitent algorithm to get argument and errors
-    1) get it from minuit if minuit is avaialble
+    consistent algorithm to get argument and errors
+    1) get it from minuit if minuit is available
     2) if not get it from args and errors
     2.1) if args is dict parse it.
     3) if all else fail get it from self.last_arg
@@ -375,7 +375,7 @@ def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
 
 def draw_compare(f, arg, edges, data, errors=None, ax=None, grid=True, normed=False, parts=False):
     """
-    this need to be rewritten
+    TODO: this needs to be rewritten
     """
     #arg is either map or tuple
     ax = plt.gca() if ax is None else ax
@@ -473,7 +473,7 @@ def draw_pdf_with_midpoints(f, arg, x, ax=None, scale=1.0, normed_pdf=False, **k
     return x, yf
 
 
-#draw comprison between function given args and data
+#draw comparison between function given args and data
 def draw_compare_hist(f, arg, data, bins=100, bound=None, ax=None, weights=None,
                       normed=False, use_w2=False, parts=False, grid=True):
     """
@@ -481,7 +481,7 @@ def draw_compare_hist(f, arg, data, bins=100, bound=None, ax=None, weights=None,
 
     ::
 
-        np.rannd(10000)
+        data = np.random.rand(10000)
         f = gaussian
         draw_compare_hist(f, {'mean':0,'sigma':1}, data, normed=True)
 

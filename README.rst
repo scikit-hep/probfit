@@ -5,10 +5,10 @@
 
 
 probfit
---------
+-------
 
 *probfit* is a set of functions that helps you construct a complex fit. It's
-intended to be used with `iminuit <http://iminuit.github.com/iminuit/>`_. The
+intended to be used with `iminuit <http://iminuit.github.io/iminuit/>`_. The
 tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression,
 Binned :math:`\chi^2` estimator and Simultaneous fit estimator.
 Various functors for manipulating PDF such as Normalization and
@@ -17,29 +17,22 @@ normally used in B physics is also provided.
 
 ::
 
-    from probfit import UnbinnedLH, gaussian
+    import numpy as np
     from iminuit import Minuit
-    data = np.randn(10000)
-    ulh = UnbinnedLH(data)
-    m = Minuit(ulh, mean=0.1, sigma=1.1)
-    m.migrad()
-    ulh.draw(m)
+    from probfit import UnbinnedLH, gaussian
+    data = np.random.randn(10000)
+    unbinned_likelihood = UnbinnedLH(gaussian, data)
+    fitter = Minuit(unbinned_likelihood, mean=0.1, sigma=1.1)
+    fitter.migrad()
+    unbinned_likelihood.draw(fitter)
 
 
-Requirement
------------
-
-- iminuit http://iminuit.github.com/iminuit/
-- numpy http://www.numpy.org/
-- matplotlib http://matplotlib.org/
-
-Tutorial
---------
-
-open tutorial.ipynb in ipython notebook. You can `view it online <http://nbviewer.ipython.org/urls/raw.github.com/iminuit/probfit/master/tutorial/tutorial.ipynb>`_ too.
-
-
-Documentation
--------------
-
-See `here <http://iminuit.github.com/probfit/>`_
+* `MIT <http://opensource.org/licenses/MIT>`_ license (open source)
+* `Documentation <http://iminuit.github.io/probfit/>`_
+* The tutorial is an IPython notebook that you can view online
+  `here <http://nbviewer.ipython.org/urls/raw.github.com/iminuit/probfit/master/tutorial/tutorial.ipynb>`_.
+  To run it locally: `cd tutorial; ipython notebook --pylab=inline tutorial.ipynb`.
+* Dependencies:
+   - `iminuit <http://iminuit.github.io/iminuit/>`_
+   - `numpy <http://www.numpy.org/>`_
+   - `matplotlib <http://matplotlib.org/>`_ (optional, for plotting)

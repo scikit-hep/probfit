@@ -50,7 +50,7 @@ setup(
     long_description=''.join(open('README.rst').readlines()[4:]),
     author='Piti Ongmongkolkul',
     author_email='piti118@gmail.com',
-    url='https://github.com/iminuit/probfit',
+    url='http://iminuit.github.io/probfit/',
     package_dir={'probfit': 'probfit'},
     packages=['probfit'],
     ext_modules=[costfunc, pdf, libstat, funcutil, functor],
