@@ -118,7 +118,7 @@ AddPdf
         :class: lightbox
 
 AddPdfNorm
-^^^^^^^^^^^
+^^^^^^^^^^
 .. autoclass:: AddPdfNorm
 
 **Example**
@@ -132,7 +132,7 @@ rename
 .. autofunction:: probfit.funcutil.rename
 
 Decorator
-^^^^^^^^^^
+^^^^^^^^^
 .. currentmodule:: probfit.decorator
 
 .. autoclass:: normalized

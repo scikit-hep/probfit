@@ -220,7 +220,7 @@ cdef class Extended:
 cdef class AddPdf:
     """
     Directly add PDF without normalization nor factor.
-    Parmeters are merged by names.
+    Parameters are merged by names.
 
     ::
 
@@ -250,7 +250,7 @@ cdef class AddPdf:
 
                 factor[0]*f + factor[1]*g
 
-          Note that all argument for callable factors will be prefixed(if 
+          Note that all argument for callable factors will be prefixed (if 
           given) as opposed to skipping the first one for pdf list. If None
           is given, all factors are assume to be constant 1. Default None.
 

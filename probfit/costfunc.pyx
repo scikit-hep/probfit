@@ -143,7 +143,8 @@ cdef class UnbinnedLH:
         and data points *data*. Currently can only do 1D fit.
 
         .. math::
-            \\textrm{UnbinnedLH} = \sum_{x \in \\textrm{data}} - \log f(x, arg \ldots)
+            \\textrm{UnbinnedLH} = \sum_{x \in \\textrm{data}} - \log f(x, arg, \ldots)
+
         **Arguments**
 
             - **f** callable object. PDF that describe the data. The parameters
@@ -175,7 +176,8 @@ cdef class UnbinnedLH:
             - **extended_bound** Bound for calculating extended term.
               Default None(minimum and maximum of data will be used).
             - **extended_nint** number pieces to sum up as 
-              integral for extended Term(using simpson3/8). Default 100.
+              integral for extended term (using simpson3/8). Default 100.
+
         .. note::
             There is a notable lack of **sum_w2** for unbinned likelihood. I
             feel like the solutions are quite sketchy. There are multiple ways
@@ -252,9 +254,9 @@ cdef class UnbinnedLH:
               parameter errors are determined from **errors**. Default None.
 
             - **show_errbars** Show error bars. Default 'normal'
-               'normal' : error = sqrt( sum of weight )
-               'sumw2'  : error = sqrt( sum of weight**2 )
-                None : no errorbars (shown as a step histogram)
+                * 'normal' : error = sqrt( sum of weight )
+                * 'sumw2'  : error = sqrt( sum of weight**2 )
+                * None : no errorbars (shown as a step histogram)
         
         **Returns**
         
