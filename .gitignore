@@ -20,5 +20,8 @@ Untitled*.*
 *~
 *.orig
 probfit/*.html
+.project
+.pydevproject
+.settings
 
 !/tutorial/*.ipynb
