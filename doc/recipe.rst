@@ -1,12 +1,17 @@
-How do I .....?
-===============
+.. _cookbook:
+
+Cookbook
+========
 
 Tell probfit to use my analytical integral
 ------------------------------------------
-probfit checks for method call integrate(bound, nint, *arg).
+
+probfit checks for a method ``integrate(bound, nint, *arg)``.
 If such method is available it calls that method to compute definite integral.
-If not it falls back to simpson3/8(cubic approximation).
+If not it falls back to simpson3/8 integration (cubic approximation).
+
 ::
+
     from probfit import integrate1d
     def line(x, m, c):
         return m*x+c
