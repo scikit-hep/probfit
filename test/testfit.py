@@ -87,9 +87,9 @@ class TestFit(unittest.TestCase):
         minuit = Minuit(sim,sigma=1.2, pedantic=False, print_level=0)
         minuit.migrad()
         assert(minuit.migrad_ok())
-        assert_almost_equal(m.values['lmu'], 0., delta=2*m.errors['lmu'])
-        assert_almost_equal(m.values['rmu'], 3., delta=2*m.errors['rmu'])
-        assert_almost_equal(m.values['sigma'], 1., delta=2*m.errors['sigma'])
+        assert_almost_equal(m.values['lmu'], 0., delta=2 * minuit.errors['lmu'])
+        assert_almost_equal(m.values['rmu'], 3., delta=2 * minuit.errors['rmu'])
+        assert_almost_equal(m.values['sigma'], 1., delta=2 * minuit.errors['sigma'])
 
 if __name__ == '__main__':
     unittest.main()
