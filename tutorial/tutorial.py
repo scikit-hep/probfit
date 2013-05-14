@@ -2602,6 +2602,17 @@ minuit.print_matrix()
 # \end{tabular}</textarea>
 #             </pre>
 #             
+# Note the red upper left corner in the correlation matrix above?
+# 
+# It shows that the three polynomial parameters `c_0`, `c_1` and `c_2` are highly correlated?
+# The reason is that we put a constraint on the polynomial to be normalized over the fit range:
+# 
+#     fit_range = (0, 5)
+#     normalized_poly = probfit.Normalized(probfit.Polynomial(2), fit_range)
+#     normalized_poly = probfit.Extended(normalized_poly, extname='NBkg')
+# 
+# To resolve this problem you could simply use a non-normalized and non-extended polynomial to model the background. We won't do this here, though ...
+
 # ## Custom Drawing
 # 
 # The `draw()` and `show()` method we provide is intended to just give you a quick look at your fit.
