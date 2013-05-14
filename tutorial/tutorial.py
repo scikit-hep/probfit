@@ -73,8 +73,8 @@ iminuit.describe(chi2)
 # minimize it
 # yes, it gives you a heads up that you didn't give it initial value
 # we can ignore it for now
-fitter = iminuit.Minuit(chi2) # see iminuit tutorial on how to give initial value/range/error
-fitter.migrad(); # MIGRAD is a very stable robust minimization method
+minuit = iminuit.Minuit(chi2) # see iminuit tutorial on how to give initial value/range/error
+minuit.migrad(); # MIGRAD is a very stable robust minimization method
 # you can look at your terminal to see what it is doing;
 
 # Out[7]:
@@ -185,12 +185,12 @@ fitter.migrad(); # MIGRAD is a very stable robust minimization method
 # <hr>
 # In[8]:
 # The output above is a pretty-printed summary of the fit results from
-# fitter.print_fmin()
+# minuit.print_fmin()
 # which was automatically called by iminuit.Minuit.migrad() after running MIGRAD.
 
 # Let's see our results as Python dictionaries ...
-print(fitter.values)
-print(fitter.errors)
+print(minuit.values)
+print(minuit.errors)
 
 # Out[8]:
 #     {'c': 16.137947520534624, 'm': 2.8862774144823855}
@@ -200,11 +200,11 @@ print(fitter.errors)
 # is calculated using the second derivative at the minimum
 # This is good in most cases where the uncertainty is symmetric not much correlation
 # exists. Migrad usually got this accurately but if you want ot be sure
-# call `fitter.hesse()` after calling `fitter.migrad()`.
+# call `minuit.hesse()` after calling `minuit.migrad()`.
 # 
 # #### Minos Error
 # is obtained by scanning the chi^2 or likelihood profile and find the point
-# where chi^2 is increased by `fitter.errordef`. Note that in the Minuit documentation
+# where chi^2 is increased by `minuit.errordef`. Note that in the Minuit documentation
 # and output `errordef` is often called `up` ... it's the same thing.
 # 
 # #### What `errordef` should I use?
@@ -226,7 +226,7 @@ print(fitter.errors)
 
 # In[9]:
 # Let's visualize our line
-chi2.draw(fitter)
+chi2.draw(minuit)
 # looks good;
 
 # Out[9]:
@@ -235,13 +235,13 @@ chi2.draw(fitter)
 # In[10]:
 # Sometimes we want the error matrix (a.k.a. covariance matrix)
 print('error matrix:')
-print(fitter.matrix())
+print(minuit.matrix())
 # or the correlation matrix
 print('correlation matrix:')
-print(fitter.matrix(correlation=True))
+print(minuit.matrix(correlation=True))
 # or a pretty html representation
 # Note that `print_matrix()` shows the correlation matrix, not the error matrix
-fitter.print_matrix()
+minuit.print_matrix()
 
 # Out[10]:
 #     error matrix:
@@ -339,12 +339,12 @@ def gauss_pdf(x, mu, sigma):
 binned_likelihood = probfit.BinnedLH(gauss_pdf, data)
 
 # In[14]:
-# Create the fitter
+# Create the minuit
 # and give an initial value for the sigma parameter
-fitter = iminuit.Minuit(binned_likelihood, sigma=3)
-# Remember: fitter.errordef is automatically set to 0.5
+minuit = iminuit.Minuit(binned_likelihood, sigma=3)
+# Remember: minuit.errordef is automatically set to 0.5
 # as required for likelihood fits (this was explained above)
-binned_likelihood.draw(fitter);
+binned_likelihood.draw(minuit);
 
 # Out[14]:
 #     -c:3: InitialParamWarning: Parameter mu does not have initial value. Assume 0.
@@ -354,7 +354,7 @@ binned_likelihood.draw(fitter);
 # image file: tutorial_files/tutorial_fig_03.png
 
 # In[15]:
-fitter.migrad()
+minuit.migrad()
 # Like in all binned fit with long zero tail. It will have to do something about the zero bin
 # probfit.BinnedLH does handle them gracefully but will give you a warning;
 
@@ -463,15 +463,15 @@ fitter.migrad()
 # <hr>
 # In[16]:
 # Visually check if the fit succeeded by plotting the model over the data
-binned_likelihood.draw(fitter) # uncertainty is given by symmetric Poisson;
+binned_likelihood.draw(minuit) # uncertainty is given by symmetric Poisson;
 
 # Out[16]:
 # image file: tutorial_files/tutorial_fig_04.png
 
 # In[17]:
 # Let's see the result
-print('Value: {}'.format(fitter.values))
-print('Error: {}'.format(fitter.errors))
+print('Value: {}'.format(minuit.values))
+print('Error: {}'.format(minuit.errors))
 
 # Out[17]:
 #     Value: {'mu': 0.9258754454758255, 'sigma': 3.9523813236078955}
@@ -479,9 +479,9 @@ print('Error: {}'.format(fitter.errors))
 # 
 # In[18]:
 # That printout can get out of hand quickly
-fitter.print_fmin()
+minuit.print_fmin()
 # Also print the correlation matrix
-fitter.print_matrix()
+minuit.print_matrix()
 
 # Out[18]:
 # <hr>
@@ -652,7 +652,7 @@ fitter.print_matrix()
 # In[19]:
 # Looking at a likelihood profile is a good method
 # to check that the reported errors make sense
-fitter.draw_mnprofile('mu');
+minuit.draw_mnprofile('mu');
 
 # Out[19]:
 #     -c:3: LogWarning: x is really small return 0
@@ -664,7 +664,7 @@ fitter.draw_mnprofile('mu');
 # You can notice that it takes some time to draw
 # We will this is because our PDF is defined in Python
 # We will show how to speed this up later
-fitter.draw_mncontour('mu', 'sigma');
+minuit.draw_mncontour('mu', 'sigma');
 
 # Out[20]:
 #     /Users/deil/Library/Python/2.7/lib/python/site-packages/iminuit/_plotting.py:85: LogWarning: x is really small return 0
@@ -718,14 +718,14 @@ chi2 = probfit.BinnedChi2(extended_gauss_pdf, data, bound=(-7,10))
 # that we don't want warnings about parameters without initial
 # value or step size.
 # And print_level=0 means that no output is generated
-fitter = iminuit.Minuit(chi2, sigma=1, pedantic=False, print_level=0)
-fitter.migrad();
+minuit = iminuit.Minuit(chi2, sigma=1, pedantic=False, print_level=0)
+minuit.migrad();
 
 # In[26]:
 # Now let's look at the results
-fitter.print_fmin()
-fitter.print_matrix()
-chi2.draw(fitter);
+minuit.print_fmin()
+minuit.print_matrix()
+chi2.draw(minuit);
 
 # Out[26]:
 # <hr>
@@ -983,13 +983,13 @@ def gauss_pdf_cython(double x, double mu, double sigma):
 unbinned_likelihood = probfit.UnbinnedLH(gauss_pdf_cython, data)
 
 # In[31]:
-fitter = iminuit.Minuit(unbinned_likelihood, sigma=2, pedantic=False, print_level=0)
-# Remember: fitter.errordef is automatically set to 0.5
+minuit = iminuit.Minuit(unbinned_likelihood, sigma=2, pedantic=False, print_level=0)
+# Remember: minuit.errordef is automatically set to 0.5
 # as required for likelihood fits (this was explained above)
-fitter.migrad() # yes: amazingly fast
-unbinned_likelihood.show(fitter)
-fitter.print_fmin()
-fitter.print_matrix() 
+minuit.migrad() # yes: amazingly fast
+unbinned_likelihood.show(minuit)
+minuit.print_fmin()
+minuit.print_matrix() 
 
 # Out[31]:
 # image file: tutorial_files/tutorial_fig_10.png
@@ -1163,7 +1163,7 @@ fitter.print_matrix()
 # Remember how slow draw_mnprofile() was in the last example?
 # Now it's super fast (even though the unbinned
 # likelihood computation is more compute-intensive).
-fitter.draw_mnprofile('mu');
+minuit.draw_mnprofile('mu');
 
 # Out[32]:
 # image file: tutorial_files/tutorial_fig_11.png
@@ -1187,11 +1187,11 @@ print(type(probfit.pdf.gaussian))
 # 
 # In[34]:
 unbinned_likelihood = probfit.UnbinnedLH(probfit.gaussian, data)
-fitter = iminuit.Minuit(unbinned_likelihood, sigma=2, pedantic=False)
-# Remember: fitter.errordef is automatically set to 0.5
+minuit = iminuit.Minuit(unbinned_likelihood, sigma=2, pedantic=False)
+# Remember: minuit.errordef is automatically set to 0.5
 # as required for likelihood fits (this was explained above)
-fitter.migrad() # yes: amazingly fast
-unbinned_likelihood.draw(fitter, show_errbars='normal') # control how fit is displayed too;
+minuit.migrad() # yes: amazingly fast
+unbinned_likelihood.draw(minuit, show_errbars='normal') # control how fit is displayed too;
 
 # Out[34]:
 # <hr>
@@ -1300,9 +1300,9 @@ unbinned_likelihood.draw(fitter, show_errbars='normal') # control how fit is dis
 # Draw the difference between data and PDF
 plt.figure(figsize=(13,4))
 plt.subplot(121)
-unbinned_likelihood.draw_residual(fitter)
+unbinned_likelihood.draw_residual(minuit)
 plt.subplot(122)
-unbinned_likelihood.draw_residual(fitter, show_errbars=True, errbar_algo='sumw2', norm=True)
+unbinned_likelihood.draw_residual(minuit, show_errbars=True, errbar_algo='sumw2', norm=True)
 
 # Out[35]:
 # image file: tutorial_files/tutorial_fig_13.png
@@ -1359,11 +1359,11 @@ print(iminuit.describe(normalized_crystalball))
 # We can fit the normalized function in the usual way ...
 unbinned_likelihood = probfit.UnbinnedLH(normalized_crystalball, data)
 start_pars = dict(alpha=1, n=2.1, mean=1.2, sigma=0.3)
-fitter = iminuit.Minuit(unbinned_likelihood, **start_pars)
-# Remember: fitter.errordef is automatically set to 0.5
+minuit = iminuit.Minuit(unbinned_likelihood, **start_pars)
+# Remember: minuit.errordef is automatically set to 0.5
 # as required for likelihood fits (this was explained above)
-fitter.migrad() # yes: amazingly fast Normalize is written in Cython
-unbinned_likelihood.show(fitter)
+minuit.migrad() # yes: amazingly fast Normalize is written in Cython
+unbinned_likelihood.show(minuit)
 # The Crystal Ball function is notorious for its sensitivity on the 'n' parameter
 # probfit give you a heads up where it might have float overflow;
 
@@ -1545,10 +1545,10 @@ print(probfit.integrate1d(line, (0, 1), 10, (1., 2.)))
 # In[41]:
 unbinned_likelihood = probfit.UnbinnedLH(normalized_crystalball, data)
 # No initial values given -> all parameters have default initial value 0
-fitter = iminuit.Minuit(unbinned_likelihood)
-# Remember: fitter.errordef is automatically set to 0.5
+minuit = iminuit.Minuit(unbinned_likelihood)
+# Remember: minuit.errordef is automatically set to 0.5
 # as required for likelihood fits (this was explained above)
-fitter.migrad() # yes: amazingly fast but tons of output on the console
+minuit.migrad() # yes: amazingly fast but tons of output on the console
 # Remember there is a heads up;
 
 # Out[41]:
@@ -1692,7 +1692,7 @@ fitter.migrad() # yes: amazingly fast but tons of output on the console
 # In[42]:
 # This shows that we failed.
 # The parameters are still at the default initial values
-unbinned_likelihood.show(fitter);
+unbinned_likelihood.show(minuit);
 
 # Out[42]:
 # image file: tutorial_files/tutorial_fig_16.png
@@ -1700,8 +1700,8 @@ unbinned_likelihood.show(fitter);
 # In[43]:
 # These two status flags tell you if the best-fit parameter values
 # and the covariance matrix (the parameter errors) are OK.
-print(fitter.migrad_ok())
-print(fitter.matrix_accurate())
+print(minuit.migrad_ok())
+print(minuit.matrix_accurate())
 
 # Out[43]:
 #     False
@@ -1710,7 +1710,7 @@ print(fitter.matrix_accurate())
 # To make MIGRAD converge we need start parameter values that are roughly correct. Remember that above the same fit converged when we used ::
 # 
 #     start_pars = dict(alpha=1, n=2.1, mean=1.2, sigma=0.3)
-#     fitter = iminuit.Minuit(unbinned_likelihood, **start_pars)
+#     minuit = iminuit.Minuit(unbinned_likelihood, **start_pars)
 #     
 # #### But how can we guess these initial values?
 # 
@@ -1800,9 +1800,9 @@ binned_likelihood = probfit.BinnedLH(pdf, data_all, bins=200, extended=True, bou
 pars = dict(mu1=1.9, error_mu1=0.1, sigma1=0.2, N1=3000,
             mu2=4.1, error_mu2=0.1, sigma2=0.1, N2=5000,
             c_0=4, c_1=4, c_2=1, NBkg=20000)
-fitter = iminuit.Minuit(binned_likelihood, pedantic=False, print_level=0, **pars)
+minuit = iminuit.Minuit(binned_likelihood, pedantic=False, print_level=0, **pars)
 # You can see that the model already roughly matches the data
-binned_likelihood.draw(fitter, parts=True);
+binned_likelihood.draw(minuit, parts=True);
 
 # Out[48]:
 # image file: tutorial_files/tutorial_fig_20.png
@@ -1811,12 +1811,12 @@ binned_likelihood.draw(fitter, parts=True);
 # This can take a while ... the likelihood is evaluated a few 100 times
 # (and each time the distributions are evaluated, including the
 # numerical computation of the normalizing integrals)
-fitter.migrad();
+minuit.migrad();
 
 # In[50]:
-binned_likelihood.show(fitter, parts=True);
-fitter.print_fmin()
-fitter.print_matrix()
+binned_likelihood.show(minuit, parts=True);
+minuit.print_fmin()
+minuit.print_matrix()
 
 # Out[50]:
 # image file: tutorial_files/tutorial_fig_21.png
@@ -2610,7 +2610,7 @@ fitter.print_matrix()
 
 # In[51]:
 # You should copy & paste the return tuple from the `draw` docstring ...
-((data_edges, datay), (errorp, errorm), (total_pdf_x, total_pdf_y), parts) = binned_likelihood.draw(fitter, parts=True);
+((data_edges, datay), (errorp, errorm), (total_pdf_x, total_pdf_y), parts) = binned_likelihood.draw(minuit, parts=True);
 # ... now we have everything to make our own plot
 
 # Out[51]:
@@ -2675,17 +2675,17 @@ print(probfit.describe(simultaneous_likelihood))
 # In[55]:
 # Ah, the beauty of Minuit ... it doesn't care what your cost funtion is ...
 # you can use it to fit (i.e. compute optimal parameters and parameter errors) anything.
-fitter = iminuit.Minuit(simultaneous_likelihood, sigma=0.5, pedantic=False, print_level=0)
+minuit = iminuit.Minuit(simultaneous_likelihood, sigma=0.5, pedantic=False, print_level=0)
 # Well, there's one thing we have to tell Minuit so that it can compute parameter errors,
 # and that is the value of `errordef`, a.k.a. `up` (explained above).
 # This is a likelihood fit, so we need `errordef = 0.5` and not the default `errordef = 1`:
-fitter.errordef = 0.5
+minuit.errordef = 0.5
 
 # In[56]:
 # Run the fit and print the results
-fitter.migrad();
-fitter.print_fmin()
-fitter.print_matrix()
+minuit.migrad();
+minuit.print_fmin()
+minuit.print_matrix()
 
 # Out[56]:
 # <hr>
@@ -2903,7 +2903,7 @@ fitter.print_matrix()
 #             </pre>
 #             
 # In[57]:
-simultaneous_likelihood.draw(fitter);
+simultaneous_likelihood.draw(minuit);
 
 # Out[57]:
 # image file: tutorial_files/tutorial_fig_25.png
