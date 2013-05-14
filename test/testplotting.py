@@ -141,8 +141,8 @@ def test_draw_ulh_with_minuit():
     data = npr.randn(1000)
     plt.figure()
     ulh = UnbinnedLH(gaussian, data)
-    m = Minuit(ulh, mean=0, sigma=1)
-    ulh.draw(m)
+    minuit = Minuit(ulh, mean=0, sigma=1)
+    ulh.draw(minuit)
 
 
 @image_comparison('draw_blh.png')
@@ -271,8 +271,8 @@ def test_draw_simultaneous_prefix():
     ulh1 = UnbinnedLH(g1, data)
     ulh2 = UnbinnedLH(g2, shifted)
     sim = SimultaneousFit(ulh1,ulh2, prefix=['g1_','g2_'])
-    m = Minuit(sim, g1_lmu=0., g1_sigma=1., g2_rmu=0., g2_sigma=1.,
-               print_level=0)
-    m.migrad()
-    sim.draw(m)
+    minuit = Minuit(sim, g1_lmu=0., g1_sigma=1., g2_rmu=0., g2_sigma=1.,
+                    print_level=0)
+    minuit.migrad()
+    sim.draw(minuit)
 

@@ -107,20 +107,20 @@ class TestOneshot(unittest.TestCase):
     def test_extended_ulh(self):
         eg = Extended(gaussian)
         lh = UnbinnedLH(eg, self.data, extended=True, extended_bound=(-20,20))
-        m = Minuit(lh, mean=4.5, sigma=1.5, N=19000., 
-                   pedantic=False, print_level=0)
-        m.migrad()
-        assert_almost_equal(m.values['N'],20000, delta=sqrt(20000.))
-        assert(m.migrad_ok())
+        minuit = Minuit(lh, mean=4.5, sigma=1.5, N=19000., 
+                        pedantic=False, print_level=0)
+        minuit.migrad()
+        assert_almost_equal(minuit.values['N'],20000, delta=sqrt(20000.))
+        assert(minuit.migrad_ok())
 
     def test_extended_ulh_2(self):
         eg = Extended(gaussian)
         lh = UnbinnedLH(eg, self.data, extended=True)
-        m = Minuit(lh, mean=4.5, sigma=1.5, N=19000., 
-                   pedantic=False, print_level=0)
-        m.migrad()
-        assert(m.migrad_ok())
-        assert_almost_equal(m.values['N'],20000, delta=sqrt(20000.))
+        minuit = Minuit(lh, mean=4.5, sigma=1.5, N=19000., 
+                        pedantic=False, print_level=0)
+        minuit.migrad()
+        assert(minuit.migrad_ok())
+        assert_almost_equal(minuit.values['N'],20000, delta=sqrt(20000.))
 
 if __name__ == '__main__':
     unittest.main()

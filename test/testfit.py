@@ -33,8 +33,8 @@ class TestFit(unittest.TestCase):
         lh = UnbinnedLH(gaussian, self.data,)
         assert_equal(list(describe(lh)), ['mean','sigma'])
         assert_almost_equal(lh(0,1), 28188.201229348757)
-        m = Minuit(lh)
-        assert_equal(m.errordef, 0.5)
+        minuit = Minuit(lh)
+        assert_equal(minuit.errordef, 0.5)
 
     def test_BinnedLH(self):
         #write a better test... this depends on subtraction
@@ -43,8 +43,8 @@ class TestFit(unittest.TestCase):
         lh = BinnedLH(gaussian, self.data, bound=[-3,3])
         assert_equal(list(describe(lh)), ['mean','sigma'])
         assert_almost_equal(lh(0,1), 20.446130781601543, 1)
-        m = Minuit(lh)
-        assert_equal(m.errordef, 0.5)
+        minuit = Minuit(lh)
+        assert_equal(minuit.errordef, 0.5)
 
 
     def test_BinnedChi2(self):
@@ -53,8 +53,8 @@ class TestFit(unittest.TestCase):
         lh = BinnedChi2(gaussian, self.data, bound=[-3,3])
         assert_equal(list(describe(lh)), ['mean','sigma'])
         assert_almost_equal(lh(0,1), 19951.005399882044, 1)
-        m = Minuit(lh)
-        assert_equal(m.errordef, 1.0)
+        minuit = Minuit(lh)
+        assert_equal(minuit.errordef, 1.0)
 
 
     def test_Chi2Regression(self):
@@ -70,8 +70,8 @@ class TestFit(unittest.TestCase):
         assert_almost_equal(lh(10, 1), 0)
 
         assert_almost_equal(lh(10, 0), 10.)
-        m = Minuit(lh)
-        assert_equal(m.errordef, 1.0)
+        minuit = Minuit(lh)
+        assert_equal(minuit.errordef, 1.0)
 
 
     def test_simultaneous(self):
@@ -84,9 +84,9 @@ class TestFit(unittest.TestCase):
         ulh2 = UnbinnedLH(g2,shifted)
         sim = SimultaneousFit(ulh1, ulh2)
         assert_equal(describe(sim),['lmu', 'sigma', 'rmu'])
-        m = Minuit(sim,sigma=1.2, pedantic=False, print_level=0)
-        m.migrad()
-        assert(m.migrad_ok())
+        minuit = Minuit(sim,sigma=1.2, pedantic=False, print_level=0)
+        minuit.migrad()
+        assert(minuit.migrad_ok())
         assert_almost_equal(m.values['lmu'], 0., delta=2*m.errors['lmu'])
         assert_almost_equal(m.values['rmu'], 3., delta=2*m.errors['rmu'])
         assert_almost_equal(m.values['sigma'], 1., delta=2*m.errors['sigma'])
