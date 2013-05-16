@@ -19,15 +19,15 @@ def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
     :return:
     """
     uml = UnbinnedLH(f, data)
-    m = Minuit(uml, print_level=print_level, **kwd)
-    m.set_strategy(2)
-    m.migrad()
-    if not m.migrad_ok() or not m.matrix_accurate():
+    minuit = Minuit(uml, print_level=print_level, **kwd)
+    minuit.set_strategy(2)
+    minuit.migrad()
+    if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
             plt.figure()
             uml.show()
-            print m.values
-    return (uml, m)
+            print minuit.values
+    return (uml, minuit)
 
 
 def fit_binx2(f, data, bins=30, bound=None, print_level=0, quiet=False, *arg, **kwd):
@@ -44,16 +44,16 @@ def fit_binx2(f, data, bins=30, bound=None, print_level=0, quiet=False, *arg, **
     :return:
     """
     uml = BinnedChi2(f, data, bins=bins, bound=bound)
-    m = Minuit(uml, print_level=print_level, **kwd)
-    m.set_strategy(2)
-    m.migrad()
-    if not m.migrad_ok() or not m.matrix_accurate():
+    minuit = Minuit(uml, print_level=print_level, **kwd)
+    minuit.set_strategy(2)
+    minuit.migrad()
+    if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
             plt.figure()
             uml.show()
-            print m.values
+            print minuit.values
 
-    return (uml, m)
+    return (uml, minuit)
 
 
 def fit_binlh(f, data, bins=30,
@@ -78,16 +78,15 @@ def fit_binlh(f, data, bins=30,
     """
     uml = BinnedLH(f, data, bins=bins, bound=bound,
                     weights=weights, use_w2=use_w2, extended=extended)
-    m = Minuit(uml, print_level=print_level, pedantic=pedantic, **kwd)
-    m.set_strategy(2)
-    m.migrad()
-    if not m.migrad_ok() or not m.matrix_accurate():
+    minuit = Minuit(uml, print_level=print_level, pedantic=pedantic, **kwd)
+    minuit.set_strategy(2)
+    minuit.migrad()
+    if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
             plt.figure()
             uml.show()
-            print m.values
-        #m.minos()
-    return (uml, m)
+            print minuit.values
+    return (uml, minuit)
 
 
 def tuplize(x):

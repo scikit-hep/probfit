@@ -15,9 +15,9 @@ In a nutshell::
     from probfit import UnbinnedLH, gaussian
     data = np.random.randn(10000)
     unbinned_likelihood = UnbinnedLH(gaussian, data)
-    fitter = Minuit(unbinned_likelihood, mean=0.1, sigma=1.1)
-    fitter.migrad()
-    unbinned_likelihood.draw(fitter)
+    minuit = Minuit(unbinned_likelihood, mean=0.1, sigma=1.1)
+    minuit.migrad()
+    unbinned_likelihood.draw(minuit)
 
 .. toctree::
     :maxdepth: 4
