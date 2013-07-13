@@ -355,7 +355,7 @@ cdef class BinnedLH:
     cdef readonly bint extended
     cdef readonly bint use_w2
     cdef int nint_subdiv
-    def __init__(self, f, data, bins=40, weights=None, bound=None,
+    def __init__(self, f, data, bins=40, weights=None, weighterrors=None, bound=None,
             badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1):
         """
         Create a Poisson Binned Likelihood object from given PDF **f** and
@@ -425,6 +425,10 @@ cdef class BinnedLH:
             - **weights** Optional 1D array of weights. Default ``None``
               (all 1's).
 
+            - **weighterrors** Optional 1D array of weight errors. Default ``None``
+              This is usually used for binned datasets where you want to manipulate
+              each bin's error. It doesn't make sense if the data is unbinned data.
+
             - **bound** tuple(min,max). Histogram bound. If ``None`` is given,
               bound is automatically determined from data. Default None.
 
@@ -462,8 +466,12 @@ cdef class BinnedLH:
         self.N = csum(self.h)
 
         if weights is not None:
-            self.w2,_ = np.histogram(data, bins, range=bound,
-                                     weights=weights*weights)
+            if weighterrors is None:
+                self.w2,_ = np.histogram(data, bins, range=bound,
+                                         weights=weights*weights)
+            else:
+                self.w2,_ = np.histogram(data, bins, range=bound,
+                                         weights=weighterrors*weighterrors )
         else:
             self.w2,_ = np.histogram(data, bins, range=bound, weights=None)
 
