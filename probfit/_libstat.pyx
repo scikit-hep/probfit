@@ -1,7 +1,8 @@
 #cython: embedsignature=True
 import numpy as np
 cimport numpy as np
-from libc.math cimport exp,pow,fabs,log,tgamma,lgamma,log1p,sqrt
+from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
+include "log1p_patch.pxi"
 from warnings import warn
 from probfit_warnings import LogWarning
 np.import_array()
