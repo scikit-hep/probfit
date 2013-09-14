@@ -5,6 +5,6 @@
         return log(y) - ((y-1)-x)/y;
     }
 #else
-    #include <cmath>
+    #include <math.h>
 #endif
 
