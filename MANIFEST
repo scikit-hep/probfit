@@ -16,6 +16,8 @@ probfit/functor.pyx
 probfit/funcutil.c
 probfit/funcutil.pyx
 probfit/info.py
+probfit/log1p.h
+probfit/log1p_patch.pxi
 probfit/nputil.py
 probfit/oneshot.py
 probfit/pdf.c

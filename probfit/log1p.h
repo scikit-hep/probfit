@@ -1,7 +1,7 @@
 #ifdef _MSC_VER //visual c++ doesn't have log1p
     __inline double log1p(double x){
         //From ROOT implementation
-        double y = 1 + x;
+        volatile double y = 1 + x;
         return log(y) - ((y-1)-x)/y;
     }
 #else
