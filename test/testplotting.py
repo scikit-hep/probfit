@@ -14,7 +14,6 @@ from probfit.costfunc import UnbinnedLH, BinnedLH, BinnedChi2, Chi2Regression, \
 
 class image_comparison:
     def __init__(self, baseline):
-
         baselineimage = join(dirname(__file__), 'baseline', baseline)
         actualimage = join(os.getcwd(), 'actual', baseline)
 
@@ -39,12 +38,12 @@ class image_comparison:
         rcParams['text.hinting'] = False
         rcParams['text.hinting_factor'] = 8
         rcParams['text.antialiased'] = False
+        rcParams['lines.antialiased'] = False
 
 
     def test(self):
         # compare_images
-        self.setup()
-        x = compare_images(self.baselineimage, self.actualimage, 0.007)
+        x = compare_images(self.baselineimage, self.actualimage, 0.001)
         if x is not None:
             print x
             assert x is None
@@ -52,8 +51,10 @@ class image_comparison:
 
     def __call__(self, f):
         def tmp():
+            self.setup()
             f()
             plt.savefig(self.actualimage)
+            plt.close()
             return self.test()
         tmp.__name__ = f.__name__
         return tmp
