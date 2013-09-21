@@ -39,6 +39,7 @@ class image_comparison:
         rcParams['text.hinting'] = False
         rcParams['text.hinting_factor'] = 8
         rcParams['text.antialiased'] = False
+        rcParams['lines.antialiased'] = False
 
 
     def test(self):
