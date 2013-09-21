@@ -54,6 +54,7 @@ class image_comparison:
             self.setup()
             f()
             plt.savefig(self.actualimage)
+            plt.close()
             return self.test()
         tmp.__name__ = f.__name__
         return tmp
