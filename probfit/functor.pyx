@@ -201,7 +201,7 @@ cdef class Extended:
     def __init__(self, f, extname='N'):
         self.f = f
         if extname in describe(f):
-            raise ValueError('%s is already taken pick something else for extname')
+            raise ValueError('%s is already taken pick something else for extname'%extname)
         self.func_code = FakeFuncCode(f,append=extname)
         #print self.func_code.__dict__
         self.func_defaults=None

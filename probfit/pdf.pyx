@@ -1,7 +1,7 @@
 #cython: embedsignature=True
 cimport cython
 
-from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, log1p, abs
+from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
