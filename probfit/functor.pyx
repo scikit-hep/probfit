@@ -680,41 +680,48 @@ cdef class Normalized:
 
 cdef class BlindFunc:
     """
-    Transform a given parameter in the given **f** by a random shift
+    Transform given parameter(s) in the given **f** by a random shift
     so that the analyst won't see the true fitted value.
     
     .. math::
-        BlindFunc(f, 'y', '123')(x, y , z) = f(x, y\pm \delta, z)
+        BlindFunc(f, ['y','z'], '123')(x, y , z) = f(x, y\pm \delta, z)
 
     ::
 
         def f(x,mu,sigma):
             return gaussian(x,mu,sigma)
-        g= BlindFunc(f, toblind='mu', seedstring= 'abcxyz', width=1, signflip=True)
+        g= BlindFunc(f, toblind=['mu','sigma'], seedstring= 'abcxyz', width=1, signflip=True)
         describe(g) # ['x', 'mu', 'sigma']
 
     **Arguments**
         - **f** call object. A function or PDF.
-        - **toblind** the name of parameter to be blinded
+        - **toblind** a list of names of parameters to be blinded. Can be a scalar if only one.
         - **seedstring** a string random number seed to control the random shift
         - **width** a Gaussian width that controls the random shift
         - **signflip** if True, sign of the parameter may be flipped
           before being shifted.
 
     """
-
     cdef f
     cdef public func_code
     cdef public func_defaults
     cdef int signflip
-    cdef int argpos
+    cdef int [:] argpos
     cdef double shift
-    cdef char* toblind
 
     def __init__(self, f, toblind, seedstring, width=1, signflip=True):
+        cdef int i
         self.f = f
-        if toblind not in describe(f):
-            raise ValueError('%s is not in a recognized parameter'%toblind)
+        blindlist=[]
+        if np.isscalar(toblind):
+            blindlist= [toblind]
+        else:
+            blindlist= toblind
+
+        for tob in blindlist:
+            if tob not in describe(f):
+                raise ValueError('%s is not in a recognized parameter'%tob)
+        self.argpos = np.empty(len(blindlist), dtype=np.int32)
         self.func_code = FakeFuncCode(f)
         self.func_defaults = None
 
@@ -727,8 +734,8 @@ cdef class BlindFunc:
 
         self.signflip = myRandom.choice([-1,1])
         self.shift = myRandom.gauss(0, width)
-        self.toblind = toblind
-        self.argpos = describe(f).index(toblind)
+        for i,bb in enumerate(blindlist):
+            self.argpos[i] = describe(f).index(bb)
 
     cpdef tuple __shift_arg__(self, tuple arg):
         cdef int numarg = len(arg)
@@ -737,7 +744,7 @@ cdef class BlindFunc:
         cdef object tmp, tmp2
         cdef double ftmp
         for i in range(numarg):
-            if i!=self.argpos:
+            if not i in self.argpos:
                 tmp =  <object>PyTuple_GetItem(arg, i)
                 Py_INCREF(tmp) # get is borrow and set is steal
                                # but <object> comes with inc ref + dec ref

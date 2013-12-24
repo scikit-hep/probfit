@@ -208,7 +208,10 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
     txt = _param_text(describe(self), arg, error)
 
     chi2 = self(*arg)
-    txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
+    if self.ndof > 0:
+        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
+    else:
+        txt+=u'chi2/ndof = (%5.4g/%d)'%(chi2, self.ndof)
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
@@ -222,6 +225,31 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
             transform=ax.transAxes)
 
     return (data_ret, error_ret, total_ret , part_ret)
+
+def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=True,
+                     norm=False):
+    ax = plt.gca() if ax is None else ax
+
+    arg, error = _get_args_and_errors(self, minuit, args, errors)
+
+    x=self.x
+    y=self.y
+    data_err = self.error
+    f=self.f
+
+    arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
+    yf = vector_apply(f, x, *arg)
+
+    yplot= y-yf
+    eplot= data_err if data_err is not None else np.zeros(len(x))
+    if norm:
+        if data_err is None:
+            warn(RuntimeWarning('No error on data points; cannot normalize to error'))
+        else:
+            yplot= yplot/data_err
+            eplot= data_err/data_err
+    ax.errorbar(x, yplot, eplot, fmt='b+')
+    ax.grid(grid)
 
 
 #from binned chi2
@@ -268,7 +296,10 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
     txt = _param_text(describe(self), arg, error)
 
     chi2 = self(*arg)
-    txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
+    if self.ndof > 0:
+        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
+    else:
+        txt+=u'chi2/ndof = (%5.4g/%d)'%(chi2, self.ndof)
 
     if print_par:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',

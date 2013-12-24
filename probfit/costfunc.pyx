@@ -530,7 +530,7 @@ cdef class BinnedLH:
 
         **Returns**
         
-        ((data_edges, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
+        ((data_edges, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
 
         """
         return plotting.draw_blh(self, minuit=minuit,
@@ -629,7 +629,7 @@ cdef class Chi2Regression:
         self.x = float2double(x)
         self.y = float2double(y)
         self.data_len = len(x)
-        self.ndof = self.data_len-1-len(describe(self))
+        self.ndof = self.data_len-len(describe(self))
 
 
     def __call__(self,*arg):
@@ -671,7 +671,7 @@ cdef class Chi2Regression:
 
         **Returns**
         
-        ((data_x, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
+        ((data_x, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
                 print_par=print_par, args=args, errors=errors, parts=parts)
@@ -688,6 +688,11 @@ cdef class Chi2Regression:
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
+
+    def draw_residual(self, minuit=None, ax=None, args=None, errors=None, grid=True,
+                      norm=False):
+        plotting.draw_x2_residual(self, minuit=minuit, ax=ax, args=args, errors= errors,
+                                   grid=grid, norm=norm)
 
 
 cdef class BinnedChi2:
@@ -775,7 +780,7 @@ cdef class BinnedChi2:
             raise ValueError('some bins are too small to do a chi2 fit. change your range')
 
         self.bins = bins
-        self.ndof = self.bins-1-len(describe(self)) # fix this taking care of fixed parameter
+        self.ndof = self.bins-len(describe(self)) # fix this taking care of fixed parameter
         self.nint_subdiv = nint_subdiv
 
     #lazy mid point implementation
@@ -814,7 +819,7 @@ cdef class BinnedChi2:
 
         **Returns**
         
-        ((data_edges, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
+        ((data_edges, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
             parmloc=parmloc, nfbins=nfbins, print_par=print_par,
