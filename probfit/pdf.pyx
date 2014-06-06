@@ -1,7 +1,7 @@
 #cython: embedsignature=True
 cimport cython
 
-from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs
+from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
@@ -355,7 +355,7 @@ cpdef double novosibirsk(double x, double width, double peak, double tail):
         qc = 0.5*xpw*xpw
     else:
         qa = tail*sqrt(log(4.))
-        if qa < smallestdiv: return badvalue
+        if fabs(qa) < smallestdiv: return badvalue
         qb = sinh(qa)/qa
         qx = xpw*qb
         qy = 1.+tail*qx
