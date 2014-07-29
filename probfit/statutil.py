@@ -12,8 +12,6 @@ def fwhm_f(f, range, arg=None, bins=1000):
     ymax = y[imax]
     rs = y[imax:] - ymax / 2.0
     ls = y[:imax] - ymax / 2.0
-    xl = 0
-    xr = 0
 
     il = first_neg(ls, 'l')
     # print il,x[il],ls[il],x[il+1],ls[il+1]

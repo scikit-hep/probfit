@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Plotting is on python since this will make it much easier to debug and adjsut
+# Plotting is on python since this will make it much easier to debug and adjust
 # no need to recompile everytime i change graph color....
 # needs a serious refactor
 from math import sqrt, ceil, floor
@@ -57,7 +57,7 @@ def _get_args_and_errors(self, minuit=None, args=None, errors=None):
 
 def _param_text(parameters, arg, error):
     txt = u''
-    for i, (k, v) in enumerate(zip(parameters, arg)):
+    for (k, v) in zip(parameters, arg):
         txt += u'%s = %5.4g' % (k, v)
         if error is not None:
             txt += u'±%5.4g' % error[k]
@@ -73,10 +73,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
              args=None, errors=None, parts=False, show_errbars='normal',
              no_plot=False):
     from matplotlib import pyplot as plt
-
-    data_ret = None
     error_ret = None
-    total_ret = None
     part_ret = []
 
     ax = plt.gca() if ax is None and not no_plot else ax
@@ -89,7 +86,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
     if not show_errbars:
         if not no_plot:
-            pp = ax.hist(mid(e), bins=e, weights=n, histtype='step')
+            ax.hist(mid(e), bins=e, weights=n, histtype='step')
         error_ret = (np.sqrt(n), np.sqrt(n))
     else:
         w2 = None
@@ -244,10 +241,7 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
             args=None, errors=None, grid=True, parts=False, no_plot=False):
     from matplotlib import pyplot as plt
-
-    data_ret = None
     error_ret = None
-    total_ret = None
     part_ret = []
 
     ax = plt.gca() if ax is None and not no_plot else ax
@@ -261,10 +255,10 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
     data_ret = x, y
     if data_err is None:
         if not no_plot: ax.plot(x, y, '+')
-        err_ret = (np.ones(len(self.x)), np.ones(len(self.x)))
+        error_ret = (np.ones(len(self.x)), np.ones(len(self.x)))
     else:
         if not no_plot: ax.errorbar(x, y, data_err, fmt='.', zorder=0)
-        err_ret = (data_err, data_err)
+        error_ret = (data_err, data_err)
     draw_arg = [('lw', 2), ('zorder', 2)]
     draw_arg.append(('color', 'r'))
 
@@ -301,7 +295,7 @@ def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=Tr
 
     ax = plt.gca() if ax is None else ax
 
-    arg, error = _get_args_and_errors(self, minuit, args, errors)
+    arg, _ = _get_args_and_errors(self, minuit, args, errors)
 
     x = self.x
     y = self.y
@@ -330,10 +324,6 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
              print_par=True, args=None, errors=None, parts=False, grid=True,
              no_plot=False):
     from matplotlib import pyplot as plt
-
-    data_ret = None
-    error_ret = None
-    total_ret = None
     part_ret = []
 
     ax = plt.gca() if ax is None and not no_plot else ax
@@ -392,10 +382,6 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
              nfbins=1000, ax=None, print_par=True, grid=True,
              args=None, errors=None, parts=False, no_plot=False):
     from matplotlib import pyplot as plt
-
-    data_ret = None
-    error_ret = None
-    total_ret = None
     part_ret = []
 
     ax = plt.gca() if ax is None and not no_plot else ax
