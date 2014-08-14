@@ -98,7 +98,7 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
         else:
             raise ValueError('show_errbars must be \'normal\' or \'sumw2\'')
 
-        pp= ax.errorbar(mid(e), n, np.sqrt(w2) , fmt='b.', capsize=0)
+        pp= ax.errorbar(mid(e), n, np.sqrt(w2) , fmt='b+', capsize=0)
 
     #bound = (e[0], e[-1])
     draw_arg = [('lw', 2)]
@@ -159,7 +159,7 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
         yerr= np.ones(len(yerr))
 
     if show_errbars:
-        pp= ax.errorbar(mid(e), n, yerr , fmt='b.', capsize=0)
+        pp= ax.errorbar(mid(e), n, yerr , fmt='b+', capsize=0)
     else: # No errorbars
         pp= ax.bar(e[:-1], n, width=np.diff(e))
 
@@ -174,6 +174,7 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
                 transform=ax.transAxes)
 
+    return mid(e), n, yerr
 
 #from chi2 regression
 def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
@@ -196,7 +197,7 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
         ax.plot(x, y, '+')
         err_ret = (np.ones(len(self.x)), np.ones(len(self.x)))
     else:
-        ax.errorbar(x, y, data_err, fmt='.')
+        ax.errorbar(x, y, data_err, fmt='+', capsize=0)
         err_ret = (data_err, data_err)
     draw_arg = [('lw', 2)]
     draw_arg.append(('color', 'r'))
@@ -248,9 +249,9 @@ def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=Tr
         else:
             yplot= yplot/data_err
             eplot= data_err/data_err
-    ax.errorbar(x, yplot, eplot, fmt='b+')
+    ax.errorbar(x, yplot, eplot, fmt='b+', capsize=0)
     ax.grid(grid)
-
+    return x, yplot, eplot
 
 #from binned chi2
 def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
@@ -267,7 +268,7 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
 
     m = mid(self.edges)
 
-    ax.errorbar(m, self.h, self.err, fmt='.')
+    ax.errorbar(m, self.h, self.err, fmt='+', capsize=0)
     data_ret = (self.edges, self.h)
     error_ret = (self.err, self.err)
 
@@ -332,7 +333,7 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     dataint= (n*np.diff(self.edges)).sum()
     scale= dataint if not self.extended else 1.0
 
-    ax.errorbar(m, n, err, fmt='.')
+    ax.errorbar(m, n, err, fmt='+', capsize=0)
     data_ret = (self.edges, n)
     error_ret = (err, err)
 
@@ -391,7 +392,7 @@ def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
         n[sel]/= err[sel]
         err= np.ones(len(err))
 
-    ax.errorbar(m, n, err, fmt='.')
+    ax.errorbar(m, n, err, fmt='+', capsize=0)
 
     ax.plot([self.edges[0],self.edges[-1]],[0.,0.], 'r-')
 
@@ -402,6 +403,7 @@ def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
     if print_par:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
+    return m, n, err
 
 
 def draw_compare(f, arg, edges, data, errors=None, ax=None, grid=True, normed=False, parts=False):
@@ -416,10 +418,10 @@ def draw_compare(f, arg, edges, data, errors=None, ax=None, grid=True, normed=Fa
     yf = vector_apply(f, x, *arg)
     total = np.sum(data)
     if normed:
-        ax.errorbar(x, data/bw/total, errors/bw/total, fmt='.b')
+        ax.errorbar(x, data/bw/total, errors/bw/total, fmt='b+', capsize=0)
         ax.plot(x, yf, 'r', lw=2)
     else:
-        ax.errorbar(x, data, errors, fmt='.b')
+        ax.errorbar(x, data, errors, fmt='b+', capsize=0)
         ax.plot(x, yf*bw, 'r', lw=2)
 
     #now draw the parts

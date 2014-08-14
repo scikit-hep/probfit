@@ -732,7 +732,10 @@ cdef class BlindFunc:
         seed2 = ''.join(seed2)
         myRandom = Random(seed2)
 
-        self.signflip = myRandom.choice([-1,1])
+        if signflip:
+            self.signflip = myRandom.choice([-1,1])
+        else:
+            self.signflip = 1
         self.shift = myRandom.gauss(0, width)
         for i,bb in enumerate(blindlist):
             self.argpos[i] = describe(f).index(bb)

@@ -216,7 +216,7 @@ cdef class UnbinnedLH:
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
              parmloc=(0.05,0.95), nfbins=200, print_par=True, args=None,
-             errors=None, parts=False, show_errbars='normal'):
+             errors=None, parts=False, grid=True, show_errbars='normal'):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -253,6 +253,8 @@ cdef class UnbinnedLH:
             - **errors** Optional dictionary of errors. If minuit is not given,
               parameter errors are determined from **errors**. Default None.
 
+            - **grid** Optional. Draw grid or not. Default True.
+
             - **show_errbars** Show error bars. Default 'normal'
                 * 'normal' : error = sqrt( sum of weight )
                 * 'sumw2'  : error = sqrt( sum of weight**2 )
@@ -265,11 +267,13 @@ cdef class UnbinnedLH:
         """
         return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
             bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts, show_errbars=show_errbars)
+            args=args, errors=errors, parts=parts, grid=grid,
+            show_errbars=show_errbars)
 
     def draw_residual(self, minuit=None, bins=100, ax=None, bound=None,
-                      parmloc=(0.05,0.95), print_par=False, args=None, errors=None,
-                      show_errbars=True, errbar_algo='normal', norm=False):
+                      parmloc=(0.05,0.95), print_par=False, args=None, 
+                      errors=None, show_errbars=True, grid=True,
+                      errbar_algo='normal', norm=False):
         """
         Draw difference between data and PDF
 
@@ -306,6 +310,8 @@ cdef class UnbinnedLH:
 
             - **show_errbars** Show error bars. Default True
 
+            - **grid** Optional. Draw grid or not. Default True.
+
             - **errbar_algo** How the error bars are calculated
                'normal' : error = sqrt( sum of weight )  [Default]
                'sumw2'  : error = sqrt( sum of weight**2 )
@@ -315,7 +321,7 @@ cdef class UnbinnedLH:
         """
         return plotting.draw_residual_ulh(self, minuit=minuit, bins=bins, ax=ax,
                    bound=bound, parmloc=parmloc, print_par=print_par, args=args, 
-                   errors=errors, show_errbars=show_errbars, 
+                   errors=errors, show_errbars=show_errbars, grid=grid,
                    errbar_algo=errbar_algo, norm=norm)
 
     def default_errordef(self):
@@ -505,7 +511,7 @@ cdef class BinnedLH:
 
     def draw(self, minuit=None, ax = None,
             parmloc=(0.05,0.95), nfbins=200, print_par=True,
-            args=None, errors=None, parts=False):
+            grid=True, args=None, errors=None, parts=False):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -525,6 +531,8 @@ cdef class BinnedLH:
 
             - **nfbins** how many point pdf should be evaluated. Default 200.
 
+            - **grid** Optional. Draw grid or not. Default True.
+
             - **print_par** print parameters and error on the plot.
               Default True.
 
@@ -535,10 +543,11 @@ cdef class BinnedLH:
         """
         return plotting.draw_blh(self, minuit=minuit,
             ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts)
+            grid=grid, args=args, errors=errors, parts=parts)
 
     def draw_residual(self, minuit=None, ax = None, parmloc=(0.05,0.95), 
-                      print_par=False, args=None, errors=None, norm=False):
+                      print_par=False, grid=True, args=None, errors=None,
+                      norm=False):
         """
         Draw difference between data and pdf.
 
@@ -559,11 +568,13 @@ cdef class BinnedLH:
             - **print_par** print parameters and error on the plot.
               Default True.
 
+            - **grid** Optional. Draw grid or not. Default True.
+
             - **norm** If True, draw difference normalized by error
                Default False.
         """
         return plotting.draw_residual_blh(self, minuit=minuit,
-            ax=ax, parmloc=parmloc, print_par=print_par,
+            ax=ax, parmloc=parmloc, print_par=print_par, grid=grid,
             args=args, errors=errors, norm=norm)
 
     def default_errordef(self):
@@ -646,7 +657,7 @@ cdef class Chi2Regression:
 
 
     def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=True,
-             args=None, errors=None, parts=False):
+             args=None, errors=None, parts=False, grid=True):
         """
         Draw comparison between points (**x**,**y**) and the function **f**.
 
@@ -667,6 +678,8 @@ cdef class Chi2Regression:
             - **print_par** print parameters and error on the plot.
               Default True.
 
+            - **grid** Optional. Draw grid or not. Default True.
+
             - **parts** draw components of PDF. Default False.
 
         **Returns**
@@ -674,7 +687,8 @@ cdef class Chi2Regression:
         ((data_x, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
-                print_par=print_par, args=args, errors=errors, parts=parts)
+                    print_par=print_par, args=args, errors=errors, parts=parts,
+                    grid=grid)
 
 
     def show(self,*arg, **kwd):
@@ -691,8 +705,8 @@ cdef class Chi2Regression:
 
     def draw_residual(self, minuit=None, ax=None, args=None, errors=None, grid=True,
                       norm=False):
-        plotting.draw_x2_residual(self, minuit=minuit, ax=ax, args=args, errors= errors,
-                                   grid=grid, norm=norm)
+        return plotting.draw_x2_residual(self, minuit=minuit, ax=ax, args=args,
+                                         errors= errors, grid=grid, norm=norm)
 
 
 cdef class BinnedChi2:
@@ -794,7 +808,7 @@ cdef class BinnedChi2:
 
 
     def draw(self, minuit=None, ax = None, parmloc=(0.05,0.95), nfbins=200,
-             print_par=True, args=None, errors=None, parts=False):
+             print_par=True, grid=True, args=None, errors=None, parts=False):
         """
         Draw comparison histogram of data and the function **f**.
 
@@ -814,6 +828,8 @@ cdef class BinnedChi2:
 
             - **nfbins** number of points to calculate f
 
+            - **grid** Optional. Draw grid or not. Default True.
+
             - **print_par** print parameters and error on the plot.
               Default True.
 
@@ -823,7 +839,7 @@ cdef class BinnedChi2:
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
             parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts)
+            args=args, errors=errors, parts=parts, grid=grid)
 
 
     def default_errordef(self):
