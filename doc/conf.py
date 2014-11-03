@@ -15,7 +15,16 @@ matplotlib.use('Agg')
 import sys
 from os.path import dirname, join
 
-sys.path.insert(0, join(dirname(__file__), '../'))
+# For local development we use the `iminuit` from the source folder.
+# On readthedocs we use the one from `site-packages`.
+# See https://github.com/iminuit/iminuit/issues/126#issuecomment-61472227
+# and http://read-the-docs.readthedocs.org/en/latest/faq.html#how-do-i-change-behavior-for-read-the-docs
+import os
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+if not on_rtd:
+    sys.path.insert(0, join(dirname(__file__), '../'))
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -100,7 +109,8 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'armstrong'
+if not on_rtd:
+    html_theme = 'armstrong'
 
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -109,7 +119,8 @@ html_theme = 'armstrong'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = ['_themes', ]
+if not on_rtd:
+    html_theme_path = ['_themes', ]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
