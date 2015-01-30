@@ -178,7 +178,7 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
 #from chi2 regression
 def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
-            args=None, errors=None, grid=True, parts=False):
+            args=None, errors=None, grid=True, parts=False, nbins=None):
     data_ret = None
     error_ret = None
     total_ret = None
@@ -192,6 +192,7 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
     y=self.y
     data_err = self.error
 
+    # Draw data points
     data_ret = x,y
     if data_err is None:
         ax.plot(x, y, '+')
@@ -202,18 +203,11 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
     draw_arg = [('lw', 2)]
     draw_arg.append(('color', 'r'))
 
+    # Draw PDF curve(s)
+    if nbins is not None:
+        x = np.linspace(x[0],x[-1], nbins)
+
     total_ret = draw_pdf_with_midpoints(self.f, arg, x, ax=ax, **dict(draw_arg))
-
-    ax.grid(grid)
-
-    txt = _param_text(describe(self), arg, error)
-
-    chi2 = self(*arg)
-    if self.ndof > 0:
-        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
-    else:
-        txt+=u'chi2/ndof = (%5.4g/%d)'%(chi2, self.ndof)
-
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
@@ -221,10 +215,20 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
                 tmp = draw_pdf_with_midpoints(p, arg, x, ax=ax, **dict(draw_arg))
                 part_ret.append(tmp)
 
+    # Print text
+    txt = _param_text(describe(self), arg, error)
+    chi2 = self(*arg)
+    if self.ndof > 0:
+        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
+    else:
+        txt+=u'chi2/ndof = (%5.4g/%d)'%(chi2, self.ndof)
+
     if print_par:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
             transform=ax.transAxes)
 
+
+    ax.grid(grid)
     return (data_ret, error_ret, total_ret , part_ret)
 
 def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=True,
