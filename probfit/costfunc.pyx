@@ -29,8 +29,6 @@ cdef class SimultaneousFit:
     #FIXME: cache each part if called with same parameter
     def __init__(self, *arg, factors=None, prefix=None, skip_prefix=None):
         """
-        __init__(self, *arg, factors=None, prefix=None, skip_prefix=None):
-
         Construct Simultaneous fit from given cost functions.
 
         **Arguments**
@@ -137,8 +135,6 @@ cdef class UnbinnedLH:
     def __init__(self, f, data , weights=None, extended=False,
                  extended_bound=None, extended_nint=100, badvalue=-100000):
         """
-        __init__(self, f, data , weights=None, badvalue=-100000)
-
         Construct -log(unbinned likelihood) from callable *f*
         and data points *data*. Currently can only do 1D fit.
 
@@ -175,7 +171,7 @@ cdef class UnbinnedLH:
 
             - **extended_bound** Bound for calculating extended term.
               Default None(minimum and maximum of data will be used).
-            - **extended_nint** number pieces to sum up as 
+            - **extended_nint** number pieces to sum up as
               integral for extended term (using simpson3/8). Default 100.
 
         .. note::
@@ -254,14 +250,14 @@ cdef class UnbinnedLH:
               parameter errors are determined from **errors**. Default None.
 
             - **show_errbars** Show error bars. Default 'normal'
-                * 'normal' : error = sqrt( sum of weight )
-                * 'sumw2'  : error = sqrt( sum of weight**2 )
-                * None : no errorbars (shown as a step histogram)
+              * 'normal' : error = sqrt( sum of weight )
+              * 'sumw2'  : error = sqrt( sum of weight**2 )
+              * None : no errorbars (shown as a step histogram)
 
             - **no_plot** Set this to True if you only want the return value
-        
+
         **Returns**
-        
+
         ((data_edges, datay), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
 
         """
@@ -310,15 +306,15 @@ cdef class UnbinnedLH:
             - **show_errbars** Show error bars. Default True
 
             - **errbar_algo** How the error bars are calculated
-               'normal' : error = sqrt( sum of weight )  [Default]
-               'sumw2'  : error = sqrt( sum of weight**2 )
+              'normal' : error = sqrt( sum of weight )  [Default]
+              'sumw2'  : error = sqrt( sum of weight**2 )
 
             - **norm** Normalzed by the error bar or not. Default False.
 
         """
         return plotting.draw_residual_ulh(self, minuit=minuit, bins=bins, ax=ax,
-                   bound=bound, parmloc=parmloc, print_par=print_par, args=args, 
-                   errors=errors, show_errbars=show_errbars, 
+                   bound=bound, parmloc=parmloc, print_par=print_par, args=args,
+                   errors=errors, show_errbars=show_errbars,
                    errbar_algo=errbar_algo, norm=norm)
 
     def default_errordef(self):
@@ -370,6 +366,7 @@ cdef class BinnedLH:
             \\textrm{BinnedLH} = -\sum_{i \in bins} s_i \\times  \left(  h_i \\times \log (\\frac{E_i}{h_i}) + (h_i-E_i) \\right)
 
         where
+
             - :math:`h_i` is sum of weight of data in ith bin.
             - :math:`b_i` is the width of ith bin.
             - :math:`N` is total number of data. :math:`N = \sum_i h_i`.
@@ -449,7 +446,7 @@ cdef class BinnedLH:
               unweighted statistics. Default False.
 
             - **nint_subdiv** controls how BinnedLH do the integral to find
-              expect number of event in each bin. The number represent the 
+              expect number of event in each bin. The number represent the
               number of subdivisions in each bin to do simpson3/8 rule.
               Default 1.
 
@@ -534,7 +531,7 @@ cdef class BinnedLH:
             - **no_plot** Set this to True if you only want the return value
 
         **Returns**
-        
+
         ((data_edges, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
 
         """
@@ -542,7 +539,7 @@ cdef class BinnedLH:
             ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
             args=args, errors=errors, parts=parts, no_plot=no_plot)
 
-    def draw_residual(self, minuit=None, ax = None, parmloc=(0.05,0.95), 
+    def draw_residual(self, minuit=None, ax = None, parmloc=(0.05,0.95),
                       print_par=False, args=None, errors=None, norm=False):
         """
         Draw difference between data and pdf.
@@ -565,7 +562,7 @@ cdef class BinnedLH:
               Default True.
 
             - **norm** If True, draw difference normalized by error
-               Default False.
+              Default False.
         """
         return plotting.draw_residual_blh(self, minuit=minuit,
             ax=ax, parmloc=parmloc, print_par=print_par,
@@ -603,8 +600,6 @@ cdef class Chi2Regression:
 
     def __init__(self, f, x, y, error=None, weights=None):
         """
-        __init__(self, f, x, y, error=None, weights=None):
-
         Create :math:`\chi^2` regression object. This is for fitting funciton
         to data points(x,y) rather than fitting PDF to a distribution.
 
@@ -612,6 +607,7 @@ cdef class Chi2Regression:
             \\textrm{Chi2Regression} = \sum_{i} w_i \\times \left( \\frac{f(x_i, arg \ldots) - y_i}{error_i} \\right)^2
 
         **Arguments**
+
             - **f** callable object to describe line given by (**x** , **y**).
               The first positional arugment of **f** is assumed to be
               independent variable. Ex:::
@@ -677,7 +673,7 @@ cdef class Chi2Regression:
             - **no_plot** Set this to true if you only want the return value
 
         **Returns**
-        
+
         ((data_x, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
@@ -721,9 +717,6 @@ cdef class BinnedChi2:
     def __init__(self, f, data, bins=40, weights=None, bound=None,
                  sumw2=False, nint_subdiv=1):
         """
-        __init__(self, f, data, bins=40, weights=None, bound=None,
-                 sumw2=False):
-
         Create Binned Chi2 Object. It calculates chi^2 assuming poisson
         statistics.
 
@@ -759,7 +752,7 @@ cdef class BinnedChi2:
               :math:`\sqrt{\sum_{j \in \\textrm{bin}_i} w_j^2}`.
 
             - **nint_subdiv** controls how BinnedChi2 do the integral to find
-              expect number of event in each bin. The number represent the 
+              expect number of event in each bin. The number represent the
               number of subdivisions in each bin to do simpson3/8.
               Default 1.
         """
@@ -828,7 +821,7 @@ cdef class BinnedChi2:
             - **no_plot** Set this to true if you only want the return value
 
         **Returns**
-        
+
         ((data_edges, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
