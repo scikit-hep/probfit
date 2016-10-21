@@ -10,12 +10,13 @@ from probfit._libstat import compute_chi2
 from probfit.nputil import vector_apply
 from probfit.costfunc import BinnedLH
 
+
 def test_gen_toy():
     np.random.seed(0)
     bound = (-1, 2)
     ntoy = 100000
     toy = gen_toy(crystalball, ntoy, bound=bound,
-        alpha=1., n=2., mean=1., sigma=0.3, quiet=False)
+                  alpha=1., n=2., mean=1., sigma=0.3, quiet=False)
 
     assert_equal(len(toy), ntoy)
 
@@ -36,7 +37,8 @@ def test_gen_toy():
 
     print(chi2, len(bins), chi2 / len(bins))
 
-    assert(0.9 < (chi2 / len(bins)) < 1.1)
+    assert (0.9 < (chi2 / len(bins)) < 1.1)
+
 
 def test_gen_toy2():
     pdf = gaussian
@@ -45,7 +47,7 @@ def test_gen_toy2():
     binlh = BinnedLH(pdf, toy, bound=(-5, 5), bins=100)
     lh = binlh(0., 1.)
     for x in toy:
-        assert(x < 5)
-        assert(x >= -5)
+        assert (x < 5)
+        assert (x >= -5)
     assert_equal(len(toy), 10000)
-    assert(lh / 100. < 1.)
+    assert (lh / 100. < 1.)
