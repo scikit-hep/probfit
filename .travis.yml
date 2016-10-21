@@ -16,7 +16,9 @@ install:
   - pip install matplotlib
   - pip install iminuit
   - pip install nose
+  - pip install sphinx sphinx_rtd_theme
 
 script:
   - python setup.py build_ext -i
   - nosetests
+  - cd docs && make html
