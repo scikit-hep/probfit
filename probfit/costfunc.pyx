@@ -18,6 +18,20 @@ cdef extern from "math.h":
     bint isnan(double x)
 
 cdef class SimultaneousFit:
+    """
+    Construct simultaneous fit from given cost functions.
+
+    **Arguments**
+
+        - **factors** Optional factor array. If not None, each cost function
+          is scaled by `factors[i]` before being summed up. Default None.
+        - **prefix** Optional list of prefix. Add prefix to variable name of
+          each cost function so that you don't accidentally merge them.
+          Default None.
+        - **skip_prefix** list of variable names that prefix should not be
+          applied to. Useful if you want to prefix them and shared some
+          of them.
+    """
     cdef readonly list allf
     cdef readonly list allpos
     cdef readonly int numf
@@ -27,20 +41,6 @@ cdef class SimultaneousFit:
     cdef readonly object prefix
     #FIXME: cache each part if called with same parameter
     def __init__(self, *arg, factors=None, prefix=None, skip_prefix=None):
-        """
-        Construct Simultaneous fit from given cost functions.
-
-        **Arguments**
-
-            - **factors** Optional factor array. If not None, each cost function
-              is scaled by `factors[i]` before being summed up. Default None.
-            - **prefix** Optional list of prefix. Add prefix to variablename of
-              each cost function so that you don't accidentally merge them.
-              Default None.
-            - **skip_prefix** list of variable names that prefix should not be
-              applied to. Useful if you want to prefix them and shared some
-              of them.
-        """
         self.allf = list(arg)
         func_code, allpos = merge_func_code(*arg, prefix=prefix,
                                             skip_prefix=skip_prefix)
