@@ -11,6 +11,7 @@ class normalized:
     Normalized decorator
 
     **Arguments**
+
         - **bound** normalized bound
         - **nint** option number of integral pieces. Default 1000.
 
@@ -33,6 +34,7 @@ class extended:
     Extended decorator
 
     **Arguments**
+
         - **extname** extended parameter name. Default 'N'
 
     .. seealso::

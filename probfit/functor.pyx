@@ -189,6 +189,7 @@ cdef class Extended:
             return N*f(x, mu, sigma)
 
     **Arguments**
+
         - **f** call object. PDF.
         - **extname** optional string. Name of the extended parameter. Default
           `'N'`
@@ -250,7 +251,7 @@ cdef class AddPdf:
 
                 factor[0]*f + factor[1]*g
 
-          Note that all argument for callable factors will be prefixed (if 
+          Note that all argument for callable factors will be prefixed (if
           given) as opposed to skipping the first one for pdf list. If None
           is given, all factors are assume to be constant 1. Default None.
 
@@ -288,8 +289,8 @@ cdef class AddPdf:
         if factors is not None:
             allf += factors
 
-        self.func_code, allpos = merge_func_code(*arg, prefix=prefix, 
-                                                 skip_first=True, 
+        self.func_code, allpos = merge_func_code(*arg, prefix=prefix,
+                                                 skip_first=True,
                                                  factor_list=factors,
                                                  skip_prefix=skip_prefix)
 
@@ -301,7 +302,7 @@ cdef class AddPdf:
         self.allf = arg # f function
         self.factors = tuple(factors) if factors is not None else None# factor function
         self.allpos = allpos # position for f arg
-        self.factpos = factpos # position for factor arg 
+        self.factpos = factpos # position for factor arg
         self.numf = len(self.allf)
         self.argcache = [None]*self.numf
         self.factor_argcache = [None]*self.numf
@@ -392,16 +393,16 @@ cdef class AddPdf:
             this_arg = construct_arg(arg, fpos[1:]-1)
             thisf = self.allf[findex]
             fac = 1.
-        
+
             if self.factors is not None:
                 facpos = self.factpos[findex]
                 # -1 accounting for no dependent variable in this arg
-                facarg = construct_arg(arg, facpos-1) 
+                facarg = construct_arg(arg, facpos-1)
                 fac = self.factors[findex](*facarg)
-            
+
             thisint = integrate1d(thisf, bound, nint, this_arg)
             ret += fac*thisint
-        
+
         return ret
 
 cdef class AddPdfNorm:
@@ -425,6 +426,7 @@ cdef class AddPdfNorm:
                    (1-f_0-f_1)*p(x, b, a, c)
 
     **Arguments**
+
         - **facname** optional list of factor name of length=. If None is given
           factor name is automatically chosen to be `f_0`, `f_1` etc.
           Default None.
@@ -567,6 +569,7 @@ cdef class Normalized:
             return f(x, a, b, c)/Integrate(f(x, a, b, c), range=(0., 1.))
 
     **Arguments**
+
         - **f** function to normalized.
         - **bound** bound of the normalization.
         - **nint** optional number of pieces to integrate. Default 300.
@@ -682,7 +685,7 @@ cdef class BlindFunc:
     """
     Transform given parameter(s) in the given **f** by a random shift
     so that the analyst won't see the true fitted value.
-    
+
     .. math::
         BlindFunc(f, ['y','z'], '123')(x, y , z) = f(x, y\pm \delta, z)
 
@@ -694,6 +697,7 @@ cdef class BlindFunc:
         describe(g) # ['x', 'mu', 'sigma']
 
     **Arguments**
+
         - **f** call object. A function or PDF.
         - **toblind** a list of names of parameters to be blinded. Can be a scalar if only one.
         - **seedstring** a string random number seed to control the random shift

@@ -19,6 +19,7 @@ Unbinned Likelihood
 
     .. automethod:: __call__
     .. automethod:: draw
+    .. automethod:: draw_residual
     .. automethod:: show
 
 **Example**
@@ -33,6 +34,7 @@ Binned Likelihood
 
     .. automethod:: __call__
     .. automethod:: draw
+    .. automethod:: draw_residual
     .. automethod:: show
 
 **Example**
@@ -47,6 +49,7 @@ Binned Likelihood
 
     .. automethod:: __call__
     .. automethod:: draw
+    .. automethod:: draw_residual
     .. automethod:: show
 
 **Example**

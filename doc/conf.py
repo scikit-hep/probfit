@@ -38,11 +38,13 @@ if not on_rtd:
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['matplotlib.sphinxext.only_directives',
-                'matplotlib.sphinxext.plot_directive',
-                'matplotlib.sphinxext.ipython_directive',
-                'sphinx.ext.autodoc',
-                'sphinx.ext.mathjax',
-                'sphinx.ext.autosummary']
+              'matplotlib.sphinxext.plot_directive',
+              'IPython.sphinxext.ipython_directive',
+              'sphinx.ext.autodoc',
+              'sphinx.ext.mathjax',
+              'sphinx.ext.autosummary']
+
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -110,8 +112,18 @@ pygments_style = 'sphinx'
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 if not on_rtd:
-    html_theme = 'armstrong'
+    try:
+        # https://github.com/snide/sphinx_rtd_theme
+        import sphinx_rtd_theme
 
+        html_theme = "sphinx_rtd_theme"
+        html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+    except ImportError:
+        # Fallback to default theme
+        print('WARNING: To get nice docs locally that look like the online docs, please do:')
+        print('WARNING: $ pip install sphinx_rtd_theme --user')
+        print('WARNING: Using default theme.')
+        html_theme = "nature"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -119,8 +131,8 @@ if not on_rtd:
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-if not on_rtd:
-    html_theme_path = ['_themes', ]
+# if not on_rtd:
+#    html_theme_path = ['_themes', ]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".

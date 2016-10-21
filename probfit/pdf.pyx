@@ -74,7 +74,7 @@ cdef class HistogramPdf:
     cdef public object func_code
     cdef public object func_defaults
     def __init__(self, hy, binedges, xname='x'):
-        """           
+        """
         A histogram PDF. User supplies a template histogram with bin contents and bin
         edges. The histogram does not have to be normalized. The resulting PDF is normalized.
         """
@@ -85,7 +85,7 @@ cdef class HistogramPdf:
         if len(binedges)!= len(hy)+1:
             raise ValueError('binedges must be exactly one entry more than hy')
         # Only one variable. The PDF shape is fixed
-        varnames= [xname] 
+        varnames= [xname]
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
 
@@ -182,12 +182,13 @@ cpdef double crystalball(double x, double alpha, double n, double mean, double s
         f(x;\\alpha,n,mean,\sigma) =
         \\begin{cases}
             \exp\left( -\\frac{1}{2} \delta^2 \\right) & \mbox{if } \delta>-\\alpha \\\\
-            \left( \\frac{n}{|\\alpha|} \\right)^n \left( \\frac{n}{|\\alpha|} - |\\alpha| - \delta \\right)^{-n} 
+            \left( \\frac{n}{|\\alpha|} \\right)^n \left( \\frac{n}{|\\alpha|} - |\\alpha| - \delta \\right)^{-n}
             \exp\left( -\\frac{1}{2}\\alpha^2\\right)
             & \mbox{if } \delta \leq \\alpha
         \end{cases}
 
     where
+
         - :math:`\delta = \\frac{x-mean}{\sigma}`
 
     .. note::
@@ -227,7 +228,7 @@ cpdef double argus(double x, double c, double chi, double p):
 
     .. note::
         http://en.wikipedia.org/wiki/ARGUS_distribution
-    
+
     """
     if c<smallestdiv:
         return badvalue
@@ -336,6 +337,7 @@ cpdef double novosibirsk(double x, double width, double peak, double tail):
         \\frac{\sinh \left( \Lambda \sqrt{\ln 4} \\right)}{\Lambda \sqrt{\ln 4}}
 
     where
+
         - width = :math:`\sigma`
         - peak = :math:`m_0`
         - tail = :math:`\Lambda`
