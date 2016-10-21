@@ -21,4 +21,4 @@ install:
 script:
   - python setup.py build_ext -i
   - nosetests
-  - cd docs && make html
+  - cd doc && make html
