@@ -244,6 +244,7 @@ cdef class UnbinnedLH:
               parameter errors are determined from **errors**. Default None.
 
             - **show_errbars** Show error bars. Default 'normal'
+
               * 'normal' : error = sqrt( sum of weight )
               * 'sumw2'  : error = sqrt( sum of weight**2 )
               * None : no errorbars (shown as a step histogram)

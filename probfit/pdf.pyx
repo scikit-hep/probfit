@@ -13,20 +13,22 @@ cdef double badvalue = 1e-300
 cdef double smallestdiv = 1e-10
 
 cdef class Polynomial:
+    """
+    Polynomial.
+
+    .. math::
+        f(x; c_i) = \sum_{i < \\text{order}} c_i x^i
+
+    User can supply order as integer in which case it uses (c_0....c_n+1)
+    default or the list of coefficient name which the first one will be the
+    lowest order and the last one will be the highest order. (order=1 is
+    a linear function)
+
+    """
     cdef int order
     cdef public object func_code
     cdef public object func_defaults
     def __init__(self,order,xname='x'):
-        """
-        .. math::
-            f(x; c_i) = \sum_{i < \\text{order}} c_i x^i
-
-        User can supply order as integer in which case it uses (c_0....c_n+1)
-        default or the list of coefficient name which the first one will be the
-        lowest order and the last one will be the highest order. (order=1 is
-        a linear function)
-
-        """
         varnames = None
         argcount = 0
         if isinstance(order, int):
