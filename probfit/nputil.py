@@ -1,16 +1,16 @@
 import numpy as np
-from _libstat import _vector_apply
+from ._libstat import _vector_apply
 
 
 def mid(x):
-    return (x[:-1]+x[1:])/2
+    return (x[:-1] + x[1:]) / 2
 
 
 def minmax(x):
     return min(x), max(x)
 
 
-#for converting numpy array to double
+# for converting numpy array to double
 def float2double(a):
     if a is None or a.dtype == np.float64:
         return a

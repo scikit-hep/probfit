@@ -1,19 +1,22 @@
 language: python
 
-branches:
-  except:
-    - gh-pages
-
 python:
-  - "2.6"
-  - "2.7"
+  - 2.7
+  - 3.4
+  - 3.5
 
-# command to install dependencies
+# https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+
 install:
-    - "pip install matplotlib --use-mirrors"
-    - "git clone git://github.com/iminuit/iminuit.git; cd iminuit; python setup.py install; cd .."
+  - pip install numpy
+  - pip install matplotlib
+  - pip install iminuit
+  - pip install nose
 
-# command to run tests
 script:
-    - "python setup.py build_ext -i"
-    - "nosetests"
+  - python setup.py build_ext -i
+  - nosetests

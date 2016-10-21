@@ -4,7 +4,7 @@ cpdef double ugaussian(double x, double mean, double sigma)
 
 cpdef double gaussian(double x, double mean, double sigma)
 
-cpdef double crystalball(double x,double alpha,double n,double mean,double sigma)
+cpdef double crystalball(double x, double alpha, double n, double mean, double sigma)
 
 cpdef double argus(double x, double c, double chi, double p)
 

@@ -1,6 +1,6 @@
-#decorators
-#@normalized_function(xmin,xmax)
-#def function_i_have_no_idea_how_to_normalize(x,y,z)
+# decorators
+# @normalized_function(xmin,xmax)
+# def function_i_have_no_idea_how_to_normalize(x,y,z)
 #   return complicated_function(x,y,z)
 #
 from .functor import Normalized, Extended
@@ -42,6 +42,7 @@ class extended:
         :class:`probfit.functor.Extended`
 
     """
+
     def __init__(self, extname='N'):
         self.extname = extname
 

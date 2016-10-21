@@ -1,28 +1,29 @@
- # -*- coding: utf-8 -*-
-#Plotting is on python since this will make it much easier to debug and adjsut
-#no need to recompile everytime i change graph color....
-
-#needs a serious refactor
-from matplotlib import pyplot as plt
-import numpy as np
-from .nputil import mid, minmax, vector_apply
-from util import parse_arg, describe
+# -*- coding: utf-8 -*-
+# Plotting is on python since this will make it much easier to debug and adjsut
+# no need to recompile everytime i change graph color....
+# needs a serious refactor
 from math import sqrt, ceil, floor
 from warnings import warn
+import numpy as np
+from matplotlib import pyplot as plt
+from .nputil import mid, minmax, vector_apply
+from .util import parse_arg, describe
+
 
 def draw_simultaneous(self, minuit=None, args=None, errors=None, **kwds):
     numf = len(self.allf)
     ret = []
     numraw = sqrt(numf)
     numcol = ceil(numraw)
-    numrow = floor(numraw) if floor(numraw)*numcol>=numf else ceil(numraw)
+    numrow = floor(numraw) if floor(numraw) * numcol >= numf else ceil(numraw)
 
     for i in range(numf):
-        plt.subplot(numrow, numcol, i+1)
+        plt.subplot(numrow, numcol, i + 1)
         part_args, part_errors = self.args_and_error_for(i, minuit, args, errors)
         ret.append(self.allf[i].draw(args=part_args, errors=part_errors, **kwds))
 
     return ret
+
 
 def _get_args_and_errors(self, minuit=None, args=None, errors=None):
     """
@@ -34,18 +35,18 @@ def _get_args_and_errors(self, minuit=None, args=None, errors=None):
     """
     ret_arg = None
     ret_error = None
-    if minuit is not None: # case 1
+    if minuit is not None:  # case 1
         ret_arg = minuit.args
         ret_error = minuit.errors
         return ret_arg, ret_error
 
-    #no minuit specified use args and errors
+    # no minuit specified use args and errors
     if args is not None:
         if isinstance(args, dict):
             ret_arg = parse_arg(self, args)
         else:
             ret_arg = args
-    else: # case 3
+    else:  # case 3
         ret_arg = self.last_arg
 
     if errors is not None:
@@ -57,18 +58,20 @@ def _get_args_and_errors(self, minuit=None, args=None, errors=None):
 def _param_text(parameters, arg, error):
     txt = u''
     for i, (k, v) in enumerate(zip(parameters, arg)):
-        txt += u'%s = %5.4g'%(k, v)
+        txt += u'%s = %5.4g' % (k, v)
         if error is not None:
-            txt += u'±%5.4g'%error[k]
+            txt += u'±%5.4g' % error[k]
         txt += u'\n'
     return txt
 
-#from UML
+
+    # from UML
+
+
 def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
              parmloc=(0.05, 0.95), nfbins=200, print_par=True, grid=True,
              args=None, errors=None, parts=False, show_errbars='normal',
              no_plot=False):
-    
     data_ret = None
     error_ret = None
     total_ret = None
@@ -78,8 +81,8 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
-    n,e= np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
-    dataint= (n*np.diff(e)).sum()
+    n, e = np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
+    dataint = (n * np.diff(e)).sum()
     data_ret = (e, n)
 
     if not show_errbars:
@@ -87,31 +90,31 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
             pp = ax.hist(mid(e), bins=e, weights=n, histtype='step')
         error_ret = (np.sqrt(n), np.sqrt(n))
     else:
-        w2= None
-        if show_errbars=='normal':
-            w2=n
+        w2 = None
+        if show_errbars == 'normal':
+            w2 = n
             error_ret = (np.sqrt(n), np.sqrt(n))
-        elif show_errbars=='sumw2':
-            weights= None
-            if self.weights!= None:
-                weights= self.weights**2
-            w2,e= np.histogram(self.data, bins=e, weights=weights)
+        elif show_errbars == 'sumw2':
+            weights = None
+            if self.weights != None:
+                weights = self.weights ** 2
+            w2, e = np.histogram(self.data, bins=e, weights=weights)
             error_ret = (np.sqrt(w2), np.sqrt(w2))
         else:
             raise ValueError('show_errbars must be \'normal\' or \'sumw2\'')
         if not no_plot:
-            pp = ax.errorbar(mid(e), n, np.sqrt(w2) , fmt='b.', capsize=0)
+            pp = ax.errorbar(mid(e), n, np.sqrt(w2), fmt='b.', capsize=0)
 
-    #bound = (e[0], e[-1])
+    # bound = (e[0], e[-1])
     draw_arg = [('lw', 2)]
     if not parts:
         draw_arg.append(('color', 'r'))
 
     # Draw pdf with finer bins
-    ef = np.linspace(e[0],e[-1], nfbins+1)
-    scale = dataint if not self.extended else nfbins/float(bins)
+    ef = np.linspace(e[0], e[-1], nfbins + 1)
+    scale = dataint if not self.extended else nfbins / float(bins)
     total_ret = draw_pdf_with_edges(self.f, arg, ef, ax=ax, density=not self.extended, scale=scale,
-                        **dict(draw_arg))
+                                    **dict(draw_arg))
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
@@ -126,49 +129,49 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
     if not no_plot and print_par:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
                 transform=ax.transAxes)
-    return  (data_ret, error_ret, total_ret, part_ret)
+    return (data_ret, error_ret, total_ret, part_ret)
+
 
 def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
                       parmloc=(0.05, 0.95), print_par=False, grid=True,
                       args=None, errors=None, show_errbars=True,
                       errbar_algo='normal', norm=False):
-
     ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
-    n,e= np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
-    dataint= (n*np.diff(e)).sum()
-    scale= dataint if not self.extended else 1.0
-    w2= None
-    if errbar_algo=='normal':
-        w2=n
-    elif errbar_algo=='sumw2':
-        weights= None
-        if self.weights!= None:
-            weights= self.weights**2
-        w2,e= np.histogram(self.data, bins=e, weights=weights)
+    n, e = np.histogram(self.data, bins=bins, range=bound, weights=self.weights)
+    dataint = (n * np.diff(e)).sum()
+    scale = dataint if not self.extended else 1.0
+    w2 = None
+    if errbar_algo == 'normal':
+        w2 = n
+    elif errbar_algo == 'sumw2':
+        weights = None
+        if self.weights != None:
+            weights = self.weights ** 2
+        w2, e = np.histogram(self.data, bins=e, weights=weights)
     else:
         raise ValueError('errbar_algo must be \'normal\' or \'sumw2\'')
-    yerr= np.sqrt(w2)
+    yerr = np.sqrt(w2)
 
     arg = parse_arg(self.f, arg, 1) if isinstance(arg, dict) else arg
     yf = vector_apply(self.f, mid(e), *arg)
-    yf*= (scale*np.diff(e) if self.extended else scale)
-    n = n- yf
+    yf *= (scale * np.diff(e) if self.extended else scale)
+    n = n - yf
     if norm:
-        sel= yerr>0
-        n[sel]/= yerr[sel]
-        yerr= np.ones(len(yerr))
+        sel = yerr > 0
+        n[sel] /= yerr[sel]
+        yerr = np.ones(len(yerr))
 
     if show_errbars:
-        pp= ax.errorbar(mid(e), n, yerr , fmt='b.', capsize=0)
-    else: # No errorbars
-        pp= ax.bar(e[:-1], n, width=np.diff(e))
+        pp = ax.errorbar(mid(e), n, yerr, fmt='b.', capsize=0)
+    else:  # No errorbars
+        pp = ax.bar(e[:-1], n, width=np.diff(e))
 
-    #bound = (e[0], e[-1])
-    #draw_arg = [('lw', 2), ('color', 'r')]
-    ax.plot([e[0],e[-1]],[0.,0.], 'r-')
+    # bound = (e[0], e[-1])
+    # draw_arg = [('lw', 2), ('color', 'r')]
+    ax.plot([e[0], e[-1]], [0., 0.], 'r-')
 
     ax.grid(grid)
 
@@ -178,23 +181,25 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
                 transform=ax.transAxes)
 
 
-#from chi2 regression
+        # from chi2 regression
+
+
 def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
             args=None, errors=None, grid=True, parts=False, no_plot=False):
     data_ret = None
     error_ret = None
     total_ret = None
     part_ret = []
-    
+
     ax = plt.gca() if ax is None and not no_plot else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
-    x=self.x
-    y=self.y
+    x = self.x
+    y = self.y
     data_err = self.error
 
-    data_ret = x,y
+    data_ret = x, y
     if data_err is None:
         if not no_plot: ax.plot(x, y, '+')
         err_ret = (np.ones(len(self.x)), np.ones(len(self.x)))
@@ -213,9 +218,9 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
 
     chi2 = self(*arg)
     if self.ndof > 0:
-        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
+        txt += u'chi2/ndof = %5.4g(%5.4g/%d)' % (chi2 / self.ndof, chi2, self.ndof)
     else:
-        txt+=u'chi2/ndof = (%5.4g/%d)'%(chi2, self.ndof)
+        txt += u'chi2/ndof = (%5.4g/%d)' % (chi2, self.ndof)
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
@@ -226,9 +231,10 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
 
     if print_par and not no_plot:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
-            transform=ax.transAxes)
+                transform=ax.transAxes)
 
-    return (data_ret, error_ret, total_ret , part_ret)
+    return (data_ret, error_ret, total_ret, part_ret)
+
 
 def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=True,
                      norm=False):
@@ -236,36 +242,37 @@ def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=Tr
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
 
-    x=self.x
-    y=self.y
+    x = self.x
+    y = self.y
     data_err = self.error
-    f=self.f
+    f = self.f
 
     arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
     yf = vector_apply(f, x, *arg)
 
-    yplot= y-yf
-    eplot= data_err if data_err is not None else np.zeros(len(x))
+    yplot = y - yf
+    eplot = data_err if data_err is not None else np.zeros(len(x))
     if norm:
         if data_err is None:
             warn(RuntimeWarning('No error on data points; cannot normalize to error'))
         else:
-            yplot= yplot/data_err
-            eplot= data_err/data_err
+            yplot = yplot / data_err
+            eplot = data_err / data_err
     ax.errorbar(x, yplot, eplot, fmt='b+')
     ax.grid(grid)
 
 
-#from binned chi2
+    # from binned chi2
+
+
 def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
              print_par=True, args=None, errors=None, parts=False, grid=True,
              no_plot=False):
-    
     data_ret = None
     error_ret = None
     total_ret = None
     part_ret = []
-    
+
     ax = plt.gca() if ax is None and not no_plot else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
@@ -279,7 +286,7 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
 
     bound = (self.edges[0], self.edges[-1])
 
-    scale = nfbins/float(self.bins) #scale back to bins
+    scale = nfbins / float(self.bins)  # scale back to bins
 
     draw_arg = [('lw', 2)]
 
@@ -287,14 +294,14 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
         draw_arg.append(('color', 'r'))
 
     total_ret = draw_pdf(self.f, arg, bins=nfbins, bound=bound, ax=ax, density=False,
-             scale=scale, no_plot=no_plot, **dict(draw_arg))
+                         scale=scale, no_plot=no_plot, **dict(draw_arg))
 
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
             for p in f_parts():
                 tmp = draw_pdf(p, arg, bound=bound, bins=nfbins, ax=ax, density=False,
-                         scale=scale, no_plot=no_plot)
+                               scale=scale, no_plot=no_plot)
                 part_ret.append(tmp)
 
     if not no_plot:
@@ -304,9 +311,9 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
 
     chi2 = self(*arg)
     if self.ndof > 0:
-        txt+=u'chi2/ndof = %5.4g(%5.4g/%d)'%(chi2/self.ndof, chi2, self.ndof)
+        txt += u'chi2/ndof = %5.4g(%5.4g/%d)' % (chi2 / self.ndof, chi2, self.ndof)
     else:
-        txt+=u'chi2/ndof = (%5.4g/%d)'%(chi2, self.ndof)
+        txt += u'chi2/ndof = (%5.4g/%d)' % (chi2, self.ndof)
 
     if print_par and not no_plot:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
@@ -315,15 +322,17 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
     return (data_ret, error_ret, total_ret, part_ret)
 
 
-#from binnedLH
+    # from binnedLH
+
+
 def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
-                nfbins=1000, ax=None, print_par=True, grid=True,
-                args=None, errors=None, parts=False, no_plot=False):
+             nfbins=1000, ax=None, print_par=True, grid=True,
+             args=None, errors=None, parts=False, no_plot=False):
     data_ret = None
     error_ret = None
     total_ret = None
     part_ret = []
-    
+
     ax = plt.gca() if ax is None and not no_plot else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
@@ -335,9 +344,9 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     else:
         err = np.sqrt(self.h)
 
-    n= np.copy(self.h)
-    dataint= (n*np.diff(self.edges)).sum()
-    scale= dataint if not self.extended else 1.0
+    n = np.copy(self.h)
+    dataint = (n * np.diff(self.edges)).sum()
+    scale = dataint if not self.extended else 1.0
 
     if not no_plot:
         ax.errorbar(m, n, err, fmt='.')
@@ -348,18 +357,18 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
     if not parts:
         draw_arg.append(('color', 'r'))
     bound = (self.edges[0], self.edges[-1])
-    
-    #scale back to bins
+
+    # scale back to bins
     if self.extended:
-        scale= nfbins/float(self.bins) 
+        scale = nfbins / float(self.bins)
     total_ret = draw_pdf(self.f, arg, bins=nfbins, bound=bound, ax=ax, density=not self.extended,
-             scale=scale, no_plot=no_plot, **dict(draw_arg))
+                         scale=scale, no_plot=no_plot, **dict(draw_arg))
     if parts:
         f_parts = getattr(self.f, 'parts', None)
         if f_parts is not None:
             for p in f_parts():
                 tmp = draw_pdf(p, arg, bins=nfbins, bound=bound, ax=ax,
-                         density=not self.extended, scale=scale, no_plot=no_plot)
+                               density=not self.extended, scale=scale, no_plot=no_plot)
                 part_ret.append(tmp)
     if not no_plot:
         ax.grid(grid)
@@ -368,10 +377,10 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
 
     if print_par and not no_plot:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
-            transform=ax.transAxes)
+                transform=ax.transAxes)
 
     return (data_ret, error_ret, total_ret, part_ret)
-    
+
 
 def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
                       ax=None, print_par=False, args=None, errors=None,
@@ -387,22 +396,22 @@ def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
     else:
         err = np.sqrt(self.h)
 
-    n= np.copy(self.h)
-    dataint= (n*np.diff(self.edges)).sum()
-    scale= dataint if not self.extended else 1.0
+    n = np.copy(self.h)
+    dataint = (n * np.diff(self.edges)).sum()
+    scale = dataint if not self.extended else 1.0
 
     arg = parse_arg(self.f, arg, 1) if isinstance(arg, dict) else arg
     yf = vector_apply(self.f, m, *arg)
-    yf*= (scale*np.diff(self.edges) if self.extended else scale)
-    n = n- yf
+    yf *= (scale * np.diff(self.edges) if self.extended else scale)
+    n = n - yf
     if norm:
-        sel= err>0
-        n[sel]/= err[sel]
-        err= np.ones(len(err))
+        sel = err > 0
+        n[sel] /= err[sel]
+        err = np.ones(len(err))
 
     ax.errorbar(m, n, err, fmt='.')
 
-    ax.plot([self.edges[0],self.edges[-1]],[0.,0.], 'r-')
+    ax.plot([self.edges[0], self.edges[-1]], [0., 0.], 'r-')
 
     ax.grid(grid)
 
@@ -410,32 +419,32 @@ def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
 
     if print_par:
         ax.text(parmloc[0], parmloc[1], txt, ha='left', va='top',
-            transform=ax.transAxes)
+                transform=ax.transAxes)
 
 
 def draw_compare(f, arg, edges, data, errors=None, ax=None, grid=True, normed=False, parts=False):
     """
     TODO: this needs to be rewritten
     """
-    #arg is either map or tuple
+    # arg is either map or tuple
     ax = plt.gca() if ax is None else ax
     arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
-    x = (edges[:-1]+edges[1:])/2.0
+    x = (edges[:-1] + edges[1:]) / 2.0
     bw = np.diff(edges)
     yf = vector_apply(f, x, *arg)
     total = np.sum(data)
     if normed:
-        ax.errorbar(x, data/bw/total, errors/bw/total, fmt='.b')
+        ax.errorbar(x, data / bw / total, errors / bw / total, fmt='.b')
         ax.plot(x, yf, 'r', lw=2)
     else:
         ax.errorbar(x, data, errors, fmt='.b')
-        ax.plot(x, yf*bw, 'r', lw=2)
+        ax.plot(x, yf * bw, 'r', lw=2)
 
-    #now draw the parts
+    # now draw the parts
     if parts:
         if not hasattr(f, 'eval_parts'):
             warn(RuntimeWarning('parts is set to True but function does '
-                            'not have eval_parts method'))
+                                'not have eval_parts method'))
         else:
             scale = bw if not normed else 1.
             parts_val = list()
@@ -445,7 +454,7 @@ def draw_compare(f, arg, edges, data, errors=None, ax=None, grid=True, normed=Fa
             py = zip(*parts_val)
             for y in py:
                 tmpy = np.array(y)
-                ax.plot(x, tmpy*scale, lw=2, alpha=0.5)
+                ax.plot(x, tmpy * scale, lw=2, alpha=0.5)
     plt.grid(grid)
     return x, yf, data
 
@@ -491,7 +500,7 @@ def draw_pdf(f, arg, bound, bins=100, scale=1.0, density=True,
 
 def draw_pdf_with_edges(f, arg, edges, ax=None, scale=1.0, density=True,
                         normed_pdf=False, **kwds):
-    x = (edges[:-1]+edges[1:])/2.0
+    x = (edges[:-1] + edges[1:]) / 2.0
     bw = np.diff(edges)
     scale *= bw if not density else 1.
 
@@ -499,13 +508,13 @@ def draw_pdf_with_edges(f, arg, edges, ax=None, scale=1.0, density=True,
                                    normed_pdf=normed_pdf, **kwds)
 
 
-def draw_pdf_with_midpoints(f, arg, x, ax=None, scale=1.0, normed_pdf=False ,no_plot=False, **kwds):
+def draw_pdf_with_midpoints(f, arg, x, ax=None, scale=1.0, normed_pdf=False, no_plot=False, **kwds):
     ax = plt.gca() if ax is None and not no_plot else ax
     arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
     yf = vector_apply(f, x, *arg)
 
     if normed_pdf:
-        normed_factor = sum(yf) # assume equal binwidth
+        normed_factor = sum(yf)  # assume equal binwidth
         yf /= normed_factor
     yf *= scale
 
@@ -514,7 +523,9 @@ def draw_pdf_with_midpoints(f, arg, x, ax=None, scale=1.0, normed_pdf=False ,no_
     return x, yf
 
 
-#draw comparison between function given args and data
+    # draw comparison between function given args and data
+
+
 def draw_compare_hist(f, arg, data, bins=100, bound=None, ax=None, weights=None,
                       normed=False, use_w2=False, parts=False, grid=True):
     """
@@ -548,7 +559,7 @@ def draw_compare_hist(f, arg, data, bins=100, bound=None, ax=None, weights=None,
     err = None
     if weights is not None and use_w2:
         err, _ = np.histogram(data, bins=bins, range=bound,
-                            weights=weights*weights)
+                              weights=weights * weights)
         err = np.sqrt(err)
     else:
         err = np.sqrt(h)

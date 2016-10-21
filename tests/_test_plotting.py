@@ -10,7 +10,8 @@ from probfit.pdf import gaussian, linear
 from probfit.funcutil import rename
 from probfit.functor import Extended, AddPdfNorm, AddPdf
 from probfit.costfunc import UnbinnedLH, BinnedLH, BinnedChi2, Chi2Regression, \
-                             SimultaneousFit
+    SimultaneousFit
+
 
 class image_comparison:
     def __init__(self, baseline):
@@ -40,14 +41,12 @@ class image_comparison:
         rcParams['text.antialiased'] = False
         rcParams['lines.antialiased'] = False
 
-
     def test(self):
         # compare_images
         x = compare_images(self.baselineimage, self.actualimage, 0.001)
         if x is not None:
-            print x
+            print(x)
             assert x is None
-
 
     def __call__(self, f):
         def tmp():
@@ -56,6 +55,7 @@ class image_comparison:
             plt.savefig(self.actualimage)
             plt.close()
             return self.test()
+
         tmp.__name__ = f.__name__
         return tmp
 
@@ -64,14 +64,14 @@ class image_comparison:
 def test_draw_pdf():
     plt.figure()
     f = gaussian
-    draw_pdf(f, {'mean':1., 'sigma':2.}, bound=(-10, 10))
+    draw_pdf(f, {'mean': 1., 'sigma': 2.}, bound=(-10, 10))
 
 
 @image_comparison('draw_pdf_linear.png')
 def test_draw_pdf_linear():
     plt.figure()
     f = linear
-    draw_pdf(f, {'m':1., 'c':2.}, bound=(-10, 10))
+    draw_pdf(f, {'m': 1., 'c': 2.}, bound=(-10, 10))
 
 
 @image_comparison('draw_compare_hist_gaussian.png')
@@ -80,7 +80,7 @@ def test_draw_compare_hist():
     np.random.seed(0)
     data = np.random.randn(10000)
     f = gaussian
-    draw_compare_hist(f, {'mean':0., 'sigma':1.}, data, normed=True)
+    draw_compare_hist(f, {'mean': 0., 'sigma': 1.}, data, normed=True)
 
 
 @image_comparison('draw_compare_hist_no_norm.png')
@@ -89,7 +89,7 @@ def test_draw_compare_hist_no_norm():
     np.random.seed(0)
     data = np.random.randn(10000)
     f = Extended(gaussian)
-    draw_compare_hist(f, {'mean':0., 'sigma':1., 'N':10000}, data, normed=False)
+    draw_compare_hist(f, {'mean': 0., 'sigma': 1., 'N': 10000}, data, normed=False)
 
 
 @image_comparison('draw_ulh.png')
@@ -100,6 +100,7 @@ def test_draw_ulh():
     ulh = UnbinnedLH(gaussian, data)
     ulh.draw(args=(0., 1.))
 
+
 @image_comparison('draw_ulh_extend.png')
 def test_draw_ulh_extend():
     np.random.seed(0)
@@ -107,6 +108,7 @@ def test_draw_ulh_extend():
     plt.figure()
     ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
     ulh.draw(args=(0., 1., 1000))
+
 
 @image_comparison('draw_residual_ulh.png')
 def test_draw_residual_ulh():
@@ -116,6 +118,7 @@ def test_draw_residual_ulh():
     ulh = UnbinnedLH(gaussian, data)
     ulh.draw_residual(args=(0., 1.))
 
+
 @image_comparison('draw_residual_ulh_norm.png')
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
@@ -124,6 +127,7 @@ def test_draw_residual_ulh_norm():
     ulh = UnbinnedLH(gaussian, data)
     ulh.draw_residual(args=(0., 1.), norm=True)
 
+
 @image_comparison('draw_ulh_extend_residual_norm.png')
 def test_draw_ulh_extend_residual_norm():
     np.random.seed(0)
@@ -131,6 +135,7 @@ def test_draw_ulh_extend_residual_norm():
     plt.figure()
     ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
     ulh.draw_residual(args=(0., 1., 1000), norm=True)
+
 
 @image_comparison('draw_ulh_with_minuit.png')
 def test_draw_ulh_with_minuit():
@@ -159,6 +164,7 @@ def test_draw_blh_extend():
     blh = BinnedLH(Extended(gaussian), data, extended=True)
     blh.draw(args=(0., 1., 1000))
 
+
 @image_comparison('draw_residual_blh.png')
 def test_draw_residual_blh():
     np.random.seed(0)
@@ -166,6 +172,7 @@ def test_draw_residual_blh():
     plt.figure()
     blh = BinnedLH(gaussian, data)
     blh.draw_residual(args=(0., 1.))
+
 
 @image_comparison('draw_residual_blh_norm.png')
 def test_draw_residual_blh_norm():
@@ -175,6 +182,7 @@ def test_draw_residual_blh_norm():
     blh = BinnedLH(gaussian, data)
     blh.draw_residual(args=(0., 1.), norm=True)
 
+
 @image_comparison('draw_blh_extend_residual_norm.png')
 def test_draw_blh_extend_residual_norm():
     np.random.seed(0)
@@ -182,6 +190,7 @@ def test_draw_blh_extend_residual_norm():
     plt.figure()
     blh = BinnedLH(Extended(gaussian), data, extended=True)
     blh.draw_residual(args=(0., 1., 1000), norm=True)
+
 
 @image_comparison('draw_bx2.png')
 def test_draw_bx2():
@@ -196,11 +205,12 @@ def test_draw_bx2():
 def test_draw_x2reg():
     np.random.seed(0)
     x = np.linspace(0, 1, 100)
-    y = 10.*x + np.random.randn(100)
+    y = 10. * x + np.random.randn(100)
     err = np.array([1] * 100)
     plt.figure()
     blh = Chi2Regression(linear, x, y, err)
     blh.draw(args=(10., 0.))
+
 
 @image_comparison('draw_ulh_with_parts.png')
 def test_ulh_with_parts():
@@ -208,7 +218,6 @@ def test_ulh_with_parts():
     data = np.random.randn(10000)
     shifted = data + 3.
     data = np.append(data, [shifted])
-    print len(data)
     plt.figure()
     g1 = rename(gaussian, ['x', 'lmu', 'lsigma'])
     g2 = rename(gaussian, ['x', 'rmu', 'rsigma'])
@@ -216,13 +225,13 @@ def test_ulh_with_parts():
     ulh = UnbinnedLH(allpdf, data)
     ulh.draw(args=(0, 1, 3, 1, 0.5), parts=True)
 
+
 @image_comparison('draw_blh_with_parts.png')
 def test_blh_with_parts():
     np.random.seed(0)
     data = np.random.randn(10000)
     shifted = data + 3.
     data = np.append(data, [shifted])
-    print len(data)
     plt.figure()
     g1 = rename(gaussian, ['x', 'lmu', 'lsigma'])
     g2 = rename(gaussian, ['x', 'rmu', 'rsigma'])
@@ -244,6 +253,7 @@ def test_bx2_with_parts():
     bx2 = BinnedChi2(allpdf, data)
     bx2.draw(args=(0, 1, 10000, 3, 1, 10000), parts=True)
 
+
 @image_comparison('draw_simultaneous.png')
 def test_draw_simultaneous():
     np.random.seed(0)
@@ -256,6 +266,7 @@ def test_draw_simultaneous():
     ulh2 = UnbinnedLH(g2, shifted)
     sim = SimultaneousFit(ulh1, ulh2)
     sim.draw(args=(0, 1, 3))
+
 
 @image_comparison('draw_simultaneous_prefix.png')
 def test_draw_simultaneous_prefix():

@@ -30,7 +30,7 @@ def rename(f, newarg):
     return FakeFunc(f, newarg)
 
 def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None,
-                    skip_prefix=None): # this needs a seiours refactor
+                    skip_prefix=None):  # this needs a seiours refactor
     """
     merge function arguments.::
 
@@ -71,29 +71,29 @@ def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None,
 
         functor.construct_arg
     """
-    if prefix is not None and len(prefix)!=len(arg):
+    if prefix is not None and len(prefix) != len(arg):
         raise ValueError('prefix should have the same length as number of ',
                          'functions. Expect %d(%r)' % (len(arg), arg))
     all_arg = []
     skip_prefix = set([]) if skip_prefix is None else set(skip_prefix)
-    for i,f in enumerate(arg):
+    for i, f in enumerate(arg):
         tmp = []
         first = skip_first
         for vn in describe(f):
             newv = vn
             if not first and prefix is not None and newv not in skip_prefix:
-                newv = prefix[i]+newv
+                newv = prefix[i] + newv
             first = False
             tmp.append(newv)
         all_arg.append(tmp)
 
     if factor_list is not None:
-        for i,f in enumerate(factor_list):
+        for i, f in enumerate(factor_list):
             tmp = []
             for vn in describe(f):
                 newv = vn
                 if prefix is not None and newv not in skip_prefix:
-                    newv = prefix[i]+newv
+                    newv = prefix[i] + newv
                 first = False
                 tmp.append(newv)
             all_arg.append(tmp)
@@ -112,14 +112,14 @@ def merge_func_code(*arg, prefix=None, skip_first=False, factor_list=None,
         tmp = []
         for v in a:
             tmp.append(merge_arg.index(v))
-        pos.append(np.array(tmp,dtype=np.int))
+        pos.append(np.array(tmp, dtype=np.int))
     return MinimalFuncCode(merge_arg), pos
+
 
 class MinimalFuncCode:
     def __init__(self, arg):
         self.co_varnames = tuple(arg)
         self.co_argcount = len(arg)
-
 
     def append(self, varname):
         tmp = list(self.co_varnames)
@@ -133,24 +133,24 @@ class MinimalFuncCode:
 class FakeFuncCode:
     def __init__(self, f, prmt=None, dock=0, append=None):
         #f can either be tuple or function object
-        self.co_varnames=describe(f)
-        self.co_argcount=len(self.co_varnames)
-        self.co_argcount-=dock
+        self.co_varnames = describe(f)
+        self.co_argcount = len(self.co_varnames)
+        self.co_argcount -= dock
         self.co_varnames = self.co_varnames[dock:]
 
-        if prmt is not None:#rename parameters from the front
-            for i,p in enumerate(prmt):
+        if prmt is not None:  #rename parameters from the front
+            for i, p in enumerate(prmt):
                 self.co_varnames[i] = p
 
-        if isinstance(append,str): append = [append]
+        if isinstance(append, str): append = [append]
 
         if append is not None:
             old_count = self.co_argcount
-            self.co_argcount+=len(append)
+            self.co_argcount += len(append)
             self.co_varnames = tuple(
-                                    list(self.co_varnames[:old_count])+
-                                    append+
-                                    list(self.co_varnames[old_count:]))
+                list(self.co_varnames[:old_count]) +
+                append +
+                list(self.co_varnames[old_count:]))
 
 
 cdef class FakeFunc:
@@ -161,9 +161,9 @@ cdef class FakeFunc:
 
     def __init__(self, f, prmt=None):
         self.f = f
-        self.func_code = FakeFuncCode(f,prmt)
-        self.func_defaults = getattr(f,'func_defaults',None)
-        self.__name__ = getattr(f,'__name__','unnamed')
+        self.func_code = FakeFuncCode(f, prmt)
+        self.func_defaults = getattr(f, 'func_defaults', None)
+        self.__name__ = getattr(f, '__name__', 'unnamed')
 
     def __call__(self, *arg):
         return self.f(*arg)

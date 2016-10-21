@@ -3,14 +3,14 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
-import plotting
 from matplotlib import pyplot as plt
-from _libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f,\
-                      csum, compute_bin_lh_f, integrate1d
-from funcutil import FakeFuncCode, merge_func_code
-from nputil import float2double, mid, minmax
-from functor cimport construct_arg
-from util import describe, remove_prefix
+from . import plotting
+from ._libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f, \
+    csum, compute_bin_lh_f, integrate1d
+from .funcutil import FakeFuncCode, merge_func_code
+from .nputil import float2double, mid, minmax
+from .functor cimport construct_arg
+from .util import describe, remove_prefix
 
 np.import_array()
 
@@ -18,7 +18,6 @@ cdef extern from "math.h":
     bint isnan(double x)
 
 cdef class SimultaneousFit:
-
     cdef readonly list allf
     cdef readonly list allpos
     cdef readonly int numf
@@ -50,10 +49,9 @@ cdef class SimultaneousFit:
         self.func_defaults = None
         self.allpos = allpos
         if factors is None:
-            factors = np.array([1.]*len(arg))
+            factors = np.array([1.] * len(arg))
         self.prefix = prefix
         self.factors = factors
-
 
     def __call__(self, *arg):
         cdef double ret = 0.
@@ -62,9 +60,8 @@ cdef class SimultaneousFit:
         for i in range(self.numf):
             pos = self.allpos[i]
             thisarg = construct_arg(arg, pos)
-            ret += self.factors[i]*self.allf[i](*thisarg)
+            ret += self.factors[i] * self.allf[i](*thisarg)
         return ret
-
 
     def args_and_error_for(self, findex, minuit=None, args=None, errors=None):
         """
@@ -87,7 +84,7 @@ cdef class SimultaneousFit:
         if isinstance(args, dict):
             parameters = describe(self)
             pos = self.allpos[i]
-            ret_val = [ args[parameters[pos[j]]] for j in range(len(pos))]
+            ret_val = [args[parameters[pos[j]]] for j in range(len(pos))]
         else:
             ret_val = construct_arg(args, self.allpos[i])
 
@@ -95,7 +92,6 @@ cdef class SimultaneousFit:
             ret_err = errors
 
         return ret_val, ret_err
-
 
     def show(self, m=None):
         """
@@ -109,7 +105,6 @@ cdef class SimultaneousFit:
         plt.show()
         return ret
 
-
     def draw(self, minuit=None, args=None, errors=None, **kwds):
         """
         Draw each pdf along with data on plotting grid
@@ -118,8 +113,7 @@ cdef class SimultaneousFit:
 
         """
         return plotting.draw_simultaneous(self, minuit=minuit, args=args,
-                                   errors=errors, **kwds)
-
+                                          errors=errors, **kwds)
 
 cdef class UnbinnedLH:
     cdef readonly object f
@@ -132,7 +126,7 @@ cdef class UnbinnedLH:
     cdef readonly bint extended
     cdef readonly tuple extended_bound
     cdef readonly int extended_nint
-    def __init__(self, f, data , weights=None, extended=False,
+    def __init__(self, f, data, weights=None, extended=False,
                  extended_bound=None, extended_nint=100, badvalue=-100000):
         """
         Construct -log(unbinned likelihood) from callable *f*
@@ -182,7 +176,7 @@ cdef class UnbinnedLH:
             and write document telling people about the caveat.
         """
         self.f = f
-        self.func_code = FakeFuncCode(f,dock=True)
+        self.func_code = FakeFuncCode(f, dock=True)
         self.weights = weights
         #only make copy when type mismatch
         self.data = float2double(data)
@@ -194,7 +188,7 @@ cdef class UnbinnedLH:
         if extended and extended_bound is None:
             self.extended_bound = minmax(data)
 
-    def __call__(self,*arg):
+    def __call__(self, *arg):
         """
         Compute sum of -log(lh) given positional arguments.
         Position argument will be passed to pdf with independent vairable
@@ -211,7 +205,7 @@ cdef class UnbinnedLH:
         return nll
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
-             parmloc=(0.05,0.95), nfbins=200, print_par=True, args=None,
+             parmloc=(0.05, 0.95), nfbins=200, print_par=True, args=None,
              errors=None, parts=False, show_errbars='normal', no_plot=False):
         """
         Draw comparison between histogram of data and pdf.
@@ -262,12 +256,12 @@ cdef class UnbinnedLH:
 
         """
         return plotting.draw_ulh(self, minuit=minuit, bins=bins, ax=ax,
-            bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts, show_errbars=show_errbars,
-            no_plot=no_plot)
+                                 bound=bound, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
+                                 args=args, errors=errors, parts=parts, show_errbars=show_errbars,
+                                 no_plot=no_plot)
 
     def draw_residual(self, minuit=None, bins=100, ax=None, bound=None,
-                      parmloc=(0.05,0.95), print_par=False, args=None, errors=None,
+                      parmloc=(0.05, 0.95), print_par=False, args=None, errors=None,
                       show_errbars=True, errbar_algo='normal', norm=False):
         """
         Draw difference between data and PDF
@@ -320,8 +314,7 @@ cdef class UnbinnedLH:
     def default_errordef(self):
         return 0.5
 
-
-    def show(self,*arg,**kwd):
+    def show(self, *arg, **kwd):
         """
         Same thing as :meth:`draw`. But show the figure immediately.
 
@@ -329,10 +322,9 @@ cdef class UnbinnedLH:
             :meth:`draw` for arguments.
 
         """
-        ret = self.draw(*arg,**kwd)
+        ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
-
 
 cdef class BinnedLH:
     cdef readonly object f
@@ -355,7 +347,7 @@ cdef class BinnedLH:
     cdef readonly bint use_w2
     cdef int nint_subdiv
     def __init__(self, f, data, bins=40, weights=None, weighterrors=None, bound=None,
-            badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1):
+                 badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1):
         """
         Create a Poisson Binned Likelihood object from given PDF **f** and
         **data** (raw points not histogram). Constant term and expected minimum
@@ -467,13 +459,13 @@ cdef class BinnedLH:
 
         if weights is not None:
             if weighterrors is None:
-                self.w2,_ = np.histogram(data, bins, range=bound,
-                                         weights=weights*weights)
+                self.w2, _ = np.histogram(data, bins, range=bound,
+                                          weights=weights * weights)
             else:
-                self.w2,_ = np.histogram(data, bins, range=bound,
-                                         weights=weighterrors*weighterrors )
+                self.w2, _ = np.histogram(data, bins, range=bound,
+                                          weights=weighterrors * weighterrors)
         else:
-            self.w2,_ = np.histogram(data, bins, range=bound, weights=None)
+            self.w2, _ = np.histogram(data, bins, range=bound, weights=None)
 
         self.w2 = float2double(self.w2)
         self.midpoints = mid(self.edges)
@@ -481,31 +473,29 @@ cdef class BinnedLH:
 
         self.bins = bins
         self.badvalue = badvalue
-        self.ndof = self.bins-(self.func_code.co_argcount-1)
+        self.ndof = self.bins - (self.func_code.co_argcount - 1)
 
         self.nint_subdiv = nint_subdiv
 
-
-    def __call__(self,*arg):
+    def __call__(self, *arg):
         """
         Calculate sum -log(poisson binned likelihood) given positional
         arguments
         """
         self.last_arg = arg
         ret = compute_bin_lh_f(self.f,
-                                self.edges,
-                                self.h, #histogram,
-                                self.w2,
-                                self.N, #sum of h
-                                arg, self.badvalue,
-                                self.extended, self.use_w2,
-                                self.nint_subdiv)
+                               self.edges,
+                               self.h,  #histogram,
+                               self.w2,
+                               self.N,  #sum of h
+                               arg, self.badvalue,
+                               self.extended, self.use_w2,
+                               self.nint_subdiv)
         return ret
 
-
     def draw(self, minuit=None, ax = None,
-            parmloc=(0.05,0.95), nfbins=200, print_par=True,
-            args=None, errors=None, parts=False, no_plot=False):
+             parmloc=(0.05, 0.95), nfbins=200, print_par=True,
+             args=None, errors=None, parts=False, no_plot=False):
         """
         Draw comparison between histogram of data and pdf.
 
@@ -536,8 +526,8 @@ cdef class BinnedLH:
 
         """
         return plotting.draw_blh(self, minuit=minuit,
-            ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts, no_plot=no_plot)
+                                 ax=ax, parmloc=parmloc, nfbins=nfbins, print_par=print_par,
+                                 args=args, errors=errors, parts=parts, no_plot=no_plot)
 
     def draw_residual(self, minuit=None, ax = None, parmloc=(0.05,0.95),
                       print_par=False, args=None, errors=None, norm=False):
@@ -565,14 +555,13 @@ cdef class BinnedLH:
               Default False.
         """
         return plotting.draw_residual_blh(self, minuit=minuit,
-            ax=ax, parmloc=parmloc, print_par=print_par,
-            args=args, errors=errors, norm=norm)
+                                          ax=ax, parmloc=parmloc, print_par=print_par,
+                                          args=args, errors=errors, norm=norm)
 
     def default_errordef(self):
         return 0.5
 
-
-    def show(self,*arg,**kwd):
+    def show(self, *arg, **kwd):
         """
         Same thing as :meth:`draw`. But show the figure immediately.
 
@@ -580,7 +569,7 @@ cdef class BinnedLH:
             :meth:`draw` for arguments.
 
         """
-        ret = self.draw(*arg,**kwd)
+        ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
 
@@ -596,7 +585,6 @@ cdef class Chi2Regression:
     cdef readonly np.ndarray x
     cdef readonly np.ndarray y
     cdef readonly tuple last_arg
-
 
     def __init__(self, f, x, y, error=None, weights=None):
         """
@@ -624,16 +612,15 @@ cdef class Chi2Regression:
             - **weight** 1D array weight for each data point.
         """
         self.f = f
-        self.func_code = FakeFuncCode(f,dock=True)
+        self.func_code = FakeFuncCode(f, dock=True)
         self.weights = float2double(weights)
         self.error = float2double(error)
         self.x = float2double(x)
         self.y = float2double(y)
         self.data_len = len(x)
-        self.ndof = self.data_len-len(describe(self))
+        self.ndof = self.data_len - len(describe(self))
 
-
-    def __call__(self,*arg):
+    def __call__(self, *arg):
         """
         Compute :math:`\chi^2`
         """
@@ -641,12 +628,10 @@ cdef class Chi2Regression:
         return compute_chi2_f(self.f, self.x, self.y, self.error,
                               self.weights, arg)
 
-
     def default_errordef(self):
         return 1.0
 
-
-    def draw(self, minuit=None, ax=None, parmloc=(0.05,0.95), print_par=True,
+    def draw(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
              args=None, errors=None, parts=False, no_plot=False):
         """
         Draw comparison between points (**x**,**y**) and the function **f**.
@@ -677,11 +662,10 @@ cdef class Chi2Regression:
         ((data_x, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
-                print_par=print_par, args=args, errors=errors, parts=parts,
-                no_plot=no_plot)
+                                print_par=print_par, args=args, errors=errors, parts=parts,
+                                no_plot=no_plot)
 
-
-    def show(self,*arg, **kwd):
+    def show(self, *arg, **kwd):
         """
         Same thing as :meth:`draw`. But show the figure immediately.
 
@@ -695,9 +679,8 @@ cdef class Chi2Regression:
 
     def draw_residual(self, minuit=None, ax=None, args=None, errors=None, grid=True,
                       norm=False):
-        plotting.draw_x2_residual(self, minuit=minuit, ax=ax, args=args, errors= errors,
-                                   grid=grid, norm=norm)
-
+        plotting.draw_x2_residual(self, minuit=minuit, ax=ax, args=args, errors=errors,
+                                  grid=grid, norm=norm)
 
 cdef class BinnedChi2:
     cdef readonly object f
@@ -757,12 +740,12 @@ cdef class BinnedChi2:
               Default 1.
         """
         self.f = f
-        self.func_code = FakeFuncCode(f,dock=True)
+        self.func_code = FakeFuncCode(f, dock=True)
         if bound is None:
             bound = minmax(data)
-        self.mymin,self.mymax = bound
+        self.mymin, self.mymax = bound
 
-        h, self.edges = np.histogram(data,bins,range=bound,weights=weights)
+        h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
         self.h = float2double(h)
         self.midpoints = mid(self.edges)
@@ -770,31 +753,30 @@ cdef class BinnedChi2:
 
         #sumw2 if requested
         if weights is not None and sumw2:
-            w2 = weights*weights
-            sw2,_ = np.histogram(data,bins,range=bound,weights=w2)
+            w2 = weights * weights
+            sw2, _ = np.histogram(data, bins, range=bound, weights=w2)
             self.err = np.sqrt(sw2)
         else:
             self.err = np.sqrt(self.h)
 
         #check if error is too small
-        if np.any(self.err<1e-5):
+        if np.any(self.err < 1e-5):
             raise ValueError('some bins are too small to do a chi2 fit. change your range')
 
         self.bins = bins
-        self.ndof = self.bins-len(describe(self)) # fix this taking care of fixed parameter
+        self.ndof = self.bins - len(describe(self))  # fix this taking care of fixed parameter
         self.nint_subdiv = nint_subdiv
 
     #lazy mid point implementation
-    def __call__(self,*arg):
+    def __call__(self, *arg):
         """
         Calculate :math:`\chi^2` given positional arguments
         """
         self.last_arg = arg
-        return compute_bin_chi2_f(self.f,  self.edges, self.h, self.err,
+        return compute_bin_chi2_f(self.f, self.edges, self.h, self.err,
                                   None, arg, self.nint_subdiv)
 
-
-    def draw(self, minuit=None, ax = None, parmloc=(0.05,0.95), nfbins=200,
+    def draw(self, minuit=None, ax = None, parmloc=(0.05, 0.95), nfbins=200,
              print_par=True, args=None, errors=None, parts=False, no_plot=False):
         """
         Draw comparison histogram of data and the function **f**.
@@ -825,15 +807,13 @@ cdef class BinnedChi2:
         ((data_edges, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_bx2(self, minuit=minuit, ax=ax,
-            parmloc=parmloc, nfbins=nfbins, print_par=print_par,
-            args=args, errors=errors, parts=parts, no_plot=no_plot)
-
+                                 parmloc=parmloc, nfbins=nfbins, print_par=print_par,
+                                 args=args, errors=errors, parts=parts, no_plot=no_plot)
 
     def default_errordef(self):
         return 1.0
 
-
-    def show(self,*arg,**kwd):
+    def show(self, *arg, **kwd):
         """
         Same thing as :meth:`draw`. But show the figure immediately.
 
@@ -841,6 +821,6 @@ cdef class BinnedChi2:
             :meth:`draw` for arguments.
 
         """
-        ret = self.draw(*arg,**kwd)
+        ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
