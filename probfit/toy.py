@@ -43,7 +43,7 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
 
     vnames = describe(f)
     if not quiet:
-        print vnames
+        print(vnames)
     my_arg = [kwd[v] for v in vnames[1:]]
     #random number
     #if accuracy is None: accuracy=10*numtoys

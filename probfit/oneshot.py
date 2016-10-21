@@ -26,7 +26,7 @@ def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
         if not quiet:
             plt.figure()
             uml.show()
-            print minuit.values
+            print(minuit.values)
     return (uml, minuit)
 
 
@@ -51,7 +51,7 @@ def fit_binx2(f, data, bins=30, bound=None, print_level=0, quiet=False, *arg, **
         if not quiet:
             plt.figure()
             uml.show()
-            print minuit.values
+            print(minuit.values)
 
     return (uml, minuit)
 
@@ -85,7 +85,7 @@ def fit_binlh(f, data, bins=30,
         if not quiet:
             plt.figure()
             uml.show()
-            print minuit.values
+            print(minuit.values)
     return (uml, minuit)
 
 
@@ -238,7 +238,7 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
 #         except ZeroDivisionError:
 #             pass
 
-#     print minparam, minfom
+#     print(minparam, minfom)
 #     ret = {}
 #     for vname, bestguess in zip(vnames, minparam):
 #         ret[vname] = bestguess
