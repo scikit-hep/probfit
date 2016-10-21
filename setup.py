@@ -1,4 +1,4 @@
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 import numpy as np
 
 # source_suffix = 'pyx'
@@ -63,11 +63,16 @@ setup(
     packages=['probfit'],
     ext_modules=[costfunc, pdf, libstat, funcutil, functor],
     install_requires=[
-        'numpy (>=1.6)',
-        'iminuit (>=1.0.2)'
+        'setuptools',
+        'numpy',
+        'iminuit',
     ],
     classifiers=[
         "Programming Language :: Python",
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
         'Topic :: Scientific/Engineering :: Physics',
         'Topic :: Scientific/Engineering :: Mathematics',
         'Intended Audience :: Science/Research',
