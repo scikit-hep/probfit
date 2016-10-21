@@ -5,8 +5,8 @@ from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
-from util import describe
-from funcutil import MinimalFuncCode
+from .funcutil import MinimalFuncCode
+
 np.import_array()
 
 cdef double badvalue = 1e-300

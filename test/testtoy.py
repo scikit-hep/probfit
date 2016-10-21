@@ -34,7 +34,7 @@ def test_gen_toy():
 
     chi2 = compute_chi2(htoy, expected, err)
 
-    print chi2, len(bins), chi2 / len(bins)
+    print(chi2, len(bins), chi2 / len(bins))
 
     assert(0.9 < (chi2 / len(bins)) < 1.1)
 

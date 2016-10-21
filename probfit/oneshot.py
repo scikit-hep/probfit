@@ -1,11 +1,10 @@
-from .costfunc import UnbinnedLH, BinnedChi2, BinnedLH
-from ._libstat import _vector_apply
-from iminuit import Minuit
-from matplotlib import pyplot as plt
-import numpy as np
-
 import itertools as itt
 import collections
+import numpy as np
+from matplotlib import pyplot as plt
+from iminuit import Minuit
+from .costfunc import UnbinnedLH, BinnedChi2, BinnedLH
+from ._libstat import _vector_apply
 from .nputil import minmax
 
 
@@ -77,7 +76,7 @@ def fit_binlh(f, data, bins=30,
     :return:
     """
     uml = BinnedLH(f, data, bins=bins, bound=bound,
-                    weights=weights, use_w2=use_w2, extended=extended)
+                   weights=weights, use_w2=use_w2, extended=extended)
     minuit = Minuit(uml, print_level=print_level, pedantic=pedantic, **kwd)
     minuit.set_strategy(2)
     minuit.migrad()
@@ -94,7 +93,7 @@ def tuplize(x):
     :param x:
     :return:
     """
-    if  isinstance(x, collections.Iterable):
+    if isinstance(x, collections.Iterable):
         return x
     else:
         return tuple([x])
@@ -133,13 +132,14 @@ def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = dict((k,v) for k, v in zip(vnames, minarg))
+    ret = dict((k, v) for k, v in zip(vnames, minarg))
     return ret
 
+
 def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=False,
-        bound=None, *arg, **kwd):
+              bound=None, *arg, **kwd):
     if bound is None: bound = minmax(data)
-    fom = BinnedLH(f, data,extended=extended,bound=bound)
+    fom = BinnedLH(f, data, extended=extended, bound=bound)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [tuplize(kwd[name]) for name in vnames]
@@ -156,7 +156,7 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=
     minarg = None
     for thisarg in itt.product(*my_arg):
         vy = _vector_apply(f, vx, thisarg)
-        if extended: vy*=bw
+        if extended: vy *= bw
         plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
         if first or thisfom < minfom:
@@ -165,7 +165,7 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = dict((k,v) for k, v in zip(vnames, minarg))
+    ret = dict((k, v) for k, v in zip(vnames, minarg))
     return ret
 
 
@@ -196,7 +196,6 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
     leg.get_frame().set_alpha(0.5)
     ret = dict((k, v) for k, v in zip(vnames, minarg))
     return ret
-
 
 # def randfr(r):
 #     """

@@ -4,7 +4,8 @@ cimport numpy as np
 from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
 include "log1p_patch.pxi"
 from warnings import warn
-from probfit_warnings import LogWarning
+from .probfit_warnings import LogWarning
+
 np.import_array()
 
 cpdef np.ndarray[np.double_t] _vector_apply(f,np.ndarray[np.double_t] x,tuple arg):
