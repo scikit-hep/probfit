@@ -3,6 +3,7 @@ import collections
 import numpy as np
 from matplotlib import pyplot as plt
 from iminuit import Minuit
+from .py23_compat import range
 from .costfunc import UnbinnedLH, BinnedChi2, BinnedLH
 from ._libstat import _vector_apply
 from .nputil import minmax
@@ -224,7 +225,7 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
 #         else:
 #             ranges[vname] = guessrange
 
-#     for i in xrange(ntry):
+#     for i in range(ntry):
 #         arg = []
 #         for vname in vnames:
 #             arg.append(randfr(ranges[vname]))

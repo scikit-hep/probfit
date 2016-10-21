@@ -1,5 +1,6 @@
 import numpy as np
 from ._libstat import _vector_apply
+from .py23_compat import range
 
 
 def fwhm_f(f, range, arg=None, bins=1000):
@@ -36,9 +37,9 @@ def xintercept(x0, y0, x1, y1):
 
 def first_neg(y, direction='r'):
     if direction == 'l':
-        xlist = xrange(len(y) - 1, -1, -1)
+        xlist = range(len(y) - 1, -1, -1)
     else:
-        xlist = xrange(len(y))
+        xlist = range(len(y))
     ret = 0
     found = False
     for i in xlist:
