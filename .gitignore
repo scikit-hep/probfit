@@ -23,5 +23,6 @@ probfit/*.html
 .project
 .pydevproject
 .settings
+probfit.egg-info
 
 !/tutorial/*.ipynb
