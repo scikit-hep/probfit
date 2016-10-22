@@ -12,14 +12,15 @@ before_script:
   - sleep 3 # give xvfb some time to start
 
 install:
+  - pip install Cython
   - pip install numpy
   - pip install matplotlib
   - pip install iminuit
-  - pip install nose
+  - pip install pytest pytest-cov
   # ipython needed for docs: IPython.sphinxext.ipython_directive
   - pip install ipython sphinx sphinx_rtd_theme
 
 script:
   - python setup.py build_ext -i
-  - nosetests
+  - python -m pytest
   - cd doc && make html

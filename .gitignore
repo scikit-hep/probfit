@@ -24,5 +24,6 @@ probfit/*.html
 .pydevproject
 .settings
 probfit.egg-info
+.cache
 
 !/tutorial/*.ipynb

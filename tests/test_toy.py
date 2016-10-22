@@ -1,4 +1,3 @@
-from nose.tools import assert_equal
 import numpy as np
 import matplotlib
 matplotlib.use('Agg', warn=False)
@@ -18,7 +17,7 @@ def test_gen_toy():
     toy = gen_toy(crystalball, ntoy, bound=bound,
                   alpha=1., n=2., mean=1., sigma=0.3, quiet=False)
 
-    assert_equal(len(toy), ntoy)
+    assert len(toy) == ntoy
 
     htoy, bins = np.histogram(toy, bins=1000, range=bound)
 
@@ -27,8 +26,6 @@ def test_gen_toy():
     f = lambda x: ncball(x, 1., 2., 1., 0.3)
 
     expected = vector_apply(f, mid(bins)) * ntoy * (bins[1] - bins[0])
-    # print htoy[:100]
-    # print expected[:100]
 
     htoy = htoy * 1.0
     err = np.sqrt(expected)
@@ -49,5 +46,5 @@ def test_gen_toy2():
     for x in toy:
         assert (x < 5)
         assert (x >= -5)
-    assert_equal(len(toy), 10000)
-    assert (lh / 100. < 1.)
+    assert len(toy) == 10000
+    assert lh / 100. < 1.
