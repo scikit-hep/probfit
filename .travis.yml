@@ -16,7 +16,10 @@ install:
   - pip install matplotlib
   - pip install iminuit
   - pip install nose
+  # ipython needed for docs: IPython.sphinxext.ipython_directive
+  - pip install ipython sphinx sphinx_rtd_theme
 
 script:
   - python setup.py build_ext -i
   - nosetests
+  - cd doc && make html

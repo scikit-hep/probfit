@@ -51,8 +51,8 @@ Commonly used API
 
 Refer to :ref:`fullapi` for complete reference.
 
-Cost Functions.
-"""""""""""""""
+Cost Functions
+""""""""""""""
 
 Refer to :ref:`costfunc`.
 

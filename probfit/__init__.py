@@ -1,3 +1,10 @@
+"""
+probfit - Cost function builder. For fitting distributions.
+
+* Code: https://github.com/iminuit/probfit
+* Docs: http://probfit.readthedocs.io
+"""
+
 from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2, SimultaneousFit
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball, \
     argus, cruijff, linear, poly2, poly3, novosibirsk, \
