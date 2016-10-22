@@ -1,5 +1,0 @@
-cython -a --line-directives --fast-fail probfit/_libstat.pyx;
-cython -a --line-directives --fast-fail probfit/costfunc.pyx;
-cython -a --line-directives --fast-fail probfit/funcutil.pyx;
-cython -a --line-directives --fast-fail probfit/pdf.pyx;
-cython -a --line-directives --fast-fail probfit/functor.pyx;
