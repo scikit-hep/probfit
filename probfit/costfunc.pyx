@@ -263,7 +263,7 @@ cdef class UnbinnedLH:
 
     def draw_residual(self, minuit=None, bins=100, ax=None, bound=None,
                       parmloc=(0.05, 0.95), print_par=False, args=None, errors=None,
-                      show_errbars=True, errbar_algo='normal', norm=False):
+                      errbar_algo='normal', norm=False, **kwargs):
         """
         Draw difference between data and PDF
 
@@ -306,11 +306,12 @@ cdef class UnbinnedLH:
 
             - **norm** Normalzed by the error bar or not. Default False.
 
+            - **kwargs** Passed to :meth:`probfit.plotting.draw_residual`
+
         """
         return plotting.draw_residual_ulh(self, minuit=minuit, bins=bins, ax=ax,
                    bound=bound, parmloc=parmloc, print_par=print_par, args=args,
-                   errors=errors, show_errbars=show_errbars,
-                   errbar_algo=errbar_algo, norm=norm)
+                   errors=errors, errbar_algo=errbar_algo, norm=norm, **kwargs)
 
     def default_errordef(self):
         return 0.5
@@ -531,7 +532,8 @@ cdef class BinnedLH:
                                  args=args, errors=errors, parts=parts, no_plot=no_plot)
 
     def draw_residual(self, minuit=None, ax = None, parmloc=(0.05,0.95),
-                      print_par=False, args=None, errors=None, norm=False):
+                      print_par=False, args=None, errors=None, norm=False,
+                      **kwargs):
         """
         Draw difference between data and pdf.
 
@@ -554,10 +556,13 @@ cdef class BinnedLH:
 
             - **norm** If True, draw difference normalized by error
               Default False.
+
+            - **kwargs** Passed to :meth:`probfit.plotting.draw_residual`
         """
         return plotting.draw_residual_blh(self, minuit=minuit,
                                           ax=ax, parmloc=parmloc, print_par=print_par,
-                                          args=args, errors=errors, norm=norm)
+                                          args=args, errors=errors, norm=norm,
+                                          **kwargs)
 
     def default_errordef(self):
         return 0.5
