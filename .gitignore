@@ -5,7 +5,6 @@
 src/*.html
 build
 *.pyc
-test_*
 .idea
 *.swp
 archive
