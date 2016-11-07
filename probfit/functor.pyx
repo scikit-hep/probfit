@@ -3,7 +3,6 @@ cimport cython
 from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GetItem,\
                      PyObject, PyTuple_SetItem, PyTuple_SetItem,\
                      PyTuple_New, Py_INCREF, PyFloat_FromDouble
-from random import Random
 import numpy as np
 cimport numpy as np
 from warnings import warn
@@ -727,15 +726,15 @@ cdef class BlindFunc:
         self.func_code = FakeFuncCode(f)
         self.func_defaults = None
 
-        mystery ='ambpel4.b4G#4hwW%&eNrw56wJE56N%wwgwywJj%whw'
-        rnd1 = Random(seedstring)
-        seed2 = list(seedstring+mystery)
-        rnd1.shuffle(seed2, rnd1.random)
-        seed2 = ''.join(seed2)
-        myRandom = Random(seed2)
+        mystery = u'ambpel4.b4G#4hwW%&eNrw56wJE56N%wwgwywJj%whw'
+        # Form an array of integers from the strings
+        seed = np.array([ord(c) for c in seedstring + mystery], dtype=np.int)
+        rnd1 = np.random.RandomState(seed)
+        rnd1.shuffle(seed)
+        myRandom = np.random.RandomState(seed)
 
         self.signflip = myRandom.choice([-1,1])
-        self.shift = myRandom.gauss(0, width)
+        self.shift = myRandom.normal(0, width)
         for i,bb in enumerate(blindlist):
             self.argpos[i] = describe(f).index(bb)
 

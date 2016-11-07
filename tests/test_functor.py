@@ -230,21 +230,19 @@ def test_rename():
     assert describe(g) == ['x', 'a', 'b']
 
 
-# TODO: fix this test on Python 3 and re-activate it
-# See https://github.com/iminuit/probfit/issues/64
-def _test_blindfunc():
+def test_blindfunc():
     np.random.seed(0)
     f = BlindFunc(gaussian, 'mean', 'abcd', width=1.5, signflip=True)
     arg = f.__shift_arg__((1, 1, 1))
-    totest = [1., -1.1665264284482637, 1.]
+    totest = [1., -2.1741271445170067, 1.]
     assert_almost_equal(arg[0], totest[0])
     assert_almost_equal(arg[1], totest[1])
     assert_almost_equal(arg[2], totest[2])
-    assert_almost_equal(f.__call__(0.5, 1., 1.), 0.0995003913596)
+    assert_almost_equal(f.__call__(0.5, 1., 1.), 0.011171196819867517)
     np.random.seed(575345)
     f = BlindFunc(gaussian, 'mean', 'abcd', width=1.5, signflip=True)
     arg = f.__shift_arg__((1, 1, 1))
     assert_almost_equal(arg[0], totest[0])
     assert_almost_equal(arg[1], totest[1])
     assert_almost_equal(arg[2], totest[2])
-    assert_almost_equal(f.__call__(0.5, 1., 1.), 0.0995003913596)
+    assert_almost_equal(f.__call__(0.5, 1., 1.), 0.011171196819867517)
