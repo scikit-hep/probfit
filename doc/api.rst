@@ -248,3 +248,7 @@ draw_pdf
 draw_compare_hist
 ^^^^^^^^^^^^^^^^^
 .. autofunction:: probfit.plotting.draw_compare_hist
+
+draw_residual
+^^^^^^^^^^^^^
+.. autofunction:: probfit.plotting.draw_residual
