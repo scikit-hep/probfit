@@ -107,6 +107,23 @@ def test_draw_residual_ulh_norm():
     ulh.draw_residual(args=(0., 1.), norm=True)
 
 
+@image_comparison('draw_residual_ulh_norm_no_errbars.png')
+def test_draw_residual_ulh_norm():
+    np.random.seed(0)
+    data = np.random.randn(1000)
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.), norm=True, show_errbars=False)
+
+
+@image_comparison('draw_residual_ulh_norm_options.png')
+def test_draw_residual_ulh_norm_options():
+    np.random.seed(0)
+    data = np.random.randn(1000)
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.), norm=True, color='green', capsize=2,
+                      grid=False, zero_line=False)
+
+
 @image_comparison('draw_ulh_extend_residual_norm.png')
 def test_draw_ulh_extend_residual_norm():
     np.random.seed(0)
@@ -154,6 +171,23 @@ def test_draw_residual_blh_norm():
     data = np.random.randn(1000)
     blh = BinnedLH(gaussian, data)
     blh.draw_residual(args=(0., 1.), norm=True)
+
+
+@image_comparison('draw_residual_blh_norm_options.png')
+def test_draw_residual_blh_norm_options():
+    np.random.seed(0)
+    data = np.random.randn(1000)
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.), norm=True, color='green', capsize=2,
+                      grid=False, zero_line=False)
+
+
+@image_comparison('draw_residual_blh_norm_no_errbars.png')
+def test_draw_residual_blh_norm():
+    np.random.seed(0)
+    data = np.random.randn(1000)
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.), norm=True, show_errbars=False)
 
 
 @image_comparison('draw_blh_extend_residual_norm.png')
