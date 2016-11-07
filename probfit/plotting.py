@@ -133,10 +133,14 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
 
 def draw_residual(x, y, yerr, xerr,
-                  show_errbars=False, ax=None,
-                  zero_line=True, grid=False,
+                  show_errbars=True, ax=None,
+                  zero_line=True, grid=True,
                   **kwargs):
     """Draw a residual plot on the axis.
+
+    By default, if show_errbars if True, residuals are drawn as blue points 
+    with errorbars with no endcaps. If show_errbars is False, residuals are 
+    drawn as a bar graph with black bars.
 
     **Arguments**
 
@@ -172,16 +176,17 @@ def draw_residual(x, y, yerr, xerr,
         plotopts.update(kwargs)
         pp = ax.errorbar(x, y, yerr, xerr, **plotopts)
     else:
-        plotopts = dict()
+        plotopts = dict(color='k')
         plotopts.update(kwargs)
         pp = ax.bar(x - xerr, y, width=2*xerr, **plotopts)
 
-    ax.set_xlim(x[0] - xerr[0], x[-1] + xerr[-1])
-
     if zero_line:
-        ax.plot([x[0], x[-1]], [0, 0], 'r-')
+        ax.plot([x[0] - xerr[0], x[-1] + xerr[-1]], [0, 0], 'r-')
 
-    ax.grid(grid)
+    # Take the `grid` kwarg to mean 'add a grid if True'; if grid is False and
+    # we called ax.grid(False) then any existing grid on ax would be turned off
+    if grid:
+        ax.grid(grid)
 
     return ax
 
