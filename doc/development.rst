@@ -21,8 +21,8 @@ from your system install.)
 Installing `Cython <http://cython.org/>`_ will allow you to build the C
 extensions. `Pylint <https://www.pylint.org/>`_ and `flake8 
 <https://pypi.python.org/pypi/flake8>`_ are used for linting, `pytest 
-<http://doc.pytest.org/en/latest/>`_ for testing, and `Sphinx 
-<http://www.sphinx-doc.org/en/1.4.8/>`_ for generating the HTML documentation.
+<http://doc.pytest.org/>`_ for testing, and `Sphinx 
+<http://www.sphinx-doc.org/>`_ for generating the HTML documentation.
 
 When developing, be sure to regularly run the test suite to see if anything's
 broken. The suite is run automatically against Python 2 and 3 when you open a
