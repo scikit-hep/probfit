@@ -1,45 +1,30 @@
-from setuptools import setup, Extension
+from glob import glob
+import os
+from setuptools import setup
+from setuptools.extension import Extension
+
 import numpy as np
 
-# source_suffix = 'pyx'
-# has_cython = False
-# try:
-#     from Cython.Distutils import build_ext
-#     has_cython = True
-# except:
-#     pass
+try:
+    from Cython.Build import cythonize
 
-# cmdclass={}
-# if not has_cython:
-source_suffix = 'c'
-# else:
-#    cmdclass = {'build_ext':build_ext}
+    USE_CYTHON = True
+except ImportError:
+    print('Cython is not available; using pre-generated C files')
+    USE_CYTHON = False
 
+ext = '.pyx' if USE_CYTHON else '.c'
+extensions = []
+for source_file in glob('probfit/*' + ext):
+    fname, _ = os.path.splitext(os.path.basename(source_file))
+    extensions.append(
+        Extension('probfit.{0}'.format(fname),
+                  sources=['probfit/{0}{1}'.format(fname, ext)],
+                  include_dirs=[np.get_include()])
+    )
 
-costfunc = Extension('probfit.costfunc',
-                     sources=['probfit/costfunc.' + source_suffix],
-                     include_dirs=[np.get_include()],
-                     extra_link_args=[])
-
-pdf = Extension('probfit.pdf',
-                sources=['probfit/pdf.' + source_suffix],
-                include_dirs=[np.get_include()],
-                extra_link_args=[])
-
-libstat = Extension('probfit._libstat',
-                    sources=['probfit/_libstat.' + source_suffix],
-                    include_dirs=[np.get_include()],
-                    extra_link_args=[])
-
-funcutil = Extension('probfit.funcutil',
-                     sources=['probfit/funcutil.' + source_suffix],
-                     include_dirs=[np.get_include()],
-                     extra_link_args=[])
-
-functor = Extension('probfit.functor',
-                    sources=['probfit/functor.' + source_suffix],
-                    include_dirs=[np.get_include()],
-                    extra_link_args=[])
+if USE_CYTHON:
+    extensions = cythonize(extensions)
 
 
 def get_version():
@@ -61,7 +46,7 @@ setup(
     url='https://github.com/iminuit/probfit',
     package_dir={'probfit': 'probfit'},
     packages=['probfit'],
-    ext_modules=[costfunc, pdf, libstat, funcutil, functor],
+    ext_modules=extensions,
     install_requires=[
         'setuptools',
         'numpy',
