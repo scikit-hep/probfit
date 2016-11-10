@@ -69,7 +69,7 @@ flake8:
 	flake8 --max-line-length=90 $(PROJECT) | grep -v __init__ | grep -v external
 
 # TODO: once the errors are fixed, remove the -E option and tackle the warnings
-pylint:
+pylint: build
 	pylint -E $(PROJECT)/ -d E1103,E0611,E1101 \
 	       --ignore="" -f colorized \
 	       --msg-template='{C}: {path}:{line}:{column}: {msg} ({symbol})'
