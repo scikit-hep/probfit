@@ -51,6 +51,7 @@ setup(
         'setuptools',
         'numpy',
         'iminuit',
+        'matplotlib'
     ],
     classifiers=[
         "Programming Language :: Python",
