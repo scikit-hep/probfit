@@ -13,6 +13,6 @@ else:  # just in case PY4
 
 
 if PY2:
-    range = xrange
+    range = xrange  # pylint: disable=undefined-variable
 else:
     range = range
