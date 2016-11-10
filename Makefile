@@ -14,7 +14,7 @@ help:
 	@echo '     help             Print this help message (the default)'
 	@echo ''
 	@echo '     clean            Remove generated files'
-	@echo '     build            Build Cython files'
+	@echo '     build            Build inplace'
 	@echo '     test             Run tests'
 	@echo '     coverage         Run tests and write coverage report'
 	@echo '     doc              Run Sphinx to generate HTML docs'
