@@ -24,5 +24,6 @@ probfit/*.html
 .settings
 probfit.egg-info
 .cache
+probfit/*.c
 
 !/tutorial/*.ipynb
