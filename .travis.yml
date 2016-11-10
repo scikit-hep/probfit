@@ -22,6 +22,7 @@ install:
   - pip install ipython sphinx sphinx_rtd_theme
 
 script:
+  - make build
   - make flake8
   - make pylint
   - make test
