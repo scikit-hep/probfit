@@ -161,7 +161,7 @@ cdef class UnbinnedLH:
               likelihood
 
               .. math::
-                \\textrm{ext_term} = \\int_{x \in \\textrm{extended_bound}}f(x, args, \\ldots) \\textrm{d} x
+                \\textrm{ext term} = \\int_{x \in \\textrm{extended bound}}f(x, \\textrm{args}, \\ldots) \\textrm{d} x
 
             - **extended_bound** Bound for calculating extended term.
               Default None(minimum and maximum of data will be used).
@@ -385,7 +385,7 @@ cdef class BinnedLH:
                     ROOFIT used **f** evaluated at midpoint.
 
             - :math:`s_i` is a scaled factor. It's 1 if ``sum_w2=False``.
-              It's :math:`s_i = \\frac{h_i}{\sum_{j \in \\textrm{bin_i}} w_j^2}`
+              It's :math:`s_i = \\frac{h_i}{\sum_{j \in \\textrm{bin }i} w_j^2}`
               if ``sum_w2=True``. The factor will scale the statistics to the
               unweighted data.
 
