@@ -25,6 +25,7 @@ In a nutshell::
 
     api.rst
     recipe.rst
+    development.rst
 
 Download & Install
 ------------------
@@ -126,3 +127,8 @@ Cookbook
 --------
 
 Cookbook recipies are at :ref:`cookbook`.
+
+Development
+-----------
+
+If you'd like to develop with the probfit source code, see the :ref:`development` section.

@@ -36,3 +36,4 @@ normally used in B physics is also provided.
    - `iminuit <http://iminuit.readthedocs.org/>`_
    - `numpy <http://www.numpy.org/>`_
    - `matplotlib <http://matplotlib.org/>`_ (optional, for plotting)
+* Developing probfit: see the `development page <http://probfit.readthedocs.io/en/latest/development.html>`_
