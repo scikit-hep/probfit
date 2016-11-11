@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# dist_fit documentation build configuration file, created by
+# probfit documentation build configuration file, created by
 # sphinx-quickstart on Sat Nov 10 11:16:37 2012.
 #
 # This file is execfile()d with the current directory set to its containing dir.
@@ -216,7 +216,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'probfit.tex', u'dist\\_fit Documentation',
+  ('index', 'probfit.tex', u'probfit Documentation',
    u'Piti Ongmongkolkul', 'manual'),
 ]
 
