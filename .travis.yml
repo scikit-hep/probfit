@@ -6,8 +6,16 @@ python:
   - 3.5
 
 env:
-  - INSTALL_MATPLOTLIB=TRUE
-  - INSTALL_MATPLOTLIB=FALSE
+  # Running the tests with and without optional dependencies
+  - RUN_TESTS=TRUE INSTALL_OPT_DEPS=TRUE
+  - RUN_TESTS=TRUE INSTALL_OPT_DEPS=FALSE
+  # Running the linter(s)
+  - RUN_LINTERS=TRUE INSTALL_OPT_DEPS=TRUE
+  # Building the package with and without optional dependencies
+  - BUILD_PACKAGE=TRUE INSTALL_OPT_DEPS=TRUE
+  - BUILD_PACKAGE=TRUE INSTALL_OPT_DEPS=FALSE
+  # Building the documentation with the optional dependencies
+  - BUILD_DOCS=TRUE INSTALL_OPT_DEPS=TRUE
 
 # https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
 before_script:
@@ -20,19 +28,7 @@ before_install:
   - python setup.py egg_info
 
 install:
-  - pip install Cython
-  - pip install numpy
-  - if [[ "$INSTALL_MATPLOTLIB" == TRUE ]]; then pip install matplotlib; fi
-  - pip install iminuit
-  - pip install pytest pytest-cov pytest-mpl
-  - pip install flake8 pylint
-  # ipython needed for docs: IPython.sphinxext.ipython_directive
-  # Can only build the documentation with matplotlib
-  - if [[ "$INSTALL_MATPLOTLIB" == TRUE ]]; then pip install ipython sphinx sphinx_rtd_theme; fi
+  - ./ci/install.sh
 
 script:
-  - make build
-  - make flake8
-  - make pylint
-  - make test
-  - if [[ "$INSTALL_MATPLOTLIB" == TRUE ]]; then make doc; fi
+  - ./ci/run.sh

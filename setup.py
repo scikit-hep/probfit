@@ -7,32 +7,48 @@ from setuptools.extension import Extension
 logging.basicConfig()
 log = logging.getLogger('probfit')
 
-try:
-    import numpy as np
 
-    USE_NUMPY = True
-except ImportError:
-    log.warning('Could not import numpy; C extensions will not be built')
-    USE_NUMPY = False
+class NumpyExtension(Extension):
+    """C Extension that implicitly uses numpy.
 
-extensions = []
-if USE_NUMPY:
+    This class can be useful because it defers the importing of the numpy
+    module until the include_dirs property is accessed. For setup.py commands
+    like egg_info, include_dirs is not queried, meaning numpy isn't required
+    and shouldn't be a dependency.
+
+    Taken from the "NumPy extensions and setup_requires" thread in the
+    distutils mailing list.
+    """
+    def __init__(self, *args, **kwargs):
+        Extension.__init__(self, *args, **kwargs)
+
+        self._include_dirs = self.include_dirs
+        del self.include_dirs
+
+    @property
+    def include_dirs(self):
+        from numpy import get_include
+
+        return self._include_dirs + [get_include()]
+
+
+def get_extensions():
+    extensions = []
     try:
         from Cython.Build import cythonize
 
-        USE_CYTHON = True
+        use_cython = True
     except ImportError:
         log.warning('Cython is not available; using pre-generated C files')
-        USE_CYTHON = False
+        use_cython = False
 
-    ext = '.pyx' if USE_CYTHON else '.c'
+    ext = '.pyx' if use_cython else '.c'
     for source_file in glob('probfit/*' + ext):
-        print(source_file)
+        log.info('Adding extension for file {0!r}'.format(source_file))
         fname, _ = os.path.splitext(os.path.basename(source_file))
         extensions.append(
-            Extension('probfit.{0}'.format(fname),
-                      sources=['probfit/{0}{1}'.format(fname, ext)],
-                      include_dirs=[np.get_include()])
+            NumpyExtension('probfit.{0}'.format(fname),
+                           sources=['probfit/{0}{1}'.format(fname, ext)])
         )
 
     if not extensions:
@@ -40,8 +56,10 @@ if USE_NUMPY:
         # files to build, so they must be generated which requires Cython
         log.error('Could not build extensions; you must install Cython')
 
-    if USE_CYTHON:
+    if use_cython:
         extensions = cythonize(extensions)
+
+    return extensions
 
 
 def get_version():
@@ -63,7 +81,7 @@ setup(
     url='https://github.com/iminuit/probfit',
     package_dir={'probfit': 'probfit'},
     packages=['probfit'],
-    ext_modules=extensions,
+    ext_modules=get_extensions(),
     install_requires=[
         'setuptools',
         'numpy',
