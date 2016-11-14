@@ -4,9 +4,7 @@
 # they are run
 set -ev
 
-if [[ "$BUILD_PACKAGE" == "TRUE" ]]; then
-  pip install cython
-fi
+pip install cython
 
 pip install -r probfit.egg-info/requires.txt
 
