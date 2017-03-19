@@ -92,7 +92,7 @@ setup(
         'setuptools',
         'numpy',
         'iminuit',
-        'matplotlib'
+        'matplotlib==1.5.3'
     ],
     classifiers=[
         "Programming Language :: Python",
