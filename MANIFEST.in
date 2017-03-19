@@ -1,6 +1,5 @@
-recursive-include probfit *.h *.c *.pyx *.pxi *.pxd *.py
+recursive-include probfit *.h *.c *.pxd
 recursive-include tests *.py *.png
 recursive-include tutorial *.ipynb *.py
 include README.rst
 include LICENSE
-include setup.py

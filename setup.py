@@ -42,6 +42,9 @@ def get_extensions():
         log.warning('Cython is not available; using pre-generated C files')
         use_cython = False
 
+    if len(glob('probfit/*.pyx')) == 0:
+        use_cython = False
+
     ext = '.pyx' if use_cython else '.c'
     for source_file in glob('probfit/*' + ext):
         log.info('Adding extension for file {0!r}'.format(source_file))
