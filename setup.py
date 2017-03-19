@@ -8,7 +8,7 @@ logging.basicConfig()
 log = logging.getLogger('probfit')
 
 
-class NumpyExtension(Extension):
+class NumpyExtension(Extension, object):
     """C Extension that implicitly uses numpy.
 
     This class can be useful because it defers the importing of the numpy
@@ -20,16 +20,28 @@ class NumpyExtension(Extension):
     distutils mailing list.
     """
     def __init__(self, *args, **kwargs):
-        Extension.__init__(self, *args, **kwargs)
+        self._include_dirs = []
+        super(NumpyExtension, self).__init__(*args, **kwargs)
 
-        self._include_dirs = self.include_dirs
-        del self.include_dirs
+        # In Python 2, the property will be showed by the instance attribute
+        try:
+            del self.include_dirs
+        except AttributeError:
+            pass
 
     @property
     def include_dirs(self):
-        from numpy import get_include
+        try:
+            from numpy import get_include
+        except:
+            log.error('Cannot import numpy; extension building will fail')
+            return self._include_dirs
 
         return self._include_dirs + [get_include()]
+
+    @include_dirs.setter
+    def include_dirs(self, dirs):
+        self._include_dirs = dirs
 
 
 def get_extensions():
@@ -42,6 +54,8 @@ def get_extensions():
         log.warning('Cython is not available; using pre-generated C files')
         use_cython = False
 
+    # Even if Cython happens to be available, in a source release only the *.c
+    # files are distributed, so Cython can't be re-run
     if len(glob('probfit/*.pyx')) == 0:
         use_cython = False
 
