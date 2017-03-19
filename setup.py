@@ -85,6 +85,9 @@ setup(
     package_dir={'probfit': 'probfit'},
     packages=['probfit'],
     ext_modules=get_extensions(),
+    setup_requires=[
+        'numpy',
+    ],
     install_requires=[
         'setuptools',
         'numpy',
