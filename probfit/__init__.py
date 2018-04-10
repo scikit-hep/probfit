@@ -38,6 +38,7 @@ __all__ = [
     'cauchy',
     'rtv_breitwigner',
     'crystalball',
+    'doublecrystalball',
     'describe',
     'doublegaussian',
     'draw_compare',
