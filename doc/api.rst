@@ -173,6 +173,13 @@ crystalball
 .. plot:: pyplots/pdf/crystalball.py
     :class: lightbox
 
+doublecrystalball
+^^^^^^^^^^^
+.. autofunction:: doublecrystalball
+
+.. plot:: pyplots/pdf/doublecrystalball.py
+    :class: lightbox
+
 cruijff
 ^^^^^^^
 .. autofunction:: cruijff
