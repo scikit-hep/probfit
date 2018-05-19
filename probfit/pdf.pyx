@@ -251,7 +251,7 @@ cpdef double doublecrystalball(double x, double alpha, double alpha2, double n, 
         else:
             al2 = fabs(alpha2)
             A2=pow(n2/al2,n2)*exp(-al2**2/2.)
-            B2=n2/a2-a2
+            B2=n2/al2-al2
             ret = A2*pow(B2+d,-n2)
     return ret
 
