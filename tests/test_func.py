@@ -72,7 +72,7 @@ def test_doublecrystalball():
     assert_allclose(pdf.doublecrystalball(10, 1, 1, 2, 2, 10, 2), 1.)
     assert_allclose(pdf.doublecrystalball(11, 1, 1, 2, 2, 10, 2), 0.8824969025845955)
     assert_allclose(pdf.doublecrystalball(12, 1, 1, 2, 2, 10, 2), 0.6065306597126334)
-    assert_allclose(pdf.doublecrystalball(14, 1, 1, 2, 2, 10, 2), 0.1353352832366127)
+    assert_allclose(pdf.doublecrystalball(14, 1, 1, 2, 2, 10, 2), 0.26956918209450376)
     assert_allclose(pdf.doublecrystalball(6, 1, 1, 2, 2, 10, 2), 0.26956918209450376)
     
 # cpdef double argus(double x, double c, double chi, double p)
