@@ -207,10 +207,10 @@ def test_draw_bx2():
 def test_draw_x2reg():
     np.random.seed(0)
     x = np.linspace(0, 1, 100)
-    y = doublecrystalball(x, 1,1,2,2,0,3) + np.random.randn(100)
+    y = 10. * x + np.random.randn(100)
     err = np.array([1] * 100)
-    blh = Chi2Regression(doublecrystalball, x, y, err)
-    blh.draw(args=(1,1,2,2,0,3))
+    blh = Chi2Regression(linear, x, y, err)
+    blh.draw(args=(10., 0.))
 
 
 @image_comparison('draw_ulh_with_parts.png')
