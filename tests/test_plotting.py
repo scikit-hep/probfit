@@ -68,8 +68,8 @@ def test_draw_compare_hist():
 def test_draw_compare_hist_no_norm():
     np.random.seed(0)
     data = np.random.randn(10000)
-    f = Extended(doublecrystalball)
-    draw_compare_hist(f, {'mean': 0, 'alpha' : 1, 'alpha2':1, 'n':2, 'n2':2 ,'sigma': 2.}, data, normed=False)
+    f = Extended(gaussian)
+    draw_compare_hist(f, {'mean': 0., 'sigma': 1., 'N': 10000}, data, normed=False)
 
 
 @image_comparison('draw_ulh.png')
