@@ -44,7 +44,7 @@ def image_comparison(filename, **kwargs):
 @image_comparison('draw_pdf.png')
 def test_draw_pdf():
     f = doublecrystalball
-    draw_pdf(f, {'mean': 1., 'alpha' = 1, 'alpha2'=1, 'n'=2, 'n2'=2 ,'sigma': 2.}, bound=(-10, 10))
+    draw_pdf(f, {'mean': 1., 'alpha' : 1, 'alpha2':1, 'n':2, 'n2':2 ,'sigma': 2.}, bound=(-10, 10))
 
 
 
@@ -58,7 +58,7 @@ def test_draw_compare_hist():
     np.random.seed(0)
     data = np.random.randn(10000)
     f = doublecrystalball
-    draw_compare_hist(f,  {'mean': 1., 'alpha' = 1, 'alpha2'=1, 'n'=2, 'n2'=2 ,'sigma': 2.}, data, normed=True)
+    draw_compare_hist(f,  {'mean': 1., 'alpha' : 1, 'alpha2':1, 'n':2, 'n2':2 ,'sigma': 2.}, data, normed=True)
 
 
 # There is a slight difference in the x-axis tick label positioning for this
@@ -69,7 +69,7 @@ def test_draw_compare_hist_no_norm():
     np.random.seed(0)
     data = np.random.randn(10000)
     f = Extended(doublecrystalball)
-    draw_compare_hist(f, {'mean': 1., 'alpha' = 1, 'alpha2'=1, 'n'=2, 'n2'=2 ,'sigma': 2.}, data, normed=False)
+    draw_compare_hist(f, {'mean': 1., 'alpha' : 1, 'alpha2':1, 'n':2, 'n2':2 ,'sigma': 2.}, data, normed=False)
 
 
 @image_comparison('draw_ulh.png')
