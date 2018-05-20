@@ -209,7 +209,7 @@ def test_draw_x2reg():
     x = np.linspace(0, 1, 100)
     y = doublecrystalball(x, 1,1,2,2,0,3) + np.random.randn(100)
     err = np.array([1] * 100)
-    blh = Chi2Regression(linear, x, y, err)
+    blh = Chi2Regression(doublecrystalball, x, y, err)
     blh.draw(args=(1,1,2,2,0,3))
 
 
