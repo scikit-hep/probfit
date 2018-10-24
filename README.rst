@@ -1,7 +1,7 @@
 .. -*- mode: rst -*-
 
-.. image:: https://travis-ci.org/iminuit/probfit.png?branch=master
-   :target: https://travis-ci.org/iminuit/probfit
+.. image:: https://travis-ci.org/scikit-hep/probfit.png?branch=master
+   :target: https://travis-ci.org/scikit-hep/probfit
 
 
 probfit
