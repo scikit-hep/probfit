@@ -50,7 +50,7 @@ setup(
     install_requires=[
         'setuptools',
         'numpy',
-        'iminuit',
+        'iminuit<1.3',
         'matplotlib'
     ],
     classifiers=[
