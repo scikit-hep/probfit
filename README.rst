@@ -30,7 +30,7 @@ normally used in B physics is also provided.
 * `MIT <http://opensource.org/licenses/MIT>`_ license (open source)
 * `Documentation <http://probfit.readthedocs.org/>`_
 * The tutorial is an IPython notebook that you can view online
-  `here <http://nbviewer.ipython.org/urls/raw.github.com/iminuit/probfit/master/tutorial/tutorial.ipynb>`_.
+  `here <http://nbviewer.ipython.org/urls/raw.github.com/scikit-hep/probfit/master/tutorial/tutorial.ipynb>`_.
   To run it locally: `cd tutorial; ipython notebook --pylab=inline tutorial.ipynb`.
 * Dependencies:
    - `iminuit <http://iminuit.readthedocs.org/>`_

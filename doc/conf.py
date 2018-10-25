@@ -17,7 +17,7 @@ from os.path import dirname, join
 
 # For local development we use the `iminuit` from the source folder.
 # On readthedocs we use the one from `site-packages`.
-# See https://github.com/iminuit/iminuit/issues/126#issuecomment-61472227
+# See https://github.com/scikit-hep/iminuit/issues/126#issuecomment-61472227
 # and http://read-the-docs.readthedocs.org/en/latest/faq.html#how-do-i-change-behavior-for-read-the-docs
 import os
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'

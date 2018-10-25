@@ -35,7 +35,7 @@ help:
 	@echo ''
 	@echo ' More info:'
 	@echo ''
-	@echo ' * probfit code: https://github.com/iminuit/probfit'
+	@echo ' * probfit code: https://github.com/scikit-hep/probfit'
 	@echo ' * probfit docs: https://probfit.readthedocs.io'
 	@echo ''
 

@@ -1,7 +1,7 @@
 """
 probfit - Cost function builder. For fitting distributions.
 
-* Code: https://github.com/iminuit/probfit
+* Code: https://github.com/scikit-hep/probfit
 * Docs: http://probfit.readthedocs.io
 """
 
