@@ -53,6 +53,9 @@ setup(
         'iminuit<1.3',
         'matplotlib'
     ],
+    tests_require = [
+        'iminuit<1.3'
+    ],
     classifiers=[
         "Programming Language :: Python",
         'Programming Language :: Python :: 2.7',
