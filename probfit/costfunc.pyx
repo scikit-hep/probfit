@@ -77,7 +77,7 @@ cdef class SimultaneousFit:
             p = self.prefix[findex] if self.prefix is not None else None
             #values = dict((remove_prefix(k, p), v) for k,v in minuit.values.items())
             keys = [minuit.parameters[j] for j in self.allpos[i]]
-            ret_val = construct_arg(minuit.args, self.allpos[i])
+            ret_val = construct_arg(tuple(minuit.args), self.allpos[i])
             errors = dict((remove_prefix(k, p), minuit.errors[k]) for k in keys)
             return ret_val, errors
 
