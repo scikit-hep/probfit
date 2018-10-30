@@ -16,6 +16,7 @@ import pytest
 import numpy as np
 from matplotlib import pyplot as plt
 from iminuit import Minuit
+import sys
 from probfit.plotting import draw_pdf, draw_compare_hist
 from probfit.pdf import gaussian, linear
 from probfit.funcutil import rename
@@ -23,6 +24,11 @@ from probfit.functor import Extended, AddPdfNorm, AddPdf
 from probfit.costfunc import UnbinnedLH, BinnedLH, BinnedChi2, Chi2Regression, \
     SimultaneousFit
 
+major, minor = sys.version_info[0:2]
+if major >= 3 and minor >= 5:
+    special_tol = 60.0
+else:
+    special_tol = 2.0
 
 def image_comparison(filename, **kwargs):
     """Decorator to provide a new Figure instance and return it.
@@ -51,7 +57,6 @@ def test_draw_pdf():
 def test_draw_pdf_linear():
     f = linear
     draw_pdf(f, {'m': 1., 'c': 2.}, bound=(-10, 10))
-
 
 # There is a slight difference in the x-axis tick label positioning for this
 # plot between Python 2 and 3, it's not important here so increase the RMS
@@ -99,14 +104,14 @@ def test_draw_residual_ulh():
     ulh.draw_residual(args=(0., 1.))
 
 
-@image_comparison('draw_residual_ulh_norm.png')
+@image_comparison('draw_residual_ulh_norm.png', tolerance=special_tol)
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
     ulh = UnbinnedLH(gaussian, data)
     ulh.draw_residual(args=(0., 1.), norm=True)
-    plt.ylim(-7.,3.)
-    plt.xlim(-4.,3.)
+    plt.ylim(-7., 3.)
+    plt.xlim(-4., 3.)
 
 
 @image_comparison('draw_residual_ulh_norm_no_errbars.png')
@@ -168,14 +173,14 @@ def test_draw_residual_blh():
     blh.draw_residual(args=(0., 1.))
 
 
-@image_comparison('draw_residual_blh_norm.png')
+@image_comparison('draw_residual_blh_norm.png', tolerance=special_tol)
 def test_draw_residual_blh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
     blh = BinnedLH(gaussian, data)
     blh.draw_residual(args=(0., 1.), norm=True)
-    plt.ylim(-4.,3.)
-    plt.xlim(-4.,3.)
+    plt.ylim(-4., 3.)
+    plt.xlim(-4., 3.)
 
 
 @image_comparison('draw_residual_blh_norm_options.png')
