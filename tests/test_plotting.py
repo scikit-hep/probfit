@@ -104,7 +104,7 @@ def test_draw_residual_ulh():
     ulh.draw_residual(args=(0., 1.))
 
 
-@image_comparison('draw_residual_ulh_norm.png', tolerance=special_tol)
+@image_comparison('draw_residual_ulh_norm.png')
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
@@ -114,7 +114,7 @@ def test_draw_residual_ulh_norm():
     plt.xlim(-4., 3.)
 
 
-@image_comparison('draw_residual_ulh_norm_no_errbars.png')
+@image_comparison('draw_residual_ulh_norm_no_errbars.png', tolerance=special_tol)
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
@@ -173,7 +173,7 @@ def test_draw_residual_blh():
     blh.draw_residual(args=(0., 1.))
 
 
-@image_comparison('draw_residual_blh_norm.png', tolerance=special_tol)
+@image_comparison('draw_residual_blh_norm.png')
 def test_draw_residual_blh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
@@ -192,7 +192,7 @@ def test_draw_residual_blh_norm_options():
                       grid=False, zero_line=False)
 
 
-@image_comparison('draw_residual_blh_norm_no_errbars.png')
+@image_comparison('draw_residual_blh_norm_no_errbars.png', tolerance=special_tol)
 def test_draw_residual_blh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
