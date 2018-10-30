@@ -21,3 +21,5 @@ cpdef double novosibirsk(double x, double width, double peak, double tail)
 cpdef double rtv_breitwigner(double x, double m, double gamma)
 
 cpdef double cauchy(double x, double m, double gamma)
+
+cpdef double johnsonSU(double x, double mean, double sigma, double nu, double tau)

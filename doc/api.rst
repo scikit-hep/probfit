@@ -194,6 +194,13 @@ novosibirsk
 .. plot:: pyplots/pdf/novosibirsk.py
     :class: lightbox
 
+johnsonSU
+^^^^^^^^^^^
+.. autofunction:: johnsonSU
+
+.. plot:: pyplots/pdf/johnsonSU.py
+    :class: lightbox
+
 argus
 ^^^^^
 .. autofunction:: argus

@@ -1,7 +1,7 @@
 #cython: embedsignature=True
 cimport cython
 
-from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs
+from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs, cosh, atan2, asinh, erf
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
@@ -113,6 +113,74 @@ cdef class HistogramPdf:
         else:
             return 0.0
 
+
+cdef class _JohnsonSU:
+    """
+    JohnsonSU.
+    """
+    cdef public object func_code
+    cdef public object func_defaults
+
+    def __init__(self, xname='x'):
+
+        varnames = [xname, "mean", "sigma", "nu", "tau"]
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+
+    def integrate(self, tuple bound, int nint_subdiv, *arg):
+
+        cdef double a, b
+        a, b = bound
+
+        cdef double mean = arg[0]
+        cdef double sigma = arg[1]
+        cdef double nu = arg[2]
+        cdef double tau = arg[3]
+
+        cdef double w = exp(tau * tau)
+        cdef double omega = - nu * tau
+        cdef double c = 0.5 * (w-1) * (w * cosh(2 * omega) + 1)
+        c = pow(c, -0.5)
+        cdef double zmax = (- b + (mean + c * sigma * sqrt(w) * sinh(omega)))
+        zmax = zmax / c / sigma
+        cdef double zmin = (- a + (mean + c * sigma * sqrt(w) * sinh(omega)))
+        zmin = zmin / c / sigma
+
+        cdef double PiBy2 = pi/2.0
+        cdef double rootPiBy2 = sqrt(PiBy2)
+
+        cdef double ret = 0.
+
+        ret = erf((nu*tau + asinh(zmax)) / (sqrt(2)*tau))
+        ret -= erf((nu*tau + asinh(zmin)) / (sqrt(2)*tau))
+        ret *= -0.25/rootPiBy2
+
+        return ret
+
+    def __call__(self, *arg):
+
+        cdef double x = arg[0]
+        cdef double mean = arg[1]
+        cdef double sigma = arg[2]
+        cdef double nu = arg[3]
+        cdef double tau = arg[4]
+
+        cdef double w = exp(tau * tau)
+        cdef double omega = - nu * tau
+        cdef double c = 0.5 * (w-1) * (w * cosh(2 * omega) + 1)
+        c = pow(c, -0.5)
+
+        cdef double z = (x - (mean + c * sigma * sqrt(w) * sinh(omega)))
+        z = z / c / sigma
+        cdef double r = -nu + asinh(z) / tau
+
+        cdef double ret = 1. / (c * sigma * 2 * pi)
+        ret *= 1. / (tau * sqrt(z*z+1))
+        ret *= exp(-0.5 * r * r)
+
+        return ret
+
+johnsonSU = _JohnsonSU()
 
 cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_R):
     """

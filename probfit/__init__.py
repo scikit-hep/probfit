@@ -5,7 +5,8 @@ probfit - Cost function builder. For fitting distributions.
 * Docs: http://probfit.readthedocs.io
 """
 
-from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2, SimultaneousFit
+from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
+ SimultaneousFit
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball, \
     argus, cruijff, linear, poly2, poly3, novosibirsk, \
     Polynomial, HistogramPdf, cauchy, rtv_breitwigner
@@ -17,7 +18,8 @@ from .plotting import *
 from .funcutil import *
 from .decorator import *
 from ._libstat import integrate1d
-from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm, BlindFunc
+from .functor import Normalized, Extended, Convolve, AddPdf, AddPdfNorm, \
+ BlindFunc
 from .info import __version__
 
 __all__ = [
@@ -40,6 +42,7 @@ __all__ = [
     'crystalball',
     'describe',
     'doublegaussian',
+    'johnsonSU'
     'draw_compare',
     'draw_compare_hist',
     'draw_pdf',
