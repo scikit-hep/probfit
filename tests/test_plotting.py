@@ -105,6 +105,7 @@ def test_draw_residual_ulh_norm():
     data = np.random.randn(1000)
     ulh = UnbinnedLH(gaussian, data)
     ulh.draw_residual(args=(0., 1.), norm=True)
+    plt.ylim(-7.,3.)
 
 
 @image_comparison('draw_residual_ulh_norm_no_errbars.png')
@@ -172,6 +173,7 @@ def test_draw_residual_blh_norm():
     data = np.random.randn(1000)
     blh = BinnedLH(gaussian, data)
     blh.draw_residual(args=(0., 1.), norm=True)
+    plt.ylim(-4.,3.)
 
 
 @image_comparison('draw_residual_blh_norm_options.png')

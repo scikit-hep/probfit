@@ -175,7 +175,7 @@ def draw_residual(x, y, yerr, xerr,
     if show_errbars:
         plotopts = dict(fmt='b.', capsize=0)
         plotopts.update(kwargs)
-        pp = ax.errorbar(x, y, yerr, xerr, **plotopts, zorder=0)
+        pp = ax.errorbar(x, y, yerr, xerr, zorder=0, **plotopts)
     else:
         plotopts = dict(color='k')
         plotopts.update(kwargs)
