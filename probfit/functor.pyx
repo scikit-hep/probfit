@@ -358,8 +358,9 @@ cdef class AddPdf:
             return ret
 
         tmp.__name__ = getattr(self.allf[findex],'__name__','unnamedpart')
-        ret = FakeFunc(tmp)
-        ret.func_code = self.func_code
+        ret = tmp
+        #ret = FakeFunc(tmp)
+        #ret.func_code = self.func_code
         return ret
 
     def eval_parts(self,*arg):
@@ -505,8 +506,9 @@ cdef class AddPdfNorm:
             return fac*self.allf[findex](*this_arg)
 
         tmp.__name__ = getattr(self.allf[findex],'__name__','unnamedpart')
-        ret = FakeFunc(tmp)
-        ret.func_code = self.func_code
+        ret = tmp
+        #ret = FakeFunc(tmp)
+        #ret.func_code = self.func_code
         return ret
 
     def eval_parts(self,*arg):
