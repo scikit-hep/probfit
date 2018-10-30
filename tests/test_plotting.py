@@ -130,6 +130,7 @@ def test_draw_ulh_extend_residual_norm():
     data = np.random.randn(1000)
     ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
     ulh.draw_residual(args=(0., 1., 1000), norm=True)
+    plt.ylim(-7.,3.)
 
 
 @image_comparison('draw_ulh_with_minuit.png')
