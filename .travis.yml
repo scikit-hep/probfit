@@ -15,7 +15,7 @@ before_script:
 install:
   - pip install Cython
   - pip install numpy
-  - pip install matplotlib
+  - pip install "matplotlib<=3.0.0"
   - pip install iminuit
   - pip install pytest pytest-cov pytest-mpl
   - pip install flake8 pylint
