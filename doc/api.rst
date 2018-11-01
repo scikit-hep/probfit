@@ -194,13 +194,6 @@ novosibirsk
 .. plot:: pyplots/pdf/novosibirsk.py
     :class: lightbox
 
-johnsonSU
-^^^^^^^^^^^
-.. autofunction:: johnsonSU
-
-.. plot:: pyplots/pdf/johnsonSU.py
-    :class: lightbox
-
 argus
 ^^^^^
 .. autofunction:: argus
@@ -226,6 +219,13 @@ poly3
 .. autofunction:: poly3
 
 .. plot:: pyplots/pdf/poly3.py
+    :class: lightbox
+
+JohnsonSU
+^^^^^^^^^
+.. autofunction:: johnsonSU
+
+.. plot:: pyplots/pdf/johnsonSU.py
     :class: lightbox
 
 Polynomial

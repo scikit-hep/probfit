@@ -144,6 +144,16 @@ def test_cauchy():
 
 def test_johnsonSU():
     assert describe(pdf.johnsonSU), ['x', "mean", "sigma", "nu", "tau"]
+    assert_allclose(pdf.johnsonSU(1., 1., 1., 1., 1.), 0.5212726124342)
+    assert_allclose(pdf.johnsonSU(1., 2., 1., 1., 1.), 0.1100533373219)
+    assert_allclose(pdf.johnsonSU(1., 2., 2., 1., 1.), 0.4758433826682)
+
+    j = pdf.johnsonSU
+    assert (hasattr(j, 'integrate'))
+    integral = j.integrate((-100, 100), 0, 1., 1., 1., 1.)
+    assert_allclose(integral, 1.0)
+    integral = j.integrate((0, 2), 0, 1., 1., 1., 1.)
+    assert_allclose(integral, 0.8786191859)
 
 def test_HistogramPdf():
     be = np.array([0, 1, 3, 4], dtype=float)

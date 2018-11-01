@@ -116,10 +116,28 @@ cdef class HistogramPdf:
 
 cdef class _JohnsonSU:
     """
-    Unnormalized JohnsonSU.
+    Normalized JohnsonSU.
 
     .. math::
+        f(x; \\mu, \\sigma, \\nu, \\tau) = \\frac{1}{\\lambda \\sqrt{2\\pi}}
+        \\frac{1}{\\sqrt{1 + \\left( \\frac{x - \\xi}{\\lambda} \\right)}}
+        e^{-\\frac{1}{2} \\left( -\\nu + \\frac{1}{\\tau}  \\right)
+        \\sinh^{-1} \\left( \\frac{x - \\xi}{\\lambda} \\right)}
+
+    where
+
+    .. math::
+        \\lambda = \\sigma \\times \\left(\\frac{1}{2}( \\exp(\\tau^{2}) - 1)
+        \\left(\\exp(\\tau^{2}) \\cosh\\left(-\\nu \\tau \\right) + 1\\right)
+        \\right)^{-\\frac{1}{2}} \\\\
+
+    and
+
+    .. math::
+        \\xi = \\mu + \\lambda \\exp\\left(\\frac{\\tau^{2}}{2}\\right)\\sinh
+        \\left( \\nu \\tau \\right)
     """
+
     cdef public object func_code
     cdef public object func_defaults
 
@@ -129,7 +147,7 @@ cdef class _JohnsonSU:
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
 
-    def integrate(self, tuple bound, int nint_subdiv, *arg):
+    def integrate(self, tuple bound, int nint_subdiv=0, *arg):
 
         cdef double a, b
         a, b = bound
@@ -143,19 +161,17 @@ cdef class _JohnsonSU:
         cdef double omega = - nu * tau
         cdef double c = 0.5 * (w-1) * (w * cosh(2 * omega) + 1)
         c = pow(c, -0.5)
-        cdef double zmax = (- b + (mean + c * sigma * sqrt(w) * sinh(omega)))
-        zmax = zmax / c / sigma
-        cdef double zmin = (- a + (mean + c * sigma * sqrt(w) * sinh(omega)))
-        zmin = zmin / c / sigma
 
-        cdef double PiBy2 = pi/2.0
-        cdef double rootPiBy2 = sqrt(PiBy2)
+        cdef double _lambda = sigma * c
+        cdef double xi = mean + _lambda * sqrt(w) * sinh(omega)
+        cdef double zmax = (b - xi) / _lambda
+        cdef double zmin = (a - xi) / _lambda
+        cdef double rmax = -nu + asinh(zmax) / tau
+        cdef double rmin = -nu + asinh(zmin) / tau
 
         cdef double ret = 0.
 
-        ret = erf((nu*tau + asinh(zmax)) / (sqrt(2)*tau))
-        ret -= erf((nu*tau + asinh(zmin)) / (sqrt(2)*tau))
-        ret *= -0.25/rootPiBy2
+        ret = 0.5 * (erf(zmax / (sqrt(2))) - erf(zmin / (sqrt(2))))
 
         return ret
 
@@ -169,15 +185,17 @@ cdef class _JohnsonSU:
 
         cdef double w = exp(tau * tau)
         cdef double omega = - nu * tau
+
         cdef double c = 0.5 * (w-1) * (w * cosh(2 * omega) + 1)
         c = pow(c, -0.5)
 
-        cdef double z = (x - (mean + c * sigma * sqrt(w) * sinh(omega)))
-        z = z / c / sigma
+        cdef double _lambda = sigma * c
+        cdef double xi = mean + _lambda * sqrt(w) * sinh(omega)
+        cdef double z = (x - xi) / _lambda
         cdef double r = -nu + asinh(z) / tau
 
-        cdef double ret = 1. / (c * sigma * 2 * pi)
-        ret *= 1. / (tau * sqrt(z*z+1))
+        cdef double ret = 1. / (tau * _lambda * sqrt(2 * pi))
+        ret *= 1. / sqrt(z * z + 1)
         ret *= exp(-0.5 * r * r)
 
         return ret
