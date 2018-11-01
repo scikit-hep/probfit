@@ -9,7 +9,7 @@ from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
  SimultaneousFit
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball, \
     argus, cruijff, linear, poly2, poly3, novosibirsk, \
-    Polynomial, HistogramPdf, cauchy, rtv_breitwigner
+    Polynomial, HistogramPdf, cauchy, rtv_breitwigner, johnsonSU
 from .toy import gen_toy, gen_toyn
 from .util import *
 from .oneshot import *
