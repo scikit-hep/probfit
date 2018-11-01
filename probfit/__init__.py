@@ -42,7 +42,7 @@ __all__ = [
     'crystalball',
     'describe',
     'doublegaussian',
-    'johnsonSU'
+    'johnsonSU',
     'draw_compare',
     'draw_compare_hist',
     'draw_pdf',

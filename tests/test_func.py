@@ -142,6 +142,8 @@ def test_cauchy():
     assert_allclose(pdf.cauchy(1, 1, 2.), 0.15915494309189535)
     assert_allclose(pdf.cauchy(1, 2, 4.), 0.07489644380795074)
 
+def test_johnsonSU():
+    assert describe(pdf.johnsonSU), ['x', "mean", "sigma", "nu", "tau"]
 
 def test_HistogramPdf():
     be = np.array([0, 1, 3, 4], dtype=float)

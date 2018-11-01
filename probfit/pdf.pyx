@@ -116,7 +116,9 @@ cdef class HistogramPdf:
 
 cdef class _JohnsonSU:
     """
-    JohnsonSU.
+    Unnormalized JohnsonSU.
+
+    .. math::
     """
     cdef public object func_code
     cdef public object func_defaults
