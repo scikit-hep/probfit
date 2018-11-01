@@ -1,7 +1,7 @@
 #cython: embedsignature=True
 cimport cython
 
-from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs
+from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs, erf
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
@@ -143,7 +143,8 @@ cpdef double ugaussian(double x, double mean, double sigma):
     Unnormalized gaussian
 
     .. math::
-        f(x; mean, \sigma) = \exp \left[ -\\frac{1}{2} \\left( \\frac{x-mean}{\sigma} \\right)^2 \\right]
+        f(x; mean, \\sigma) = \\exp \\left[ -\\frac{1}{2} \\left(
+        \\frac{x-mean}{\\sigma} \\right)^2 \\right]
 
     """
     cdef double ret = 0
@@ -155,25 +156,101 @@ cpdef double ugaussian(double x, double mean, double sigma):
         ret = exp(-0.5*d2)
     return ret
 
-
-cpdef double gaussian(double x, double mean, double sigma):
+cdef class Gaussian:
     """
     Normalized gaussian.
 
     .. math::
-        f(x; mean, \sigma) = \\frac{1}{\sqrt{2\pi}\sigma}
-        \exp \left[  -\\frac{1}{2} \left(\\frac{x-mean}{\sigma}\\right)^2 \\right]
+        f(x; mean, \\sigma) = \\frac{1}{\\sqrt{2\\pi}\\sigma}
+        \\exp \\left[  -\\frac{1}{2} \\left(\\frac{x-mean}{\\sigma}\\right)^2
+        \\right]
 
     """
-    cdef double badvalue = 1e-300
-    cdef double ret = 0
-    if sigma < smallestdiv:
-        ret = badvalue
-    else:
-        d = (x-mean)/sigma
-        d2 = d*d
-        ret = 1/(sqrt(2*pi)*sigma)*exp(-0.5*d2)
-    return ret
+
+    cdef public object func_code
+    cdef public object func_defaults
+    cdef double mean
+    cdef double sigma
+
+    def __init__(self, mean=None, sigma=None, xname='x'):
+
+        varnames = [xname]
+
+        if mean is not None and sigma is not None:
+            self.mean = mean
+            self.sigma = sigma
+        else:
+            self.mean = -99999
+            self.sigma = -99999
+            varnames.append("mean")
+            varnames.append("sigma")
+
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+
+    def _get_args(self, *arg):
+
+        cdef double mean
+        cdef double sigma
+
+        mean = self.mean if self.mean != -99999 else arg[0]
+        sigma = self.sigma if self.mean != -99999 else arg[1]
+
+        return mean, sigma
+
+    def __call__(self, *arg):
+
+        cdef double x = arg[0]
+
+        mean, sigma = self._get_args(*arg[1:])
+
+        cdef double ret = 0
+
+        if sigma < smallestdiv:
+            ret = badvalue
+        else:
+            d = (x-mean)/sigma
+            d2 = d*d
+            ret = 1/(sqrt(2*pi)*sigma)*exp(-0.5*d2)
+
+        return ret
+
+    def log(self, *arg):
+
+        cdef double x = arg[0]
+
+        mean, sigma = self._get_args(*arg[1:])
+
+        cdef double ret = 0
+
+        ret += log(1 / (sigma * sqrt(2*pi)))
+        ret += -0.5 * ((x - mean) / sigma)**2
+
+        return ret
+
+    def integrate(self, tuple bound, int nint_subdiv, *arg):
+
+        cdef double a, b
+        a, b = bound
+
+        mean, sigma = self._get_args(*arg)
+
+        cdef double PiBy2 = pi/2.0
+        cdef double rootPiBy2 = sqrt(PiBy2)
+        cdef double xscale = sqrt(2.0) * sigma
+
+        cdef double ret = 0
+
+        if sigma < smallestdiv:
+            ret = badvalue
+        else:
+            ret = erf((b - mean)/xscale)
+            ret -= erf((a - mean)/xscale)
+            ret *= 0.5
+
+        return ret
+
+gaussian = Gaussian()
 
 
 cpdef double crystalball(double x, double alpha, double n, double mean, double sigma):

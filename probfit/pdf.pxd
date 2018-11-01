@@ -2,7 +2,7 @@ cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_
 
 cpdef double ugaussian(double x, double mean, double sigma)
 
-cpdef double gaussian(double x, double mean, double sigma)
+#cpdef double gaussian(double x, double mean, double sigma)
 
 cpdef double crystalball(double x, double alpha, double n, double mean, double sigma)
 

@@ -126,6 +126,7 @@ cdef class UnbinnedLH:
     cdef readonly bint extended
     cdef readonly tuple extended_bound
     cdef readonly int extended_nint
+    cdef public dict constraints
     def __init__(self, f, data, weights=None, extended=False,
                  extended_bound=None, extended_nint=100, badvalue=-100000):
         """
@@ -187,6 +188,17 @@ cdef class UnbinnedLH:
         self.extended_nint = extended_nint
         if extended and extended_bound is None:
             self.extended_bound = minmax(data)
+        self.constraints = {}
+
+    def addconstraints(self, parameter, constraint):
+
+        if parameter not in describe(self):
+            msg = "{0} not in {1}.".format(parameter, describe(self))
+            raise ValueError(msg)
+
+        check_constraint(constraint)
+
+        self.constraints[parameter] = constraint
 
     def __call__(self, *arg):
         """
@@ -202,6 +214,16 @@ cdef class UnbinnedLH:
             extended_term = integrate1d(self.f, self.extended_bound,
                                         self.extended_nint, arg)
             nll += extended_term
+
+        for param, constraint in self.constraints.items():
+
+            argpos = describe(self).index(param)
+
+            if hasattr(constraint, "log"):
+                nll += -constraint.log(arg[argpos])
+            else:
+                nll += -log(constraint(arg[argpos]))
+
         return nll
 
     def draw(self, minuit=None, bins=100, ax=None, bound=None,
@@ -830,3 +852,20 @@ cdef class BinnedChi2:
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
+
+
+def check_constraint(function):
+
+    if hasattr(function, "__call__"):
+            if len(describe(function)) > 1:
+                raise TypeError("Please provide a function with of single\
+                argument.")
+
+            test_return = function(0.0)
+            if not isinstance(test_return, (int, float)):
+                raise ValueError("Please provide a function that returns a\
+                number (int/float).")
+
+    else:
+        raise TypeError("Please provide a function with one argument\
+        returning a number (int/float).")

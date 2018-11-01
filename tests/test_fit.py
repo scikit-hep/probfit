@@ -5,9 +5,10 @@ import iminuit
 from iminuit import describe
 from iminuit.iminuit_warnings import InitialParamWarning
 from probfit.funcutil import rename
-from probfit.pdf import gaussian, linear
+from probfit.pdf import gaussian, linear, Gaussian, ugaussian
 from probfit.costfunc import UnbinnedLH, BinnedLH, BinnedChi2, Chi2Regression, \
     SimultaneousFit
+from probfit.functor import Normalized
 
 
 class TestFit:
@@ -78,3 +79,50 @@ class TestFit:
         assert_allclose(minuit.values['lmu'], 0., atol=2 * minuit.errors['lmu'])
         assert_allclose(minuit.values['rmu'], 3., atol=2 * minuit.errors['rmu'])
         assert_allclose(minuit.values['sigma'], 1., atol=2 * minuit.errors['sigma'])
+
+def test_ulh_with_constraints():
+
+    data = np.random.normal(0.0, 1.0, 1000)
+
+    pdf = gaussian
+
+    ulh = UnbinnedLH(pdf, data)
+
+    assert ulh(0.0, 1.0) <= ulh(-0.2, 1.0)
+    assert ulh(0.0, 1.0) <= ulh(0.2, 1.0)
+    assert ulh(0.0, 1.0) <= ulh(0.0, 1.5)
+    assert ulh(0.0, 1.0) <= ulh(0.0, 0.5)
+    assert ulh(0.0, 1.0) <= ulh(0.1, 0.5)
+
+    mean_constraint = Gaussian(mean=0.2, sigma=0.01)
+
+    ulh.addconstraints("mean", mean_constraint)
+    assert ulh.constraints == {"mean": mean_constraint}
+
+    nll_02_1 = ulh(0.2, 1.0)
+    nll_0_1 = ulh(0.0, 1.0)
+    nll_01_1 = ulh(0.1, 1.0)
+    nll_03_1 = ulh(0.3, 1.0)
+    nll_02_15 = ulh(0.2, 1.5)
+    nll_02_05 = ulh(0.2, 0.5)
+
+    assert nll_02_1 <= nll_0_1
+    assert nll_02_1 <= nll_01_1
+    assert nll_02_1 <= nll_03_1
+    assert nll_02_1 <= nll_02_15
+    assert nll_02_1 <= nll_02_05
+
+    ngauss = Normalized(ugaussian, bound=(-10, 10))
+
+    def nmean_constraint(x):
+        return ngauss(x, 0.2, 0.01)
+
+    ulh.addconstraints("mean", nmean_constraint)
+    assert ulh.constraints == {"mean": nmean_constraint}
+
+    assert_allclose(ulh(0.2, 1.0), nll_02_1, rtol=0.001)
+    assert_allclose(ulh(0.0, 1.0), nll_0_1, rtol=0.001)
+    assert_allclose(ulh(0.1, 1.0), nll_01_1, rtol=0.001)
+    assert_allclose(ulh(0.3, 1.0), nll_03_1, rtol=0.001)
+    assert_allclose(ulh(0.2, 1.5), nll_02_15, rtol=0.001)
+    assert_allclose(ulh(0.2, 0.5), nll_02_05, rtol=0.001)
