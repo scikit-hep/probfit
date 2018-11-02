@@ -16,6 +16,7 @@ import pytest
 import numpy as np
 from matplotlib import pyplot as plt
 from iminuit import Minuit
+import sys
 from probfit.plotting import draw_pdf, draw_compare_hist
 from probfit.pdf import gaussian, linear, doublecrystalball
 from probfit.funcutil import rename
@@ -23,6 +24,11 @@ from probfit.functor import Extended, AddPdfNorm, AddPdf
 from probfit.costfunc import UnbinnedLH, BinnedLH, BinnedChi2, Chi2Regression, \
     SimultaneousFit
 
+major, minor = sys.version_info[0:2]
+if major >= 3 and minor >= 5:
+    special_tol = 60.0
+else:
+    special_tol = 2.0
 
 def image_comparison(filename, **kwargs):
     """Decorator to provide a new Figure instance and return it.
@@ -49,7 +55,6 @@ def test_draw_pdf():
 
 
 
-    
 # There is a slight difference in the x-axis tick label positioning for this
 # plot between Python 2 and 3, it's not important here so increase the RMS
 # slightly such that it's ignored
@@ -100,11 +105,14 @@ def test_draw_residual_ulh():
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(doublecrystalball, data)
-    ulh.draw_residual(args=(1., 1.,2.,2.,1.,2.), norm=True)
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.), norm=True)
+    plt.ylim(-7., 3.)
+    plt.xlim(-4., 3.)
 
 
-@image_comparison('draw_residual_ulh_norm_no_errbars.png')
+
+@image_comparison('draw_residual_ulh_norm_no_errbars.png', tolerance=special_tol)
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
@@ -125,8 +133,10 @@ def test_draw_residual_ulh_norm_options():
 def test_draw_ulh_extend_residual_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(Extended(doublecrystalball), data, extended=True)
-    ulh.draw_residual(args=(1., 1.,2.,2.,1.,2., 1000), norm=True)
+    ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
+    ulh.draw_residual(args=(0., 1., 1000), norm=True)
+    plt.ylim(-7.,3.)
+
 
 
 @image_comparison('draw_ulh_with_minuit.png')
@@ -166,8 +176,11 @@ def test_draw_residual_blh():
 def test_draw_residual_blh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedLH(doublecrystalball, data)
-    blh.draw_residual(args=(1., 1.,2.,2.,1.,2.), norm=True)
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.), norm=True)
+    plt.ylim(-4., 3.)
+    plt.xlim(-4., 3.)
+
 
 
 @image_comparison('draw_residual_blh_norm_options.png')
@@ -179,7 +192,7 @@ def test_draw_residual_blh_norm_options():
                       grid=False, zero_line=False)
 
 
-@image_comparison('draw_residual_blh_norm_no_errbars.png')
+@image_comparison('draw_residual_blh_norm_no_errbars.png', tolerance=special_tol)
 def test_draw_residual_blh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)

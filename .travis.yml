@@ -4,6 +4,7 @@ python:
   - 2.7
   - 3.4
   - 3.5
+  - 3.6
 
 # https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
 before_script:
@@ -14,7 +15,7 @@ before_script:
 install:
   - pip install Cython
   - pip install numpy
-  - pip install matplotlib
+  - pip install "matplotlib<=3.0.0"
   - pip install iminuit
   - pip install pytest pytest-cov pytest-mpl
   - pip install flake8 pylint

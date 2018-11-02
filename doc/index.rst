@@ -36,13 +36,13 @@ From pip::
 
 or get the latest development from github::
 
-    git clone git://github.com/iminuit/probfit.git
+    git clone git://github.com/scikit-hep/probfit.git
 
 Tutorial
 --------
 
 The tutorial consists of an IPython notebook in the tutorial directory.
-You can `view it online <http://nbviewer.ipython.org/urls/raw.github.com/iminuit/probfit/master/tutorial/tutorial.ipynb>`_ too.
+You can `view it online <http://nbviewer.ipython.org/urls/raw.github.com/scikit-hep/probfit/master/tutorial/tutorial.ipynb>`_ too.
 
 
 Commonly used API
