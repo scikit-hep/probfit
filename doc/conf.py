@@ -37,8 +37,7 @@ if not on_rtd:
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['matplotlib.sphinxext.only_directives',
-              'matplotlib.sphinxext.plot_directive',
+extensions = ['matplotlib.sphinxext.plot_directive',
               'IPython.sphinxext.ipython_directive',
               'sphinx.ext.autodoc',
               'sphinx.ext.mathjax',
