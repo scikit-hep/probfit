@@ -26,7 +26,11 @@ Strict dependencies
 - `Python <http://docs.python-guide.org/en/latest/starting/installation/>`__ (2.7+, 3.4+)
 - `Numpy <https://scipy.org/install.html>`__
 - `iminuit <http://iminuit.readthedocs.org/>`_
-- `matplotlib <http://matplotlib.org/>`_ (only for plotting)
+
+Optional dependencies
+---------------------
+
+- `matplotlib <http://matplotlib.org/>`_ for the plotting functions
 
 Getting started
 ---------------
@@ -45,7 +49,7 @@ Getting started
 Documentation and Tutorial
 --------------------------
 
-*`Documentation <http://probfit.readthedocs.org/>`_
+* `Documentation <http://probfit.readthedocs.org/>`_
 * The tutorial is an IPython notebook that you can view online
   `here <http://nbviewer.ipython.org/urls/raw.github.com/scikit-hep/probfit/master/tutorial/tutorial.ipynb>`_.
   To run it locally: `cd tutorial; ipython notebook --pylab=inline tutorial.ipynb`.

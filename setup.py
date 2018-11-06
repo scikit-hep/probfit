@@ -50,8 +50,7 @@ setup(
     install_requires=[
         'setuptools',
         'numpy',
-        'iminuit',
-        'matplotlib'
+        'iminuit'
     ],
     classifiers=[
         "Programming Language :: Python",

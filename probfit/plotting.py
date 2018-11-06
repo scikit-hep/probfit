@@ -5,12 +5,12 @@
 from math import sqrt, ceil, floor
 from warnings import warn
 import numpy as np
-from matplotlib import pyplot as plt
 from .nputil import mid, minmax, vector_apply
 from .util import parse_arg, describe
 
 
 def draw_simultaneous(self, minuit=None, args=None, errors=None, **kwds):
+    from matplotlib import pyplot as plt
     numf = len(self.allf)
     ret = []
     numraw = sqrt(numf)
@@ -72,6 +72,8 @@ def draw_ulh(self, minuit=None, bins=100, ax=None, bound=None,
              parmloc=(0.05, 0.95), nfbins=200, print_par=True, grid=True,
              args=None, errors=None, parts=False, show_errbars='normal',
              no_plot=False):
+    from matplotlib import pyplot as plt
+
     data_ret = None
     error_ret = None
     total_ret = None
@@ -170,6 +172,8 @@ def draw_residual(x, y, yerr, xerr,
 
     The matplotlib axis instance the plot was drawn on.
     """
+    from matplotlib import pyplot as plt
+
     ax = plt.gca() if ax is None else ax
 
     if show_errbars:
@@ -196,6 +200,8 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
                       parmloc=(0.05, 0.95), print_par=False,
                       args=None, errors=None, errbar_algo='normal', norm=False,
                       **kwargs):
+    from matplotlib import pyplot as plt
+
     ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
@@ -237,6 +243,8 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
 def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
             args=None, errors=None, grid=True, parts=False, no_plot=False):
+    from matplotlib import pyplot as plt
+
     data_ret = None
     error_ret = None
     total_ret = None
@@ -289,6 +297,8 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
 
 def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=True,
                      norm=False):
+    from matplotlib import pyplot as plt
+
     ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
@@ -319,6 +329,8 @@ def draw_x2_residual(self, minuit=None, ax=None, args=None, errors=None, grid=Tr
 def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
              print_par=True, args=None, errors=None, parts=False, grid=True,
              no_plot=False):
+    from matplotlib import pyplot as plt
+
     data_ret = None
     error_ret = None
     total_ret = None
@@ -379,6 +391,8 @@ def draw_bx2(self, minuit=None, parmloc=(0.05, 0.95), nfbins=500, ax=None,
 def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
              nfbins=1000, ax=None, print_par=True, grid=True,
              args=None, errors=None, parts=False, no_plot=False):
+    from matplotlib import pyplot as plt
+
     data_ret = None
     error_ret = None
     total_ret = None
@@ -436,6 +450,8 @@ def draw_blh(self, minuit=None, parmloc=(0.05, 0.95),
 def draw_residual_blh(self, minuit=None, parmloc=(0.05, 0.95),
                       ax=None, print_par=False, args=None, errors=None,
                       norm=False, **kwargs):
+    from matplotlib import pyplot as plt
+
     ax = plt.gca() if ax is None else ax
 
     arg, error = _get_args_and_errors(self, minuit, args, errors)
@@ -473,6 +489,8 @@ def draw_compare(f, arg, edges, data, errors=None, ax=None, grid=True, normed=Fa
     """
     TODO: this needs to be rewritten
     """
+    from matplotlib import pyplot as plt
+
     # arg is either map or tuple
     ax = plt.gca() if ax is None else ax
     arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
@@ -557,6 +575,8 @@ def draw_pdf_with_edges(f, arg, edges, ax=None, scale=1.0, density=True,
 
 
 def draw_pdf_with_midpoints(f, arg, x, ax=None, scale=1.0, normed_pdf=False, no_plot=False, **kwds):
+    from matplotlib import pyplot as plt
+
     ax = plt.gca() if ax is None and not no_plot else ax
     arg = parse_arg(f, arg, 1) if isinstance(arg, dict) else arg
     yf = vector_apply(f, x, *arg)
@@ -601,6 +621,8 @@ def draw_compare_hist(f, arg, data, bins=100, bound=None, ax=None, weights=None,
         - **parts** draw parts of pdf. (Works with AddPdf and Add2PdfNorm).
           Default False.
     """
+    from matplotlib import pyplot as plt
+
     ax = plt.gca() if ax is None else ax
     bound = minmax(data) if bound is None else bound
     h, e = np.histogram(data, bins=bins, range=bound, weights=weights)

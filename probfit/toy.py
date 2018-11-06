@@ -1,7 +1,6 @@
 from warnings import warn
 import numpy as np
 import numpy.random as npr
-from matplotlib import pyplot as plt
 from ._libstat import compute_cdf, invert_cdf, _vector_apply
 from .util import describe
 from .probfit_warnings import SmallIntegralWarning
@@ -62,6 +61,7 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
 
     if not quiet:
         # move this to plotting
+        from matplotlib import pyplot as plt
         plt.figure()
         plt.title('comparison')
         numbin = 100
