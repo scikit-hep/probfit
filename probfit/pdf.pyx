@@ -116,7 +116,7 @@ cdef class HistogramPdf:
 
 cdef class _JohnsonSU:
     """
-    Normalized JohnsonSU.
+    Normalized JohnsonSU [1]_.
 
     .. math::
         f(x; \\mu, \\sigma, \\nu, \\tau) = \\frac{1}{\\lambda \\sqrt{2\\pi}}
@@ -135,7 +135,13 @@ cdef class _JohnsonSU:
 
     .. math::
         \\xi = \\mu + \\lambda \\exp\\left(\\frac{\\tau^{2}}{2}\\right)\\sinh
-        \\left( \\nu \\tau \\right)
+        \\left( \\nu \\tau \\right)$
+
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution
+
     """
 
     cdef public object func_code
