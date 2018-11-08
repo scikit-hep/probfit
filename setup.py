@@ -29,7 +29,7 @@ if USE_CYTHON:
 
 def get_version():
     version = {}
-    with open('probfit/info.py') as fp:
+    with open('probfit/version.py') as fp:
         exec(fp.read(), version)
     return version['__version__']
 
@@ -50,8 +50,7 @@ setup(
     install_requires=[
         'setuptools',
         'numpy',
-        'iminuit',
-        'matplotlib'
+        'iminuit'
     ],
     classifiers=[
         "Programming Language :: Python",

@@ -1,7 +1,6 @@
 from iminuit import Minuit
 from probfit import BinnedLH, Extended, AddPdf, gen_toy
 from probfit.pdf import HistogramPdf
-from probfit.plotting import draw_pdf
 import numpy as np
 
 bound = (0, 10)

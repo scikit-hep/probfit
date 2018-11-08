@@ -105,6 +105,7 @@ and send us pull request.
     cauchy
     rtv_breitwigner
     doublegaussian
+    johnsonSU
     argus
     linear
     poly2

@@ -3,7 +3,6 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
-from matplotlib import pyplot as plt
 from . import plotting
 from ._libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f, \
     csum, compute_bin_lh_f, integrate1d
@@ -101,6 +100,7 @@ cdef class SimultaneousFit:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(m)
         plt.show()
         return ret
@@ -324,6 +324,7 @@ cdef class UnbinnedLH:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
@@ -575,6 +576,7 @@ cdef class BinnedLH:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
@@ -679,6 +681,7 @@ cdef class Chi2Regression:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
@@ -827,6 +830,7 @@ cdef class BinnedChi2:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret

@@ -228,6 +228,13 @@ poly3
 .. plot:: pyplots/pdf/poly3.py
     :class: lightbox
 
+JohnsonSU
+^^^^^^^^^
+.. autofunction:: johnsonSU
+
+.. plot:: pyplots/pdf/johnsonSU.py
+    :class: lightbox
+
 Polynomial
 ^^^^^^^^^^
 .. autoclass:: Polynomial
