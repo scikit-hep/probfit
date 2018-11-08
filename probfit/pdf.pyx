@@ -121,8 +121,8 @@ cdef class _JohnsonSU:
     .. math::
         f(x; \\mu, \\sigma, \\nu, \\tau) = \\frac{1}{\\lambda \\sqrt{2\\pi}}
         \\frac{1}{\\sqrt{1 + \\left( \\frac{x - \\xi}{\\lambda} \\right)}}
-        e^{-\\frac{1}{2} \\left( -\\nu + \\frac{1}{\\tau}  \\right)
-        \\sinh^{-1} \\left( \\frac{x - \\xi}{\\lambda} \\right)}
+        e^{-\\frac{1}{2} \\left( -\\nu + \\frac{1}{\\tau}
+        \\sinh^{-1} \\left( \\frac{x - \\xi}{\\lambda} \\right)\\right)^{2}}
 
     where
 
@@ -514,3 +514,72 @@ cpdef double cauchy(double x, double m, double gamma):
     """
     cdef double xmg = (x-m)/gamma
     return 1/(pi*gamma*(1+xmg*xmg))
+
+
+cdef class Exponential:
+    """
+    Exponential [1]_.
+
+    .. math::
+        f(x;\\tau,\\delta) =
+        \\begin{cases}
+            \exp\left(-\\tau (x - \\delta) \right) & \mbox{if } \\x \\geq
+            \\delta \\\\
+            0 & \mbox{if } \\x < \\delta
+        \end{cases}
+
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Exponential_distribution
+
+    """
+    cdef public object func_code
+    cdef public object func_defaults
+    cdef public float shift
+
+    def __init__(self, xname='x', shift=0.0):
+
+        varnames = [xname, "tau"]
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+        self.shift = shift
+
+    def __call__(self, *arg):
+
+        cdef double x = arg[0]
+        cdef double tau = arg[1]
+        cdef double ret = 0
+
+        if x >= self.shift:
+            ret = tau * exp((x - self.shift) * -tau)
+        else:
+            ret = 0.
+
+        return ret
+
+    def cdf(self, x, tau):
+
+        cdef double ret = 0
+
+        if x >= self.shift:
+            ret = 1. - exp((x - self.shift) * -tau)
+        else:
+            ret = 0.
+
+        return ret
+
+    def integrate(self, tuple bound, int nint_subdiv, *arg):
+
+        cdef double a, b
+        a, b = bound
+
+        cdef double tau = arg[0]
+
+        Fa = self.cdf(a, tau)
+        Fb = self.cdf(b, tau)
+
+        return Fb - Fa
+
+
+exponential = Exponential()

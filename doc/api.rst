@@ -228,6 +228,13 @@ JohnsonSU
 .. plot:: pyplots/pdf/johnsonSU.py
     :class: lightbox
 
+Exponential
+^^^^^^^^^^^
+.. autofunction:: exponential
+
+.. plot:: pyplots/pdf/exponential.py
+    :class: lightbox
+
 Polynomial
 ^^^^^^^^^^
 .. autoclass:: Polynomial
