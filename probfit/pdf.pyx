@@ -135,7 +135,7 @@ cdef class _JohnsonSU:
 
     .. math::
         \\xi = \\mu + \\lambda \\exp\\left(\\frac{\\tau^{2}}{2}\\right)\\sinh
-        \\left( \\nu \\tau \\right)$
+        \\left( \\nu \\tau \\right)
 
     References
     ----------
