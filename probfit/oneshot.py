@@ -1,7 +1,6 @@
 import itertools as itt
 import collections
 import numpy as np
-from matplotlib import pyplot as plt
 from iminuit import Minuit
 from .py23_compat import range
 from .costfunc import UnbinnedLH, BinnedChi2, BinnedLH
@@ -24,6 +23,7 @@ def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
     minuit.migrad()
     if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
+            from matplotlib import pyplot as plt
             plt.figure()
             uml.show()
             print(minuit.values)
@@ -49,6 +49,7 @@ def fit_binx2(f, data, bins=30, bound=None, print_level=0, quiet=False, *arg, **
     minuit.migrad()
     if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
+            from matplotlib import pyplot as plt
             plt.figure()
             uml.show()
             print(minuit.values)
@@ -83,6 +84,7 @@ def fit_binlh(f, data, bins=30,
     minuit.migrad()
     if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
+            from matplotlib import pyplot as plt
             plt.figure()
             uml.show()
             print(minuit.values)
@@ -114,6 +116,7 @@ def pprint_arg(vnames, value):
 
 
 def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
+    from matplotlib import pyplot as plt
     fom = UnbinnedLH(f, data)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
@@ -139,6 +142,7 @@ def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
 
 def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=False,
               bound=None, *arg, **kwd):
+    from matplotlib import pyplot as plt
     if bound is None: bound = minmax(data)
     fom = BinnedLH(f, data, extended=extended, bound=bound)
     narg = f.func_code.co_argcount
@@ -171,6 +175,7 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=
 
 
 def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kwd):
+    from matplotlib import pyplot as plt
     fom = BinnedChi2(f, data)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
