@@ -8,7 +8,7 @@ data = randn(1000)*2 + 1
 #Unextended
 
 blh = BinnedLH(gaussian, data)
-#if you wonder what it loos like call desceibe(blh)
+#if you wonder what it looks like call describe(blh)
 m = Minuit(blh, mean=0., sigma=0.5)
 
 plt.figure(figsize=(8, 6))

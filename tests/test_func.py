@@ -283,7 +283,7 @@ def test_merge_func_code_factor_list():
 
 
 def test_merge_func_code_skip_prefix():
-    funccode, pos = merge_func_code(
+    funccode, _ = merge_func_code(
         f, f2,
         prefix=['f_', 'g_'],
         skip_first=True,
