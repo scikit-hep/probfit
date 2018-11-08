@@ -52,10 +52,12 @@ def test_draw_pdf():
     f = gaussian
     draw_pdf(f, {'mean': 1., 'sigma': 2.}, bound=(-10, 10))
 
+    
 @image_comparison('draw_pdf_linear.png')
 def test_draw_pdf_linear():
     f = linear
     draw_pdf(f, {'m': 1., 'c': 2.}, bound=(-10, 10))
+
 
 # There is a slight difference in the x-axis tick label positioning for this
 # plot between Python 2 and 3, it's not important here so increase the RMS
@@ -113,7 +115,6 @@ def test_draw_residual_ulh_norm():
     plt.xlim(-4., 3.)
 
 
-
 @image_comparison('draw_residual_ulh_norm_no_errbars.png', tolerance=special_tol)
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
@@ -138,7 +139,6 @@ def test_draw_ulh_extend_residual_norm():
     ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
     ulh.draw_residual(args=(0., 1., 1000), norm=True)
     plt.ylim(-7.,3.)
-
 
 
 @image_comparison('draw_ulh_with_minuit.png')
@@ -174,7 +174,6 @@ def test_draw_residual_blh():
     blh.draw_residual(args=(0., 1.))
 
 
-
 @image_comparison('draw_residual_blh_norm.png')
 def test_draw_residual_blh_norm():
     np.random.seed(0)
@@ -183,7 +182,6 @@ def test_draw_residual_blh_norm():
     blh.draw_residual(args=(0., 1.), norm=True)
     plt.ylim(-4., 3.)
     plt.xlim(-4., 3.)
-
 
 
 @image_comparison('draw_residual_blh_norm_options.png')
