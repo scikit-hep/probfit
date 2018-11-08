@@ -18,7 +18,7 @@ from matplotlib import pyplot as plt
 from iminuit import Minuit
 import sys
 from probfit.plotting import draw_pdf, draw_compare_hist
-from probfit.pdf import gaussian, linear, doublecrystalball
+from probfit.pdf import gaussian, linear
 from probfit.funcutil import rename
 from probfit.functor import Extended, AddPdfNorm, AddPdf
 from probfit.costfunc import UnbinnedLH, BinnedLH, BinnedChi2, Chi2Regression, \
@@ -49,21 +49,23 @@ def image_comparison(filename, **kwargs):
 
 @image_comparison('draw_pdf.png')
 def test_draw_pdf():
-    f = doublecrystalball
-    draw_pdf(f, {'mean': 1., 'alpha' : 1, 'alpha2':1, 'n':2, 'n2':2 ,'sigma': 2.}, bound=(-10, 10))
+    f = gaussian
+    draw_pdf(f, {'mean': 1., 'sigma': 2.}, bound=(-10, 10))
 
-
-
+@image_comparison('draw_pdf_linear.png')
+def test_draw_pdf_linear():
+    f = linear
+    draw_pdf(f, {'m': 1., 'c': 2.}, bound=(-10, 10))
 
 # There is a slight difference in the x-axis tick label positioning for this
 # plot between Python 2 and 3, it's not important here so increase the RMS
 # slightly such that it's ignored
-@image_comparison('draw_compare_hist_doublecrystalball.png', tolerance=2.05)
+@image_comparison('draw_compare_hist_gaussian.png', tolerance=2.05)
 def test_draw_compare_hist():
     np.random.seed(0)
     data = np.random.randn(10000)
-    f = doublecrystalball
-    draw_compare_hist(f,  {'mean': 1., 'alpha' : 1, 'alpha2':1, 'n':2, 'n2':2 ,'sigma': 2.}, data, normed=True)
+    f = gaussian
+    draw_compare_hist(f, {'mean': 0., 'sigma': 1.}, data, normed=True)
 
 
 # There is a slight difference in the x-axis tick label positioning for this
@@ -81,24 +83,24 @@ def test_draw_compare_hist_no_norm():
 def test_draw_ulh():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(doublecrystalball, data)
-    ulh.draw(args=(1., 1.,2.,2.,1.,2.))
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw(args=(0., 1.))
 
 
 @image_comparison('draw_ulh_extend.png')
 def test_draw_ulh_extend():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(Extended(doublecrystalball), data, extended=True)
-    ulh.draw(args=(1., 1.,2.,2.,1.,2., 1000))
+    ulh = UnbinnedLH(Extended(gaussian), data, extended=True)
+    ulh.draw(args=(0., 1., 1000))
 
 
 @image_comparison('draw_residual_ulh.png')
 def test_draw_residual_ulh():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(doublecrystalball, data)
-    ulh.draw_residual(args=(1., 1.,2.,2.,1.,2.))
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.))
 
 
 @image_comparison('draw_residual_ulh_norm.png')
@@ -116,16 +118,16 @@ def test_draw_residual_ulh_norm():
 def test_draw_residual_ulh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(doublecrystalball, data)
-    ulh.draw_residual(args=(1., 1.,2.,2.,1.,2.), norm=True, show_errbars=False)
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.), norm=True, show_errbars=False)
 
 
 @image_comparison('draw_residual_ulh_norm_options.png')
 def test_draw_residual_ulh_norm_options():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(doublecrystalball, data)
-    ulh.draw_residual(args=(1., 1.,2.,2.,1.,2.), norm=True, color='green', capsize=2,
+    ulh = UnbinnedLH(gaussian, data)
+    ulh.draw_residual(args=(0., 1.), norm=True, color='green', capsize=2,
                       grid=False, zero_line=False)
 
 
@@ -143,8 +145,8 @@ def test_draw_ulh_extend_residual_norm():
 def test_draw_ulh_with_minuit():
     np.random.seed(0)
     data = np.random.randn(1000)
-    ulh = UnbinnedLH(doublecrystalball, data)
-    minuit = Minuit(ulh, mean=0, sigma=1, alpha = 1, alpha2 =1, n=2, n2=2)
+    ulh = UnbinnedLH(gaussian, data)
+    minuit = Minuit(ulh, mean=0, sigma=1)
     ulh.draw(minuit)
 
 
@@ -152,24 +154,25 @@ def test_draw_ulh_with_minuit():
 def test_draw_blh():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedLH(doublecrystalball, data)
-    blh.draw(args=(1., 1.,2.,2.,1.,2.))
+    blh = BinnedLH(gaussian, data)
+    blh.draw(args=(0., 1.))
 
 
 @image_comparison('draw_blh_extend.png')
 def test_draw_blh_extend():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedLH(Extended(doublecrystalball), data, extended=True)
-    blh.draw(args=(1., 1.,2.,2.,1.,2., 1000))
+    blh = BinnedLH(Extended(gaussian), data, extended=True)
+    blh.draw(args=(0., 1., 1000))
 
 
 @image_comparison('draw_residual_blh.png')
 def test_draw_residual_blh():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedLH(doublecrystalball, data)
-    blh.draw_residual(args=(1., 1.,2.,2.,1.,2.))
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.))
+
 
 
 @image_comparison('draw_residual_blh_norm.png')
@@ -187,8 +190,8 @@ def test_draw_residual_blh_norm():
 def test_draw_residual_blh_norm_options():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedLH(doublecrystalball, data)
-    blh.draw_residual(args=(1., 1.,2.,2.,1.,2.), norm=True, color='green', capsize=2,
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.), norm=True, color='green', capsize=2,
                       grid=False, zero_line=False)
 
 
@@ -196,24 +199,24 @@ def test_draw_residual_blh_norm_options():
 def test_draw_residual_blh_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedLH(doublecrystalball, data)
-    blh.draw_residual(args=(1., 1.,2.,2.,1.,2.), norm=True, show_errbars=False)
+    blh = BinnedLH(gaussian, data)
+    blh.draw_residual(args=(0., 1.), norm=True, show_errbars=False)
 
 
 @image_comparison('draw_blh_extend_residual_norm.png')
 def test_draw_blh_extend_residual_norm():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedLH(Extended(doublecrystalball), data, extended=True)
-    blh.draw_residual(args=(1., 1.,2.,2.,1.,2., 1000), norm=True)
+    blh = BinnedLH(Extended(gaussian), data, extended=True)
+    blh.draw_residual(args=(0., 1., 1000), norm=True)
 
 
 @image_comparison('draw_bx2.png')
 def test_draw_bx2():
     np.random.seed(0)
     data = np.random.randn(1000)
-    blh = BinnedChi2(Extended(doublecrystalball), data)
-    blh.draw(args=(1., 1.,2.,2.,1.,2., 1000))
+    blh = BinnedChi2(Extended(gaussian), data)
+    blh.draw(args=(0., 1., 1000))
 
 
 @image_comparison('draw_x2reg.png')
