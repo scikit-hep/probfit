@@ -9,7 +9,7 @@ from probfit._libstat import compute_chi2
 from probfit.nputil import vector_apply
 from probfit.costfunc import BinnedLH
 
-    
+
 def test_gen_toy():
     np.random.seed(0)
     bound = (-1, 2)
