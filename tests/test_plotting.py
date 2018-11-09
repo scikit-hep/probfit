@@ -52,7 +52,7 @@ def test_draw_pdf():
     f = gaussian
     draw_pdf(f, {'mean': 1., 'sigma': 2.}, bound=(-10, 10))
 
-    
+
 @image_comparison('draw_pdf_linear.png')
 def test_draw_pdf_linear():
     f = linear
