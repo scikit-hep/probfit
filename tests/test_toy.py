@@ -35,7 +35,7 @@ def test_gen_toy():
 
     assert (0.9 < (chi2 / len(bins)) < 1.1)
 
-    
+
 def test_gen_toy2():
     pdf = gaussian
     np.random.seed(0)
