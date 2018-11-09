@@ -2,12 +2,12 @@ from probfit.pdf import doublecrystalball
 from probfit.plotting import draw_normed_pdf
 import matplotlib.pyplot as plt
 
-bound = (5.22, 5.30)
+bound = (-2, 12)
 
-arg = dict(alpha=1.,alpha2=1., n=2.,n2=2, mean=5.28, sigma=0.01)
+arg = dict(alpha=1.,alpha2=2., n=2.,n2=4, mean=5, sigma=1)
 draw_normed_pdf(crystalball, arg=arg, bound=bound, label=str(arg), density=True)
 
-arg = dict(alpha=0.5, alpha2=0.5, n=10., n2=10., mean=5.28, sigma=0.005)
+arg = dict(alpha=2, alpha2=1, n=7., n2=10., mean=5, sigma=1)
 draw_normed_pdf(crystalball, arg=arg, bound=bound, label=str(arg), density=True)
 
 plt.grid(True)
