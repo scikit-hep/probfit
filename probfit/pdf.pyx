@@ -521,12 +521,11 @@ cdef class Exponential:
     Exponential [1]_.
 
     .. math::
-        f(x;\\tau,\\delta) =
+        f(x;\\tau) =
         \\begin{cases}
-            \exp\left(-\\tau (x - \\delta) \right) & \mbox{if } \\x \\geq
-            \\delta \\\\
-            0 & \mbox{if } \\x < \\delta
-        \end{cases}
+            \\exp\\left(-\\tau x \right) & \\mbox{if } \\x \\geq 0 \\\\
+            0 & \\mbox{if } \\x < 0
+        \\end{cases}
 
     References
     ----------
@@ -536,14 +535,12 @@ cdef class Exponential:
     """
     cdef public object func_code
     cdef public object func_defaults
-    cdef public float shift
 
-    def __init__(self, xname='x', shift=0.0):
+    def __init__(self, xname='x'):
 
         varnames = [xname, "tau"]
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
-        self.shift = shift
 
     def __call__(self, *arg):
 
@@ -551,8 +548,8 @@ cdef class Exponential:
         cdef double tau = arg[1]
         cdef double ret = 0
 
-        if x >= self.shift:
-            ret = tau * exp((x - self.shift) * -tau)
+        if x >= 0:
+            ret = tau * exp(x * -tau)
         else:
             ret = 0.
 
@@ -562,8 +559,8 @@ cdef class Exponential:
 
         cdef double ret = 0
 
-        if x >= self.shift:
-            ret = 1. - exp((x - self.shift) * -tau)
+        if x >= 0:
+            ret = 1. - exp(x * -tau)
         else:
             ret = 0.
 
