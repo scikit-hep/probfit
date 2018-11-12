@@ -58,6 +58,7 @@ def test_draw_pdf_linear():
     f = linear
     draw_pdf(f, {'m': 1., 'c': 2.}, bound=(-10, 10))
 
+
 # There is a slight difference in the x-axis tick label positioning for this
 # plot between Python 2 and 3, it's not important here so increase the RMS
 # slightly such that it's ignored

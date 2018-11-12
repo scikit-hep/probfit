@@ -312,6 +312,43 @@ cpdef double crystalball(double x, double alpha, double n, double mean, double s
             ret = A*pow(B-d,-n)
     return ret
 
+cpdef double doublecrystalball(double x, double alpha, double alpha2, double n, double n2, double mean, double sigma):
+    """
+    Unnormalized double crystal ball function
+    A gaussian core with two power tails
+
+    
+
+    """
+    cdef double d = 0.
+    cdef double ret = 0
+    cdef double A = 0
+    cdef double B = 0
+    cdef double A2 = 0
+    cdef double B2 = 0
+    if sigma < smallestdiv:
+        ret = badvalue
+    elif fabs(alpha) < smallestdiv:
+        ret = badvalue
+    elif n<1.:
+        ret = badvalue
+    else:
+        d = (x-mean)/sigma
+        if d<-alpha:
+            al = fabs(alpha)
+            A=pow(n/al,n)*exp(-al**2/2.)
+            B=n/al-al
+            ret = A*pow(B-d,-n)
+            
+        elif d < alpha2 :
+            ret = exp(-0.5*d**2)
+        else:
+            al2 = fabs(alpha2)
+            A2=pow(n2/al2,n2)*exp(-al2**2/2.)
+            B2=n2/al2-al2
+            ret = A2*pow(B2+d,-n2)
+    return ret
+
 
 #Background stuff
 cpdef double argus(double x, double c, double chi, double p):

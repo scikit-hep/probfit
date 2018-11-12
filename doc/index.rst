@@ -100,6 +100,7 @@ and send us pull request.
 .. autosummary::
     gaussian
     crystalball
+    doublecrystalball
     cruijff
     cauchy
     rtv_breitwigner

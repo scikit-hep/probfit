@@ -66,7 +66,22 @@ def test_crystalball():
     assert_allclose(pdf.crystalball(14, 1, 2, 10, 2), 0.1353352832366127)
     assert_allclose(pdf.crystalball(6, 1, 2, 10, 2), 0.26956918209450376)
 
+# cpdef double doubecrystalball(double x,double alpha,double alpha2, double n,double n2, double mean,double sigma)
+def test_doublecrystalball():
+    assert describe(pdf.doublecrystalball) == ['x', 'alpha', 'alpha2', 'n', 'n2', 'mean', 'sigma']
+    assert_allclose(pdf.doublecrystalball(10, 1, 1, 2, 2, 10, 2), 1.)
+    assert_allclose(pdf.doublecrystalball(11, 1, 1, 2, 2, 10, 2), 0.8824969025845955)
+    assert_allclose(pdf.doublecrystalball(12, 1, 1, 2, 2, 10, 2), 0.6065306597126334)
+    assert_allclose(pdf.doublecrystalball(14, 1, 1, 2, 2, 10, 2), 0.26956918209450376)
+    assert_allclose(pdf.doublecrystalball(6, 1, 1, 2, 2, 10, 2), 0.26956918209450376)
+    assert_allclose(pdf.doublecrystalball(-10, 1, 5, 3, 4, 10, 2), 0.00947704155801)
+    assert_allclose(pdf.doublecrystalball(0, 1, 5, 3, 4, 10, 2), 0.047744395954055)
+    assert_allclose(pdf.doublecrystalball(11, 1, 5, 3, 4, 10, 2), 0.8824969025846)
+    assert_allclose(pdf.doublecrystalball(20, 1, 5, 3, 4, 10, 2), 0.0000037266531720786)
+    assert_allclose(pdf.doublecrystalball(25, 1, 5, 3, 4, 10, 2), 0.00000001287132228271)
 
+
+    
 # cpdef double argus(double x, double c, double chi, double p)
 def test_argus():
     assert describe(pdf.argus) == ['x', 'c', 'chi', 'p']

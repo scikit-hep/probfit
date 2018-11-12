@@ -16,7 +16,6 @@ def test_gen_toy():
     ntoy = 100000
     toy = gen_toy(crystalball, ntoy, bound=bound,
                   alpha=1., n=2., mean=1., sigma=0.3, quiet=False)
-
     assert len(toy) == ntoy
 
     htoy, bins = np.histogram(toy, bins=1000, range=bound)

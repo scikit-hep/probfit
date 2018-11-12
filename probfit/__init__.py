@@ -5,9 +5,10 @@ probfit - Cost function builder. For fitting distributions.
 * Docs: http://probfit.readthedocs.io
 """
 
+
 from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
  SimultaneousFit
-from .pdf import doublegaussian, ugaussian, gaussian, crystalball, \
+from .pdf import doublegaussian, doublecrystalball, ugaussian, gaussian, crystalball, \
     argus, cruijff, linear, poly2, poly3, novosibirsk, \
     Polynomial, HistogramPdf, cauchy, rtv_breitwigner, johnsonSU
 from .toy import gen_toy, gen_toyn
@@ -41,6 +42,7 @@ __all__ = [
     'cauchy',
     'rtv_breitwigner',
     'crystalball',
+    'doublecrystalball',
     'describe',
     'doublegaussian',
     'johnsonSU',
