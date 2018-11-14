@@ -10,7 +10,7 @@ from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
 from .pdf import doublegaussian, ugaussian, gaussian, crystalball, \
     argus, cruijff, linear, poly2, poly3, novosibirsk, \
     Polynomial, HistogramPdf, cauchy, rtv_breitwigner, johnsonSU, \
-    exponential, Exponential
+    exponential
 
 from .toy import gen_toy, gen_toyn
 from .util import *
