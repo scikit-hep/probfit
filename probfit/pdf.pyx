@@ -516,14 +516,14 @@ cpdef double cauchy(double x, double m, double gamma):
     return 1/(pi*gamma*(1+xmg*xmg))
 
 
-cdef class Exponential:
+cdef class _Exponential:
     """
     Exponential [1]_.
 
     .. math::
         f(x;\\tau) =
         \\begin{cases}
-            \\exp\\left(-\\tau x \right) & \\mbox{if } \\x \\geq 0 \\\\
+            \\exp\\left(-\\lambda x \right) & \\mbox{if } \\x \\geq 0 \\\\
             0 & \\mbox{if } \\x < 0
         \\end{cases}
 
@@ -538,29 +538,29 @@ cdef class Exponential:
 
     def __init__(self, xname='x'):
 
-        varnames = [xname, "tau"]
+        varnames = [xname, "lambda"]
         self.func_code = MinimalFuncCode(varnames)
         self.func_defaults = None
 
     def __call__(self, *arg):
 
         cdef double x = arg[0]
-        cdef double tau = arg[1]
+        cdef double _lambda = arg[1]
         cdef double ret = 0
 
         if x >= 0:
-            ret = tau * exp(x * -tau)
+            ret = _lambda * exp(x * -_lambda)
         else:
             ret = 0.
 
         return ret
 
-    def cdf(self, x, tau):
+    def cdf(self, x, _lambda):
 
         cdef double ret = 0
 
         if x >= 0:
-            ret = 1. - exp(x * -tau)
+            ret = 1. - exp(x * -_lambda)
         else:
             ret = 0.
 
@@ -571,12 +571,12 @@ cdef class Exponential:
         cdef double a, b
         a, b = bound
 
-        cdef double tau = arg[0]
+        cdef double _lambda = arg[0]
 
-        Fa = self.cdf(a, tau)
-        Fb = self.cdf(b, tau)
+        Fa = self.cdf(a, _lambda)
+        Fb = self.cdf(b, _lambda)
 
         return Fb - Fa
 
 
-exponential = Exponential()
+exponential = _Exponential()

@@ -67,6 +67,5 @@ __all__ = [
     'try_uml',
     'ugaussian',
     'exponential',
-    'Exponential',
     '__version__',
 ]
