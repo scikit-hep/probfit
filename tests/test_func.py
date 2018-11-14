@@ -158,7 +158,7 @@ def test_johnsonSU():
 
 
 def test_exponential():
-    assert describe(pdf.exponential), ['x', "tau"]
+    assert describe(pdf.exponential), ['x', "lambda"]
     assert_allclose(pdf.exponential(0., 1.), 1.)
     assert_allclose(pdf.exponential(0., 10.), 10.)
     assert_allclose(pdf.exponential(1., 1.), exp(-1))
