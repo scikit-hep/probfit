@@ -2,18 +2,16 @@ from probfit.pdf import exponential
 from probfit.plotting import draw_pdf
 import matplotlib.pyplot as plt
 
-bound = (0, 5)
-
-arg = {"lambda": 0.5}
-draw_pdf(exponential, arg=arg, bound=bound, label=str(arg), density=False,
+_arg = {"lambda": 0.5}
+draw_pdf(exponential, arg=_arg, bound=(0, 5), label=str(_arg), density=False,
          bins=100)
 
 arg = {"lambda": 1.0}
-draw_pdf(exponential, arg=arg, bound=bound, label=str(arg), density=False,
+draw_pdf(exponential, arg=_arg, bound=(0, 5), label=str(_arg), density=False,
          bins=100)
 
 arg = {"lambda": 1.5}
-draw_pdf(exponential, arg=arg, bound=bound, label=str(arg), density=False,
+draw_pdf(exponential, arg=_arg, bound=(0, 5), label=str(_arg), density=False,
          bins=100)
 
 plt.grid(True)
