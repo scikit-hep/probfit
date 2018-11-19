@@ -1,4 +1,4 @@
-from math import log
+from math import log, exp
 import numpy as np
 from numpy.testing import assert_allclose
 from iminuit import describe
@@ -157,6 +157,7 @@ def test_cauchy():
     assert_allclose(pdf.cauchy(1, 1, 2.), 0.15915494309189535)
     assert_allclose(pdf.cauchy(1, 2, 4.), 0.07489644380795074)
 
+
 def test_johnsonSU():
     assert describe(pdf.johnsonSU), ['x', "mean", "sigma", "nu", "tau"]
     assert_allclose(pdf.johnsonSU(1., 1., 1., 1., 1.), 0.5212726124342)
@@ -169,6 +170,30 @@ def test_johnsonSU():
     assert_allclose(integral, 1.0)
     integral = j.integrate((0, 2), 0, 1., 1., 1., 1.)
     assert_allclose(integral, 0.8786191859)
+
+
+def test_exponential():
+    assert describe(pdf.exponential), ['x', "lambda"]
+    assert_allclose(pdf.exponential(0., 1.), 1.)
+    assert_allclose(pdf.exponential(0., 10.), 10.)
+    assert_allclose(pdf.exponential(1., 1.), exp(-1))
+    assert_allclose(pdf.exponential(2., 1.), exp(-2))
+    assert_allclose(pdf.exponential(1., 2.), 2*exp(-2))
+    assert_allclose(pdf.exponential(2., 2.), 2*exp(-4))
+
+    j = pdf.exponential
+    assert (hasattr(j, 'integrate'))
+    integral = j.integrate((-100, 100), 0, 1.)
+    assert_allclose(integral, 1.0)
+    integral = j.integrate((0, 1), 0, 1)
+    assert_allclose(integral, 1. - exp(-1))
+    integral = j.integrate((1, 2), 0, 1)
+    assert_allclose(integral, exp(-1) - exp(-2))
+    integral = j.integrate((0, 1), 0, 2)
+    assert_allclose(integral, 1. - exp(-2))
+    integral = j.integrate((1, 2), 0, 2)
+    assert_allclose(integral, exp(-2) - exp(-4))
+
 
 def test_HistogramPdf():
     be = np.array([0, 1, 3, 4], dtype=float)

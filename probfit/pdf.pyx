@@ -121,8 +121,8 @@ cdef class _JohnsonSU:
     .. math::
         f(x; \\mu, \\sigma, \\nu, \\tau) = \\frac{1}{\\lambda \\sqrt{2\\pi}}
         \\frac{1}{\\sqrt{1 + \\left( \\frac{x - \\xi}{\\lambda} \\right)}}
-        e^{-\\frac{1}{2} \\left( -\\nu + \\frac{1}{\\tau}  \\right)
-        \\sinh^{-1} \\left( \\frac{x - \\xi}{\\lambda} \\right)}
+        e^{-\\frac{1}{2} \\left( -\\nu + \\frac{1}{\\tau}
+        \\sinh^{-1} \\left( \\frac{x - \\xi}{\\lambda} \\right)\\right)^{2}}
 
     where
 
@@ -551,3 +551,69 @@ cpdef double cauchy(double x, double m, double gamma):
     """
     cdef double xmg = (x-m)/gamma
     return 1/(pi*gamma*(1+xmg*xmg))
+
+
+cdef class _Exponential:
+    """
+    Exponential [1]_.
+
+    .. math::
+        f(x;\\tau) =
+        \\begin{cases}
+            \\exp\\left(-\\lambda x \right) & \\mbox{if } \\x \\geq 0 \\\\
+            0 & \\mbox{if } \\x < 0
+        \\end{cases}
+
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Exponential_distribution
+
+    """
+    cdef public object func_code
+    cdef public object func_defaults
+
+    def __init__(self, xname='x'):
+
+        varnames = [xname, "lambda"]
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+
+    def __call__(self, *arg):
+
+        cdef double x = arg[0]
+        cdef double _lambda = arg[1]
+        cdef double ret = 0
+
+        if x >= 0:
+            ret = _lambda * exp(x * -_lambda)
+        else:
+            ret = 0.
+
+        return ret
+
+    def cdf(self, x, _lambda):
+
+        cdef double ret = 0
+
+        if x >= 0:
+            ret = 1. - exp(x * -_lambda)
+        else:
+            ret = 0.
+
+        return ret
+
+    def integrate(self, tuple bound, int nint_subdiv, *arg):
+
+        cdef double a, b
+        a, b = bound
+
+        cdef double _lambda = arg[0]
+
+        Fa = self.cdf(a, _lambda)
+        Fb = self.cdf(b, _lambda)
+
+        return Fb - Fa
+
+
+exponential = _Exponential()

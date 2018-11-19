@@ -10,7 +10,9 @@ from .costfunc import UnbinnedLH, BinnedLH, Chi2Regression, BinnedChi2,\
  SimultaneousFit
 from .pdf import doublegaussian, doublecrystalball, ugaussian, gaussian, crystalball, \
     argus, cruijff, linear, poly2, poly3, novosibirsk, \
-    Polynomial, HistogramPdf, cauchy, rtv_breitwigner, johnsonSU
+    Polynomial, HistogramPdf, cauchy, rtv_breitwigner, johnsonSU, \
+    exponential
+
 from .toy import gen_toy, gen_toyn
 from .util import *
 from .oneshot import *
@@ -66,5 +68,6 @@ __all__ = [
     'try_chi2',
     'try_uml',
     'ugaussian',
+    'exponential',
     '__version__',
 ]
