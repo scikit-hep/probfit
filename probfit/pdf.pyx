@@ -177,7 +177,7 @@ cdef class _JohnsonSU:
 
         cdef double ret = 0.
 
-        ret = 0.5 * (erf(zmax / (sqrt(2))) - erf(zmin / (sqrt(2))))
+        ret = 0.5 * (erf(rmax / (sqrt(2))) - erf(rmin / (sqrt(2))))
 
         return ret
 
@@ -317,7 +317,7 @@ cpdef double doublecrystalball(double x, double alpha, double alpha2, double n, 
     Unnormalized double crystal ball function
     A gaussian core with two power tails
 
-    
+
 
     """
     cdef double d = 0.
@@ -339,7 +339,7 @@ cpdef double doublecrystalball(double x, double alpha, double alpha2, double n, 
             A=pow(n/al,n)*exp(-al**2/2.)
             B=n/al-al
             ret = A*pow(B-d,-n)
-            
+
         elif d < alpha2 :
             ret = exp(-0.5*d**2)
         else:
@@ -558,9 +558,9 @@ cdef class _Exponential:
     Exponential [1]_.
 
     .. math::
-        f(x;\\tau) =
+        f(x;m\\tau) =
         \\begin{cases}
-            \\exp\\left(-\\lambda x \right) & \\mbox{if } \\x \\geq 0 \\\\
+            \\exp \\left(-\\lambda x \\right) & \\mbox{if } \\x \\geq 0 \\\\
             0 & \\mbox{if } \\x < 0
         \\end{cases}
 
