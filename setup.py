@@ -52,6 +52,7 @@ setup(
         'numpy',
         'iminuit'
     ],
+    tests_require=['pytest'],
     classifiers=[
         "Programming Language :: Python",
         'Programming Language :: Python :: 2.7',
