@@ -81,7 +81,7 @@ def test_doublecrystalball():
     assert_allclose(pdf.doublecrystalball(25, 1, 5, 3, 4, 10, 2), 0.00000001287132228271)
 
 
-    
+
 # cpdef double argus(double x, double c, double chi, double p)
 def test_argus():
     assert describe(pdf.argus) == ['x', 'c', 'chi', 'p']
@@ -169,7 +169,7 @@ def test_johnsonSU():
     integral = j.integrate((-100, 100), 0, 1., 1., 1., 1.)
     assert_allclose(integral, 1.0)
     integral = j.integrate((0, 2), 0, 1., 1., 1., 1.)
-    assert_allclose(integral, 0.8786191859)
+    assert_allclose(integral, 0.8837311663857358)
 
 
 def test_exponential():
