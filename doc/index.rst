@@ -1,12 +1,8 @@
 probfit
 =======
 
-*probfit* is a set of functions that helps you construct a complex fit. It's
-intended to be used with `iminuit <http://iminuit.readthedocs.org/>`_. The
-tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression,
-Binned :math:`\chi^2` estimator and Simultaneous fit estimator. Normalization and
-Convolution with cache are also included. Various builtin function that's
-normally used in B physics is also provided.
+*probfit* is a set of functions that helps you construct a complex fit. It is
+intended to be used with `iminuit <http://iminuit.readthedocs.org/>`_. The tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression, binned :math:`\chi^2` estimator and Simultaneous fit estimator. Normalization and convolution with cache are also included. Various builtin functions used in B physics are also provided.
 
 In a nutshell::
 
@@ -18,6 +14,8 @@ In a nutshell::
     minuit = Minuit(unbinned_likelihood, mean=0.1, sigma=1.1)
     minuit.migrad()
     unbinned_likelihood.draw(minuit)
+
+Probfit was created by Piti Ongmongkolkul (piti118@gmail.com). It is currently maintained by the Scikit-HEP community.
 
 .. toctree::
     :maxdepth: 4
@@ -36,7 +34,7 @@ From pip::
 
 or get the latest development from github::
 
-    git clone git://github.com/scikit-hep/probfit.git
+    pip install git+https://github.com/scikit-hep/probfit.git
 
 Tutorial
 --------
