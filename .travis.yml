@@ -1,5 +1,7 @@
 language: python
 
+dist: xenial
+services: xvfb
 
 branches:
   only:
@@ -10,12 +12,6 @@ python:
   - 3.4
   - 3.5
   - 3.6
-
-# https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
-before_script:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
-  - sleep 3 # give xvfb some time to start
 
 install:
   - pip install Cython
@@ -32,5 +28,5 @@ script:
   - make build
   - make flake8
   - make pylint
-  - make test
+  - xvfb-run make test
   - cd doc && make html
