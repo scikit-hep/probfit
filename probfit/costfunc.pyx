@@ -465,7 +465,7 @@ cdef class BinnedLH:
             h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
         if data_binned:
-            h = bin_contents
+            h = bin_contents * weights
             self.edges = bin_edges
             self.mymin = bin_edges[0]
             self.mymax = bin_edges[-1]
@@ -493,9 +493,9 @@ cdef class BinnedLH:
         if data_binned:
             if weights is not None:
                 if weighterrors is None:
-                    self.w2 = self.h * weights * weights
+                    self.w2 = self.h * weights
                 else:
-                    self.w2 = self.h * weighterrors * weighterrors
+                    self.w2 = self.h / weights * weighterrors * weighterrors
             else:
                 self.w2 = self.h
 
