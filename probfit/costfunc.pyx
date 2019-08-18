@@ -807,7 +807,7 @@ cdef class BinnedChi2:
             h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
         if data_binned:
-            h = bin_contents
+            h = bin_contents * weights
             self.edges = bin_edges
             self.mymin = bin_edges[0]
             self.mymax = bin_edges[-1]
@@ -822,9 +822,15 @@ cdef class BinnedChi2:
 
         #sumw2 if requested
         if weights is not None and sumw2:
-            w2 = weights * weights
-            sw2, _ = np.histogram(data, bins, range=bound, weights=w2)
-            self.err = np.sqrt(sw2)
+            if not data_binned:
+                w2 = weights * weights
+                sw2, _ = np.histogram(data, bins, range=bound, weights=w2)
+                self.err = np.sqrt(sw2)
+
+            if data_binned:
+                sw2 = self.h * weights
+                self.err = np.sqrt(sw2)
+                
         else:
             self.err = np.sqrt(self.h)
 

@@ -9,12 +9,14 @@ np.random.seed(0)
 data = np.random.randn(10000) * 4 + 1
 plt.hist(data, bins=100, histtype='step');
 
+weights = np.ones(len(data)) * 0.1
+
 def gauss_pdf(x, mu, sigma):
     return 1 / np.sqrt(2 * np.pi) / sigma * np.exp(-(x - mu) **2 / 2. / sigma ** 2)
 
 extended_gauss_pdf = probfit.Extended(gauss_pdf)
 iminuit.describe(extended_gauss_pdf)
-chi2 = probfit.BinnedChi2(extended_gauss_pdf, data, bins=100, bound=(-7,10))
+chi2 = probfit.BinnedChi2(extended_gauss_pdf, data, bins=100, bound=(-7,10), weights=weights, sumw2=True)
 
 minuit = iminuit.Minuit(chi2, sigma=1, pedantic=False, print_level=0)
 minuit.migrad();
