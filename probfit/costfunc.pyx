@@ -350,8 +350,9 @@ cdef class BinnedLH:
     cdef readonly bint extended
     cdef readonly bint use_w2
     cdef int nint_subdiv
-    def __init__(self, f, data, bins=40, weights=None, weighterrors=None, bound=None,
-                 badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1):
+    def __init__(self, f, data=None, bins=40, weights=None, weighterrors=None, bound=None,
+                 badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1,
+                 data_binned=False, bin_contents=None, bin_edges=None):
         """
         Create a Poisson Binned Likelihood object from given PDF **f** and
         **data** (raw points not histogram). Constant term and expected minimum
@@ -452,24 +453,51 @@ cdef class BinnedLH:
         self.use_w2 = use_w2
         self.extended = extended
 
-        if bound is None: bound = minmax(data)
+        if (not data_binned) and (data is None):
+            raise ValueError('Whether 1D array raw data or histogrmaed data are required.')
+        if (data_binned) and ((bin_contents is None) or (bin_edges is None)):
+            raise ValueError('Whether 1D array raw data or histogrmaed data are required.')
 
-        self.mymin, self.mymax = bound
+        if not data_binned:
+            if bound is None:
+                bound = minmax(data)
+            self.mymin, self.mymax = bound
+            h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
-        h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
+        if data_binned:
+            h = bin_contents
+            self.edges = bin_edges
+            self.mymin = bin_edges[0]
+            self.mymax = bin_edges[-1]
+            bins = len(bin_contents)
+
+            if len(bin_contents) is not len(bin_edges)-1:
+                raise ValueError('Numbers of bin contents and edges are not correct')
 
         self.h = float2double(h)
         self.N = csum(self.h)
 
-        if weights is not None:
-            if weighterrors is None:
-                self.w2, _ = np.histogram(data, bins, range=bound,
-                                          weights=weights * weights)
+        if not data_binned:
+            if weights is not None:
+                if weighterrors is None:
+                    self.w2, _ = np.histogram(data, bins, range=bound,
+                                              weights=weights * weights)
+                else:
+                    self.w2, _ = np.histogram(data, bins, range=bound,
+                                              weights=weighterrors * weighterrors)
             else:
-                self.w2, _ = np.histogram(data, bins, range=bound,
-                                          weights=weighterrors * weighterrors)
-        else:
-            self.w2, _ = np.histogram(data, bins, range=bound, weights=None)
+                self.w2, _ = np.histogram(data, bins, range=bound, weights=None)
+
+
+        # TODO - To check before merge
+        if data_binned:
+            if weights is not None:
+                if weighterrors is None:
+                    self.w2 = self.h * weights * weights
+                else:
+                    self.w2 = self.h * weighterrors * weighterrors
+            else:
+                self.w2 = self.h
 
         self.w2 = float2double(self.w2)
         self.midpoints = mid(self.edges)
@@ -773,10 +801,10 @@ cdef class BinnedChi2:
         self.func_code = FakeFuncCode(f, dock=True)
 
         if not data_binned:
-            h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
             if bound is None:
                 bound = minmax(data)
             self.mymin, self.mymax = bound
+            h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
         if data_binned:
             h = bin_contents
