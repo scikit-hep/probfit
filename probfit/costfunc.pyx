@@ -447,7 +447,16 @@ cdef class BinnedLH:
               number of subdivisions in each bin to do simpson3/8 rule.
               Default 1.
 
+            - **data_binned** Boolean whether the data has already been binned. 
+              Default False. When this option is used, bin_contents and bin_edges
+              are required instead of data.
+
+            - **bin_contents** 1D array of bin contents.
+
+            - **bin_edges** 1D array of bin edges.
+
         """
+
         self.f = f
         self.func_code = FakeFuncCode(f, dock=True)
         self.use_w2 = use_w2
