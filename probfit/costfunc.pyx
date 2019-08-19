@@ -474,6 +474,9 @@ cdef class BinnedLH:
             h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
         if data_binned:
+            if weights is None:
+                weights = np.ones(len(bin_contents))
+            
             h = bin_contents * weights
             self.edges = bin_edges
             self.mymin = bin_edges[0]
@@ -816,6 +819,9 @@ cdef class BinnedChi2:
             h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
 
         if data_binned:
+            if weights is None:
+                weights = np.ones(len(bin_contents))
+
             h = bin_contents * weights
             self.edges = bin_edges
             self.mymin = bin_edges[0]
