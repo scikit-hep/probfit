@@ -1,0 +1,12 @@
+repos:
+- repo: https://github.com/asottile/setup-cfg-fmt
+  rev: v1.16.0
+  hooks:
+  - id: setup-cfg-fmt
+    stages: [manual]
+
+- repo: https://github.com/mgedmin/check-manifest
+  rev: "0.46"
+  hooks:
+  - id: check-manifest
+    stages: [manual]

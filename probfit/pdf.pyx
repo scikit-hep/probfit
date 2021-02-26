@@ -1,4 +1,5 @@
-#cython: embedsignature=True
+# cython: embedsignature=True, language_level=2
+
 cimport cython
 
 from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs, cosh, atan2, asinh, erf

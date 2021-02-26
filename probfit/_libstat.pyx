@@ -1,4 +1,5 @@
-#cython: embedsignature=True
+# cython: embedsignature=True, language_level=2
+
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
