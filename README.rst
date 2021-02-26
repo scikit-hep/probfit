@@ -1,19 +1,39 @@
 .. -*- mode: rst -*-
 
-.. image:: https://travis-ci.org/iminuit/probfit.png?branch=master
-   :target: https://travis-ci.org/iminuit/probfit
-
-
 probfit
--------
+=======
+
+.. image:: https://img.shields.io/pypi/v/probfit.svg
+   :target: https://pypi.python.org/pypi/probfit
+
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1477853.svg
+   :target: https://doi.org/10.5281/zenodo.1477853
+
+.. image:: https://travis-ci.org/scikit-hep/probfit.png?branch=master
+   :target: https://travis-ci.org/scikit-hep/probfit
 
 *probfit* is a set of functions that helps you construct a complex fit. It's
 intended to be used with `iminuit <http://iminuit.readthedocs.org/>`_. The
-tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression,
+tool includes Binned/Unbinned Likelihood estimators, :math:`\chi^2` regression,
 Binned :math:`\chi^2` estimator and Simultaneous fit estimator.
-Various functors for manipulating PDF such as Normalization and
-Convolution(with caching) and various builtin functions
-normally used in B physics is also provided.
+Various functors for manipulating PDFs such as Normalization and
+Convolution (with caching) and various built-in functions
+normally used in B physics are also provided.
+
+Strict dependencies
+-------------------
+
+- `Python <http://docs.python-guide.org/en/latest/starting/installation/>`__ (2.7+, 3.4+)
+- `Numpy <https://scipy.org/install.html>`__
+- `iminuit <http://iminuit.readthedocs.org/>`_
+
+Optional dependencies
+---------------------
+
+- `matplotlib <http://matplotlib.org/>`_ for the plotting functions
+
+Getting started
+---------------
 
 .. code-block:: python
 
@@ -26,14 +46,16 @@ normally used in B physics is also provided.
     minuit.migrad()
     unbinned_likelihood.draw(minuit)
 
+Documentation and Tutorial
+--------------------------
 
-* `MIT <http://opensource.org/licenses/MIT>`_ license (open source)
 * `Documentation <http://probfit.readthedocs.org/>`_
 * The tutorial is an IPython notebook that you can view online
-  `here <http://nbviewer.ipython.org/urls/raw.github.com/iminuit/probfit/master/tutorial/tutorial.ipynb>`_.
+  `here <http://nbviewer.ipython.org/urls/raw.github.com/scikit-hep/probfit/master/tutorial/tutorial.ipynb>`_.
   To run it locally: `cd tutorial; ipython notebook --pylab=inline tutorial.ipynb`.
-* Dependencies:
-   - `iminuit <http://iminuit.readthedocs.org/>`_
-   - `numpy <http://www.numpy.org/>`_
-   - `matplotlib <http://matplotlib.org/>`_ (optional, for plotting)
 * Developing probfit: see the `development page <http://probfit.readthedocs.io/en/latest/development.html>`_
+
+License
+-------
+
+The package is licensed under the `MIT <http://opensource.org/licenses/MIT>`_ license (open source).

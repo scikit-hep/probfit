@@ -173,6 +173,13 @@ crystalball
 .. plot:: pyplots/pdf/crystalball.py
     :class: lightbox
 
+doublecrystalball
+^^^^^^^^^^^
+.. autofunction:: doublecrystalball
+
+.. plot:: pyplots/pdf/doublecrystalball.py
+    :class: lightbox
+
 cruijff
 ^^^^^^^
 .. autofunction:: cruijff
@@ -219,6 +226,20 @@ poly3
 .. autofunction:: poly3
 
 .. plot:: pyplots/pdf/poly3.py
+    :class: lightbox
+
+JohnsonSU
+^^^^^^^^^
+.. autofunction:: johnsonSU
+
+.. plot:: pyplots/pdf/johnsonSU.py
+    :class: lightbox
+
+Exponential
+^^^^^^^^^^^
+.. autofunction:: exponential
+
+.. plot:: pyplots/pdf/exponential.py
     :class: lightbox
 
 Polynomial

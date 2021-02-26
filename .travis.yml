@@ -6,10 +6,15 @@ addons:
     packages:
       - python-tk
 
+branches:
+  only:
+    - master
+
 python:
   - 2.7
   - 3.4
   - 3.5
+  - 3.6
 
 env:
   # Running the tests with and without optional dependencies

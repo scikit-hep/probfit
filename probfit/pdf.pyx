@@ -1,7 +1,7 @@
 #cython: embedsignature=True
 cimport cython
 
-from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs
+from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs, cosh, atan2, asinh, erf
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
 cimport numpy as np
@@ -114,6 +114,100 @@ cdef class HistogramPdf:
             return 0.0
 
 
+cdef class _JohnsonSU:
+    """
+    Normalized JohnsonSU [1]_.
+
+    .. math::
+        f(x; \\mu, \\sigma, \\nu, \\tau) = \\frac{1}{\\lambda \\sqrt{2\\pi}}
+        \\frac{1}{\\sqrt{1 + \\left( \\frac{x - \\xi}{\\lambda} \\right)}}
+        e^{-\\frac{1}{2} \\left( -\\nu + \\frac{1}{\\tau}
+        \\sinh^{-1} \\left( \\frac{x - \\xi}{\\lambda} \\right)\\right)^{2}}
+
+    where
+
+    .. math::
+        \\lambda = \\sigma \\times \\left(\\frac{1}{2}( \\exp(\\tau^{2}) - 1)
+        \\left(\\exp(\\tau^{2}) \\cosh\\left(-\\nu \\tau \\right) + 1\\right)
+        \\right)^{-\\frac{1}{2}} \\\\
+
+    and
+
+    .. math::
+        \\xi = \\mu + \\lambda \\exp\\left(\\frac{\\tau^{2}}{2}\\right)\\sinh
+        \\left( \\nu \\tau \\right)
+
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Johnson%27s_SU-distribution
+
+    """
+
+    cdef public object func_code
+    cdef public object func_defaults
+
+    def __init__(self, xname='x'):
+
+        varnames = [xname, "mean", "sigma", "nu", "tau"]
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+
+    def integrate(self, tuple bound, int nint_subdiv=0, *arg):
+
+        cdef double a, b
+        a, b = bound
+
+        cdef double mean = arg[0]
+        cdef double sigma = arg[1]
+        cdef double nu = arg[2]
+        cdef double tau = arg[3]
+
+        cdef double w = exp(tau * tau)
+        cdef double omega = - nu * tau
+        cdef double c = 0.5 * (w-1) * (w * cosh(2 * omega) + 1)
+        c = pow(c, -0.5)
+
+        cdef double _lambda = sigma * c
+        cdef double xi = mean + _lambda * sqrt(w) * sinh(omega)
+        cdef double zmax = (b - xi) / _lambda
+        cdef double zmin = (a - xi) / _lambda
+        cdef double rmax = -nu + asinh(zmax) / tau
+        cdef double rmin = -nu + asinh(zmin) / tau
+
+        cdef double ret = 0.
+
+        ret = 0.5 * (erf(rmax / (sqrt(2))) - erf(rmin / (sqrt(2))))
+
+        return ret
+
+    def __call__(self, *arg):
+
+        cdef double x = arg[0]
+        cdef double mean = arg[1]
+        cdef double sigma = arg[2]
+        cdef double nu = arg[3]
+        cdef double tau = arg[4]
+
+        cdef double w = exp(tau * tau)
+        cdef double omega = - nu * tau
+
+        cdef double c = 0.5 * (w-1) * (w * cosh(2 * omega) + 1)
+        c = pow(c, -0.5)
+
+        cdef double _lambda = sigma * c
+        cdef double xi = mean + _lambda * sqrt(w) * sinh(omega)
+        cdef double z = (x - xi) / _lambda
+        cdef double r = -nu + asinh(z) / tau
+
+        cdef double ret = 1. / (tau * _lambda * sqrt(2 * pi))
+        ret *= 1. / sqrt(z * z + 1)
+        ret *= exp(-0.5 * r * r)
+
+        return ret
+
+johnsonSU = _JohnsonSU()
+
 cpdef double doublegaussian(double x, double mean, double sigma_L, double sigma_R):
     """
     Unnormalized double gaussian
@@ -216,6 +310,43 @@ cpdef double crystalball(double x, double alpha, double n, double mean, double s
             A=pow(n/al,n)*exp(-al**2/2.)
             B=n/al-al
             ret = A*pow(B-d,-n)
+    return ret
+
+cpdef double doublecrystalball(double x, double alpha, double alpha2, double n, double n2, double mean, double sigma):
+    """
+    Unnormalized double crystal ball function
+    A gaussian core with two power tails
+
+
+
+    """
+    cdef double d = 0.
+    cdef double ret = 0
+    cdef double A = 0
+    cdef double B = 0
+    cdef double A2 = 0
+    cdef double B2 = 0
+    if sigma < smallestdiv:
+        ret = badvalue
+    elif fabs(alpha) < smallestdiv:
+        ret = badvalue
+    elif n<1.:
+        ret = badvalue
+    else:
+        d = (x-mean)/sigma
+        if d<-alpha:
+            al = fabs(alpha)
+            A=pow(n/al,n)*exp(-al**2/2.)
+            B=n/al-al
+            ret = A*pow(B-d,-n)
+
+        elif d < alpha2 :
+            ret = exp(-0.5*d**2)
+        else:
+            al2 = fabs(alpha2)
+            A2=pow(n2/al2,n2)*exp(-al2**2/2.)
+            B2=n2/al2-al2
+            ret = A2*pow(B2+d,-n2)
     return ret
 
 
@@ -420,3 +551,69 @@ cpdef double cauchy(double x, double m, double gamma):
     """
     cdef double xmg = (x-m)/gamma
     return 1/(pi*gamma*(1+xmg*xmg))
+
+
+cdef class _Exponential:
+    """
+    Exponential [1]_.
+
+    .. math::
+        f(x;\\tau) =
+        \\begin{cases}
+            \\exp \\left(-\\lambda x \\right) & \\mbox{if } \\x \\geq 0 \\\\
+            0 & \\mbox{if } \\x < 0
+        \\end{cases}
+        
+    References
+    ----------
+
+    .. [1] https://en.wikipedia.org/wiki/Exponential_distribution
+
+    """
+    cdef public object func_code
+    cdef public object func_defaults
+
+    def __init__(self, xname='x'):
+
+        varnames = [xname, "lambda"]
+        self.func_code = MinimalFuncCode(varnames)
+        self.func_defaults = None
+
+    def __call__(self, *arg):
+
+        cdef double x = arg[0]
+        cdef double _lambda = arg[1]
+        cdef double ret = 0
+
+        if x >= 0:
+            ret = _lambda * exp(x * -_lambda)
+        else:
+            ret = 0.
+
+        return ret
+
+    def cdf(self, x, _lambda):
+
+        cdef double ret = 0
+
+        if x >= 0:
+            ret = 1. - exp(x * -_lambda)
+        else:
+            ret = 0.
+
+        return ret
+
+    def integrate(self, tuple bound, int nint_subdiv, *arg):
+
+        cdef double a, b
+        a, b = bound
+
+        cdef double _lambda = arg[0]
+
+        Fa = self.cdf(a, _lambda)
+        Fb = self.cdf(b, _lambda)
+
+        return Fb - Fa
+
+
+exponential = _Exponential()

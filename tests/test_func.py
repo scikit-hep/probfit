@@ -1,4 +1,4 @@
-from math import log
+from math import log, exp
 import numpy as np
 from numpy.testing import assert_allclose
 from iminuit import describe
@@ -65,6 +65,21 @@ def test_crystalball():
     assert_allclose(pdf.crystalball(12, 1, 2, 10, 2), 0.6065306597126334)
     assert_allclose(pdf.crystalball(14, 1, 2, 10, 2), 0.1353352832366127)
     assert_allclose(pdf.crystalball(6, 1, 2, 10, 2), 0.26956918209450376)
+
+# cpdef double doubecrystalball(double x,double alpha,double alpha2, double n,double n2, double mean,double sigma)
+def test_doublecrystalball():
+    assert describe(pdf.doublecrystalball) == ['x', 'alpha', 'alpha2', 'n', 'n2', 'mean', 'sigma']
+    assert_allclose(pdf.doublecrystalball(10, 1, 1, 2, 2, 10, 2), 1.)
+    assert_allclose(pdf.doublecrystalball(11, 1, 1, 2, 2, 10, 2), 0.8824969025845955)
+    assert_allclose(pdf.doublecrystalball(12, 1, 1, 2, 2, 10, 2), 0.6065306597126334)
+    assert_allclose(pdf.doublecrystalball(14, 1, 1, 2, 2, 10, 2), 0.26956918209450376)
+    assert_allclose(pdf.doublecrystalball(6, 1, 1, 2, 2, 10, 2), 0.26956918209450376)
+    assert_allclose(pdf.doublecrystalball(-10, 1, 5, 3, 4, 10, 2), 0.00947704155801)
+    assert_allclose(pdf.doublecrystalball(0, 1, 5, 3, 4, 10, 2), 0.047744395954055)
+    assert_allclose(pdf.doublecrystalball(11, 1, 5, 3, 4, 10, 2), 0.8824969025846)
+    assert_allclose(pdf.doublecrystalball(20, 1, 5, 3, 4, 10, 2), 0.0000037266531720786)
+    assert_allclose(pdf.doublecrystalball(25, 1, 5, 3, 4, 10, 2), 0.00000001287132228271)
+
 
 
 # cpdef double argus(double x, double c, double chi, double p)
@@ -141,6 +156,43 @@ def test_cauchy():
     assert_allclose(pdf.cauchy(1, 1, 1.), 0.3183098861837907)
     assert_allclose(pdf.cauchy(1, 1, 2.), 0.15915494309189535)
     assert_allclose(pdf.cauchy(1, 2, 4.), 0.07489644380795074)
+
+
+def test_johnsonSU():
+    assert describe(pdf.johnsonSU), ['x', "mean", "sigma", "nu", "tau"]
+    assert_allclose(pdf.johnsonSU(1., 1., 1., 1., 1.), 0.5212726124342)
+    assert_allclose(pdf.johnsonSU(1., 2., 1., 1., 1.), 0.1100533373219)
+    assert_allclose(pdf.johnsonSU(1., 2., 2., 1., 1.), 0.4758433826682)
+
+    j = pdf.johnsonSU
+    assert (hasattr(j, 'integrate'))
+    integral = j.integrate((-100, 100), 0, 1., 1., 1., 1.)
+    assert_allclose(integral, 1.0)
+    integral = j.integrate((0, 2), 0, 1., 1., 1., 1.)
+    assert_allclose(integral, 0.8837311663857358)
+
+
+def test_exponential():
+    assert describe(pdf.exponential), ['x', "lambda"]
+    assert_allclose(pdf.exponential(0., 1.), 1.)
+    assert_allclose(pdf.exponential(0., 10.), 10.)
+    assert_allclose(pdf.exponential(1., 1.), exp(-1))
+    assert_allclose(pdf.exponential(2., 1.), exp(-2))
+    assert_allclose(pdf.exponential(1., 2.), 2*exp(-2))
+    assert_allclose(pdf.exponential(2., 2.), 2*exp(-4))
+
+    j = pdf.exponential
+    assert (hasattr(j, 'integrate'))
+    integral = j.integrate((-100, 100), 0, 1.)
+    assert_allclose(integral, 1.0)
+    integral = j.integrate((0, 1), 0, 1)
+    assert_allclose(integral, 1. - exp(-1))
+    integral = j.integrate((1, 2), 0, 1)
+    assert_allclose(integral, exp(-1) - exp(-2))
+    integral = j.integrate((0, 1), 0, 2)
+    assert_allclose(integral, 1. - exp(-2))
+    integral = j.integrate((1, 2), 0, 2)
+    assert_allclose(integral, exp(-2) - exp(-4))
 
 
 def test_HistogramPdf():
@@ -271,7 +323,7 @@ def test_merge_func_code_factor_list():
 
 
 def test_merge_func_code_skip_prefix():
-    funccode, pos = merge_func_code(
+    funccode, _ = merge_func_code(
         f, f2,
         prefix=['f_', 'g_'],
         skip_first=True,

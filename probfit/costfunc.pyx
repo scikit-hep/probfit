@@ -3,7 +3,6 @@ cimport cython
 import numpy as np
 cimport numpy as np
 from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
-from matplotlib import pyplot as plt
 from . import plotting
 from ._libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f, \
     csum, compute_bin_lh_f, integrate1d
@@ -77,7 +76,7 @@ cdef class SimultaneousFit:
             p = self.prefix[findex] if self.prefix is not None else None
             #values = dict((remove_prefix(k, p), v) for k,v in minuit.values.items())
             keys = [minuit.parameters[j] for j in self.allpos[i]]
-            ret_val = construct_arg(minuit.args, self.allpos[i])
+            ret_val = construct_arg(tuple(minuit.args), self.allpos[i])
             errors = dict((remove_prefix(k, p), minuit.errors[k]) for k in keys)
             return ret_val, errors
 
@@ -101,6 +100,7 @@ cdef class SimultaneousFit:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(m)
         plt.show()
         return ret
@@ -161,7 +161,7 @@ cdef class UnbinnedLH:
               likelihood
 
               .. math::
-                \\textrm{ext_term} = \\int_{x \in \\textrm{extended_bound}}f(x, args, \\ldots) \\textrm{d} x
+                \\textrm{ext term} = \\int_{x \in \\textrm{extended bound}}f(x, \\textrm{args}, \\ldots) \\textrm{d} x
 
             - **extended_bound** Bound for calculating extended term.
               Default None(minimum and maximum of data will be used).
@@ -324,6 +324,7 @@ cdef class UnbinnedLH:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
@@ -385,7 +386,7 @@ cdef class BinnedLH:
                     ROOFIT used **f** evaluated at midpoint.
 
             - :math:`s_i` is a scaled factor. It's 1 if ``sum_w2=False``.
-              It's :math:`s_i = \\frac{h_i}{\sum_{j \in \\textrm{bin_i}} w_j^2}`
+              It's :math:`s_i = \\frac{h_i}{\sum_{j \in \\textrm{bin }i} w_j^2}`
               if ``sum_w2=True``. The factor will scale the statistics to the
               unweighted data.
 
@@ -575,6 +576,7 @@ cdef class BinnedLH:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
@@ -679,6 +681,7 @@ cdef class Chi2Regression:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret
@@ -827,6 +830,7 @@ cdef class BinnedChi2:
             :meth:`draw` for arguments.
 
         """
+        from matplotlib import pyplot as plt
         ret = self.draw(*arg, **kwd)
         plt.show()
         return ret

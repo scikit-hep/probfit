@@ -81,7 +81,7 @@ def get_extensions():
 
 def get_version():
     version = {}
-    with open('probfit/info.py') as fp:
+    with open('probfit/version.py') as fp:
         exec(fp.read(), version)
     return version['__version__']
 
@@ -95,7 +95,7 @@ setup(
     long_description=''.join(open('README.rst').readlines()[4:]),
     author='Piti Ongmongkolkul',
     author_email='piti118@gmail.com',
-    url='https://github.com/iminuit/probfit',
+    url='https://github.com/scikit-hep/probfit',
     package_dir={'probfit': 'probfit'},
     packages=['probfit'],
     ext_modules=get_extensions(),
@@ -106,14 +106,16 @@ setup(
         'setuptools',
         'numpy',
         'iminuit',
-        'matplotlib==1.5.3'
+        'matplotlib==1.5.4'
     ],
+    tests_require=['pytest'],
     classifiers=[
         "Programming Language :: Python",
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Scientific/Engineering :: Physics',
         'Topic :: Scientific/Engineering :: Mathematics',
         'Intended Audience :: Science/Research',
