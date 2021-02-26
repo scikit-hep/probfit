@@ -1,0 +1,37 @@
+name: Main
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - master
+      - main
+      - develop
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version:
+        - 2.7
+        - 3.5
+        - 3.9
+    name: Dev ${{ matrix.python-version }}
+
+    steps:
+    - uses: actions/checkout@v1
+  
+    - name: Setup python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Build and get requirements
+      run: pip install .[dev]
+      
+    - name: Test
+      run: pytest

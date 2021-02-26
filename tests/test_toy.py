@@ -1,6 +1,4 @@
 import numpy as np
-import matplotlib
-matplotlib.use('Agg', warn=False)
 from probfit.nputil import mid
 from probfit.pdf import crystalball, gaussian
 from probfit.functor import Normalized
