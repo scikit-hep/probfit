@@ -106,7 +106,7 @@ setup(
         'setuptools',
         'numpy',
         'iminuit',
-        'matplotlib==1.5.4'
+        'matplotlib==1.5.3'
     ],
     tests_require=['pytest'],
     classifiers=[
