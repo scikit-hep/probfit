@@ -1,4 +1,5 @@
-#cython: embedsignature=True
+# cython: embedsignature=True, language_level=2
+
 cimport cython
 import numpy as np
 cimport numpy as np

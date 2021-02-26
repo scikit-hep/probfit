@@ -2,5 +2,5 @@ recursive-include probfit *.h *.c *.pyx *.pxi *.pxd *.py
 recursive-include tests *.py *.png
 recursive-include tutorial *.ipynb *.py
 include README.rst
-include LICENSE
+include LICENSE AUTHORS CHANGELOG
 include setup.py

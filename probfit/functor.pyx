@@ -1,4 +1,5 @@
-#cython: embedsignature=True
+# cython: embedsignature=True, language_level=2
+
 cimport cython
 from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GetItem,\
                      PyObject, PyTuple_SetItem, PyTuple_SetItem,\
