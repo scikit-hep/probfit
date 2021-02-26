@@ -14,8 +14,8 @@ probfit
 
 *probfit* is a set of functions that helps you construct a complex fit. It's
 intended to be used with `iminuit <http://iminuit.readthedocs.org/>`_. The
-tool includes Binned/Unbinned Likelihood estimators, :math:`\chi^2` regression,
-Binned :math:`\chi^2` estimator and Simultaneous fit estimator.
+tool includes Binned/Unbinned Likelihood estimators, 𝝌² regression,
+Binned 𝝌² estimator and Simultaneous fit estimator.
 Various functors for manipulating PDFs such as Normalization and
 Convolution (with caching) and various built-in functions
 normally used in B physics are also provided.
@@ -23,9 +23,9 @@ normally used in B physics are also provided.
 Strict dependencies
 -------------------
 
-- `Python <http://docs.python-guide.org/en/latest/starting/installation/>`__ (2.7+, 3.4+)
-- `Numpy <https://scipy.org/install.html>`__
-- `iminuit <http://iminuit.readthedocs.org/>`_
+- `Python <http://docs.python-guide.org/en/latest/starting/installation/>`__ (2.7+, 3.5+)
+- `NumPy <https://scipy.org/install.html>`__
+- `iminuit <http://iminuit.readthedocs.org/>`_ (<2)
 
 Optional dependencies
 ---------------------
