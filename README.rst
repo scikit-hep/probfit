@@ -9,8 +9,8 @@ probfit
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1477853.svg
    :target: https://doi.org/10.5281/zenodo.1477853
 
-.. image:: https://travis-ci.org/scikit-hep/probfit.png?branch=master
-   :target: https://travis-ci.org/scikit-hep/probfit
+.. image:: https://github.com/scikit-hep/probfit/actions/workflows/main.yml/badge.svg
+   :target: https://github.com/scikit-hep/probfit/actions/workflows/main.yml
 
 *probfit* is a set of functions that helps you construct a complex fit. It's
 intended to be used with `iminuit <http://iminuit.readthedocs.org/>`_. The
