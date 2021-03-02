@@ -736,7 +736,7 @@ cdef class BlindFunc:
         rnd1.shuffle(seed)
         myRandom = np.random.RandomState(seed)
 
-        self.signflip = myRandom.choice([-1,1])
+        self.signflip = myRandom.choice([-1,1]) if signflip else 1
         self.shift = myRandom.normal(0, width)
         for i,bb in enumerate(blindlist):
             self.argpos[i] = describe(f).index(bb)
