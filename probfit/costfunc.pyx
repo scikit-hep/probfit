@@ -641,7 +641,7 @@ cdef class Chi2Regression:
         return 1.0
 
     def draw(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
-             args=None, errors=None, parts=False, no_plot=False):
+             args=None, errors=None, parts=False, nbins=None, no_plot=False):
         """
         Draw comparison between points (**x**,**y**) and the function **f**.
 
@@ -666,13 +666,16 @@ cdef class Chi2Regression:
 
             - **no_plot** Set this to true if you only want the return value
 
+            - **nbins** draw the PDF curve using this number of bins, 
+              instead of (if None) using the data binning.
+
         **Returns**
 
         ((data_x, data_y), (errorp,errorm), (total_pdf_x, total_pdf_y), parts)
         """
         return plotting.draw_x2(self, minuit=minuit, ax=ax, parmloc=parmloc,
                                 print_par=print_par, args=args, errors=errors, parts=parts,
-                                no_plot=no_plot)
+                                no_plot=no_plot, nbins=nbins)
 
     def show(self, *arg, **kwd):
         """

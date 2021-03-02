@@ -239,7 +239,7 @@ def draw_residual_ulh(self, minuit=None, bins=100, ax=None, bound=None,
 
 
 def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
-            args=None, errors=None, grid=True, parts=False, no_plot=False):
+            args=None, errors=None, grid=True, parts=False, nbins=None, no_plot=False):
     from matplotlib import pyplot as plt
     error_ret = None
     part_ret = []
@@ -262,7 +262,11 @@ def draw_x2(self, minuit=None, ax=None, parmloc=(0.05, 0.95), print_par=True,
     draw_arg = [('lw', 2), ('zorder', 2)]
     draw_arg.append(('color', 'r'))
 
-    total_ret = draw_pdf_with_midpoints(self.f, arg, x, ax=ax, no_plot=no_plot, **dict(draw_arg))
+    # Draw PDF curve(s)
+    if nbins is not None:
+        x = np.linspace(x[0],x[-1], nbins)
+
+    total_ret = draw_pdf_with_midpoints(self.f, arg, x, no_plot=no_plot, ax=ax, **dict(draw_arg))
 
     if not no_plot:
         ax.grid(grid)
