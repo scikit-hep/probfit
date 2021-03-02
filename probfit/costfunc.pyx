@@ -350,9 +350,8 @@ cdef class BinnedLH:
     cdef readonly bint extended
     cdef readonly bint use_w2
     cdef int nint_subdiv
-    def __init__(self, f, data=None, bins=40, weights=None, weighterrors=None, bound=None,
-                 badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1,
-                 data_binned=False, bin_contents=None, bin_edges=None):
+    def __init__(self, f, data, bins=40, weights=None, weighterrors=None, bound=None,
+                 badvalue=1000000, extended=False, use_w2=False, nint_subdiv=1):
         """
         Create a Poisson Binned Likelihood object from given PDF **f** and
         **data** (raw points not histogram). Constant term and expected minimum
@@ -414,8 +413,8 @@ cdef class BinnedLH:
                     def bad_gauss(mu, sigma, x):#bad
                         pass
 
-            - **data** 1D array of data. This is raw data not histogrammed
-              data.
+            - **data** 1D array of data if raw data; otherwise, this can be a
+              tuple of contents, edges (like NumPy).
 
             - **bins** number of bins data should be histogrammed. Default 40.
 
@@ -447,14 +446,6 @@ cdef class BinnedLH:
               number of subdivisions in each bin to do simpson3/8 rule.
               Default 1.
 
-            - **data_binned** Boolean whether the data has already been binned. 
-              Default False. When this option is used, bin_contents and bin_edges
-              are required instead of data.
-
-            - **bin_contents** 1D array of bin contents.
-
-            - **bin_edges** 1D array of bin edges.
-
         """
 
         self.f = f
@@ -462,28 +453,26 @@ cdef class BinnedLH:
         self.use_w2 = use_w2
         self.extended = extended
 
-        if (not data_binned) and (data is None):
-            raise ValueError('Whether 1D array raw data or histogrmaed data are required.')
-        if (data_binned) and ((bin_contents is None) or (bin_edges is None)):
-            raise ValueError('Whether 1D array raw data or histogrmaed data are required.')
-
-        if not data_binned:
+        if isinstance(data, tuple) and len(data) == 2:
+            h, self.edges = data
+            data_binned = True
+        else:
             if bound is None:
                 bound = minmax(data)
             self.mymin, self.mymax = bound
             h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
+            data_binned = False
 
         if data_binned:
             if weights is None:
-                weights = np.ones(len(bin_contents))
+                weights = np.ones(len(h))
             
-            h = bin_contents * weights
-            self.edges = bin_edges
-            self.mymin = bin_edges[0]
-            self.mymax = bin_edges[-1]
-            bins = len(bin_contents)
+            h *= weights
+            self.mymin = self.edges[0]
+            self.mymax = self.edges[-1]
+            bins = len(h)
 
-            if len(bin_contents) is not len(bin_edges)-1:
+            if bins != len(self.edges)-1:
                 raise ValueError('Numbers of bin contents and edges are not correct')
 
         self.h = float2double(h)
@@ -747,7 +736,7 @@ cdef class BinnedChi2:
     cdef readonly tuple last_arg
     cdef readonly int ndof
     cdef int nint_subdiv
-    def __init__(self, f, data=None, bins=40, weights=None, bound=None,
+    def __init__(self, f, data, bins=40, weights=None, bound=None,
                  sumw2=False, nint_subdiv=1,
                  data_binned=False, bin_contents=None, bin_edges=None):
         """
@@ -773,7 +762,8 @@ cdef class BinnedChi2:
                     def bad_gauss(mu, sigma, x):#bad
                         pass
 
-            - **data** 1D array data (raw not histogram)
+            - **data** 1D array of data if raw data; otherwise, this can be a
+              tuple of contents, edges (like NumPy).
 
             - **bins** Optional number of bins to histogram data. Default 40.
 
@@ -789,47 +779,32 @@ cdef class BinnedChi2:
               expect number of event in each bin. The number represent the
               number of subdivisions in each bin to do simpson3/8.
               Default 1.
-
-            - **data_binned** 
-              When you have already histogramed data, Use True. Default False.
-              Use bin_contents and bin_edges at the same time.
-
-            - **bin_contents** 
-              1D array data histogramed.
-              `hist[0]` should be set when `hist = numpy.histogram(...)`
-
-            - **bin_edges** 
-              1D array of histogram edges.
-              `hist[1]` should be set when `hist = numpy.histogram(...)`
-
         """
-
-        if (not data_binned) and (data is None):
-            raise ValueError('Whether 1D array raw data or histogrmaed data are required.')
-        if (data_binned) and ((bin_contents is None) or (bin_edges is None)):
-            raise ValueError('Whether 1D array raw data or histogrmaed data are required.')
 
         self.f = f
         self.func_code = FakeFuncCode(f, dock=True)
 
-        if not data_binned:
+        if isinstance(data, tuple) and len(data) == 2:
+            h, self.edges = data
+            data_binned = True
+        else:
             if bound is None:
                 bound = minmax(data)
             self.mymin, self.mymax = bound
             h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
+            data_binned = False
 
         if data_binned:
             if weights is None:
-                weights = np.ones(len(bin_contents))
+                weights = np.ones(len(h))
+            
+            h *= weights
+            self.mymin = self.edges[0]
+            self.mymax = self.edges[-1]
+            bins = len(h)
 
-            h = bin_contents * weights
-            self.edges = bin_edges
-            self.mymin = bin_edges[0]
-            self.mymax = bin_edges[-1]
-            bins = len(bin_contents)
-            if len(bin_contents) is not len(bin_edges)-1:
+            if bins != len(self.edges)-1:
                 raise ValueError('Numbers of bin contents and edges are not correct')
-
 
         self.h = float2double(h)
         self.midpoints = mid(self.edges)
