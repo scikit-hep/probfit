@@ -273,7 +273,8 @@ cpdef double gaussian(double x, double mean, double sigma):
 
 cpdef double crystalball(double x, double alpha, double n, double mean, double sigma):
     """
-    Unnormalized crystal ball function
+    Unnormalized crystal ball function. If alpha > 0, the non-Gaussian tail
+    is on the left. Otherwise, the tail is on the right.
 
     .. math::
         f(x;\\alpha,n,mean,\sigma) =
@@ -304,13 +305,16 @@ cpdef double crystalball(double x, double alpha, double n, double mean, double s
         ret = badvalue
     else:
         d = (x-mean)/sigma
-        if d > -alpha :
+        if (alpha > 0 and d > -alpha) or (alpha < 0 and d < -alpha) :
+            # same as a Gaussian in this region
             ret = exp(-0.5*d**2)
         else:
+            # exponential tail
             al = fabs(alpha)
+            asign = np.sign(alpha)
             A=pow(n/al,n)*exp(-al**2/2.)
             B=n/al-al
-            ret = A*pow(B-d,-n)
+            ret = A*pow(B-d*asign, -n)
     return ret
 
 cpdef double doublecrystalball(double x, double alpha, double alpha2, double n, double n2, double mean, double sigma):
