@@ -1,8 +1,10 @@
 probfit
 =======
 
-*probfit* is a set of functions that helps you construct a complex fit. It is
-intended to be used with `iminuit <http://iminuit.readthedocs.org/>`_. The tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression, binned :math:`\chi^2` estimator and Simultaneous fit estimator. Normalization and convolution with cache are also included. Various builtin functions used in B physics are also provided.
+*probfit* is a set of functions that helps you construct a complex fit.
+It is intended to be used with `iminuit <https://iminuit.readthedocs.io/>`_.
+The tool includes Binned/Unbinned Likelihood estimator, :math:`\chi^2` regression, binned :math:`\chi^2` estimator and Simultaneous fit estimator.
+Normalization and convolution with cache are also included. Various builtin functions used in B physics are also provided.
 
 In a nutshell::
 

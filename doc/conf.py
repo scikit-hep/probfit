@@ -62,7 +62,7 @@ master_doc = "index"
 
 # General information about the project.
 project = u"probfit"
-copyright = u"2012, Piti Ongmongkolkul"
+copyright = u"2012-2021, Piti Ongmongkolkul"
 autoclass_content = "both"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
