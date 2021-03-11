@@ -1,3 +1,25 @@
+---------- 1.2.0 ----------
+
+#108 Formatting updates
+
+#107 Smoother drawings, right side crystal ball
+
+#105 Major build system update
+
+#104 Support prebinned data
+
+#100 Fix integrate method in johnsonSU
+
+#98 Add exponential PDF
+
+#96 Matplotlib dep main optional
+
+---------- 1.1.0 -----------
+
+#95 First version to support Python 3
+
+... missing PRs, see GitHub ...
+
 #36 Custom Drawing from draw() return values -- PO
 
 #35 Add BlindFunc to blind the true value of parameters -- CC
