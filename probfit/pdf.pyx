@@ -1,11 +1,27 @@
 # cython: embedsignature=True, language_level=2
 
 cimport cython
+from libc.math cimport (
+    abs,
+    asinh,
+    atan2,
+    cosh,
+    erf,
+    exp,
+    fabs,
+    log,
+    pow,
+    sinh,
+    sqrt,
+    tgamma,
+)
 
-from libc.math cimport exp, pow, fabs, log, sqrt, sinh, tgamma, abs, fabs, cosh, atan2, asinh, erf
+
 cdef double pi = 3.14159265358979323846264338327
 import numpy as np
+
 cimport numpy as np
+
 from .funcutil import MinimalFuncCode
 
 np.import_array()
@@ -568,7 +584,7 @@ cdef class _Exponential:
             \\exp \\left(-\\lambda x \\right) & \\mbox{if } \\x \\geq 0 \\\\
             0 & \\mbox{if } \\x < 0
         \\end{cases}
-        
+
     References
     ----------
 

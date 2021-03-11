@@ -1,17 +1,34 @@
 # cython: embedsignature=True, language_level=2
 
 cimport cython
-from cpython cimport PyFloat_AsDouble, PyTuple_GetItem, PyTuple_GetItem,\
-                     PyObject, PyTuple_SetItem, PyTuple_SetItem,\
-                     PyTuple_New, Py_INCREF, PyFloat_FromDouble
+from cpython cimport (
+    Py_INCREF,
+    PyFloat_AsDouble,
+    PyFloat_FromDouble,
+    PyObject,
+    PyTuple_GetItem,
+    PyTuple_New,
+    PyTuple_SetItem,
+)
+
 import numpy as np
+
 cimport numpy as np
+
 from warnings import warn
+
 from .probfit_warnings import SmallIntegralWarning
-from _libstat cimport integrate1d_with_edges, _vector_apply,\
-                      has_ana_integral, integrate1d
-from .funcutil import FakeFuncCode, merge_func_code, FakeFunc
+
+from _libstat cimport (
+    _vector_apply,
+    has_ana_integral,
+    integrate1d,
+    integrate1d_with_edges,
+)
+
+from .funcutil import FakeFunc, FakeFuncCode, merge_func_code
 from .util import describe
+
 
 cpdef tuple construct_arg(tuple arg, np.ndarray[np.int_t] fpos):
     cdef int size = fpos.shape[0]

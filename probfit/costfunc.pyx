@@ -1,15 +1,28 @@
 # cython: embedsignature=True, language_level=2
 
 cimport cython
+
 import numpy as np
+
 cimport numpy as np
-from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
+from libc.math cimport exp, fabs, lgamma, log, pow, sqrt, tgamma
+
 from . import plotting
-from ._libstat cimport compute_nll, compute_chi2_f, compute_bin_chi2_f, \
-    csum, compute_bin_lh_f, integrate1d
+
+from ._libstat cimport (
+    compute_bin_chi2_f,
+    compute_bin_lh_f,
+    compute_chi2_f,
+    compute_nll,
+    csum,
+    integrate1d,
+)
+
 from .funcutil import FakeFuncCode, merge_func_code
 from .nputil import float2double, mid, minmax
+
 from .functor cimport construct_arg
+
 from .util import describe, remove_prefix
 
 np.import_array()
@@ -466,7 +479,7 @@ cdef class BinnedLH:
         if data_binned:
             if weights is None:
                 weights = np.ones(len(h))
-            
+
             # dtypes may differ
             h = h * weights
             self.mymin = self.edges[0]
@@ -696,7 +709,7 @@ cdef class Chi2Regression:
 
             - **no_plot** Set this to true if you only want the return value
 
-            - **nbins** draw the PDF curve using this number of bins, 
+            - **nbins** draw the PDF curve using this number of bins,
               instead of (if None) using the data binning.
 
         **Returns**
@@ -801,7 +814,7 @@ cdef class BinnedChi2:
         if data_binned:
             if weights is None:
                 weights = np.ones(len(h))
-            
+
             # dtypes may differ
             h = h * weights
             self.mymin = self.edges[0]
@@ -825,7 +838,7 @@ cdef class BinnedChi2:
             if data_binned:
                 sw2 = self.h * weights
                 self.err = np.sqrt(sw2)
-                
+
         else:
             self.err = np.sqrt(self.h)
 

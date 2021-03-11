@@ -4,7 +4,7 @@ Development
 ===========
 
 Contributions to probfit are welcome. You should fork the repository,
-create a branch in your fork, and then `open a pull request 
+create a branch in your fork, and then `open a pull request
 <https://github.com/scikit-hep/probfit/pulls>`_.
 
 Developing probfit requires a few dependencies, in addition to those required

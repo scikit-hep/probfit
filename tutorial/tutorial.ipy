@@ -8,32 +8,33 @@
 # <markdowncell>
 
 # [probfit](http://iminuit.github.io/probfit/) is a modeling / fitting package to be used together with [iminuit](http://iminuit.github.com/iminuit/).
-# 
+#
 # This tutorial is a fast-paced introduction to the probfit features:
-# 
+#
 # * built-in common models: polynomial, gaussian, ...
 # * build-in common fit statistics: chi^2, binned and unbinned likelihood
 # * tools to get your fits to converge and check the results: try_uml, draw, draw_residuals, ...
 # * tools to help you implement your own models and fit statistics: Normalize, Extended, integrate_1d, ...
-# 
+#
 # Please start this notebook with the ``ipython --pylab=inline`` option to get inline plots.
 
 # <codecell>
 
+import iminuit
+import matplotlib.pyplot as plt
 # We assume you have executed this cell in all the following examples
 import numpy as np
-import matplotlib.pyplot as plt
-import iminuit
+
 import probfit
 
 # <markdowncell>
 
 # In your own code you can explicitly import what you need to save
 # typing in interactive sessions, e.g.
-# 
+#
 #     from iminuit import Minuit, describe
 #     from probfit import gaussian, BinnedLH
-# 
+#
 # We don't do this here, we only import `iminuit` and `probfit` into our
 # namespace so that it is clear to you which functions and classes come
 # from which package while reading the code below.
@@ -41,14 +42,14 @@ import probfit
 # <markdowncell>
 
 # ## Chi^2 straight line fit
-# 
+#
 # We can't really call this a fitting package without being able to fit a straight line, right?
 
 # <codecell>
 
 # Let's make a straight line with gaussian(mu=0, sigma=1) noise
 np.random.seed(0)
-x = np.linspace(0, 10, 20) 
+x = np.linspace(0, 10, 20)
 y = 3 * x + 15 + np.random.randn(len(x))
 err = np.ones(len(x))
 plt.errorbar(x, y, err, fmt='.');
@@ -101,26 +102,26 @@ print(minuit.errors)
 # This is good in most cases where the uncertainty is symmetric not much correlation
 # exists. Migrad usually got this accurately but if you want ot be sure
 # call `minuit.hesse()` after calling `minuit.migrad()`.
-# 
+#
 # #### Minos Error
 # is obtained by scanning the chi^2 or likelihood profile and find the point
 # where chi^2 is increased by `minuit.errordef`. Note that in the Minuit documentation
 # and output `errordef` is often called `up` ... it's the same thing.
-# 
+#
 # #### What `errordef` should I use?
-# 
+#
 # As explained in the Minuit documentation you should use:
-# 
+#
 # * `errordef = 1` for chi^2 fits
 # * `errordef = 0.5` for likelihood fits
-# 
+#
 # `errordef=1` is the default, so you only have to set it to `errordef=0.5`
 # if you are defining a likelihood cost function (if you don't your HESSE and MINOS errors will be incorrect).
 # `probfit` helps you by defining a `default_errordef()` attribute on the
 # cost function classes, which is automatically detected by the `Minuit` constructor
 # and can be used to set `Minuit.errordef` correctly, so that users can't forget.
 # Classes used in this tutorial:
-# 
+#
 # * `probfit.Chi2Regression.get_errordef()` and `probfit.BinnedChi2.get_errordef()` return 1.
 # * `probfit.BinnedLH.get_errordef()` and `probfit.UnbinnedLH.get_errordef()` return 0.5.
 
@@ -218,7 +219,7 @@ minuit.draw_mncontour('mu', 'sigma');
 # <markdowncell>
 
 # ## Chi^2 fit of a Gaussian distribution
-# 
+#
 # Let's explore another popular cost function chi^2.
 # Chi^2 is bad when you have bin with 0.
 # ROOT just ignore.
@@ -274,7 +275,7 @@ chi2.draw(minuit);
 # <markdowncell>
 
 # ## Fast unbinned likelihood fit Cython
-# 
+#
 # Unbinned likelihood is computationally very very expensive if you have a lot of data.
 # It's now a good time that we talk about how to speed things up with [Cython](http://cython.org).
 
@@ -301,15 +302,18 @@ plt.hist(data, bins=100, histtype='step');
 # * Load it into the current namespace
 # If you don't understand these things, don't worry, it basically means:
 # * Get full-metal speed easily
+
 cimport cython
-from libc.math cimport exp, M_PI, sqrt
+from libc.math cimport M_PI, exp, sqrt
+
+
 @cython.binding(True) # IMPORTANT: this tells Cython to dump the function signature
 def gauss_pdf_cython(double x, double mu, double sigma):
     return 1 / sqrt(2 * M_PI) / sigma * exp(-(x - mu) ** 2 / 2. / sigma ** 2)
 
 # <codecell>
 
-# Define the unbinned likelihood cost function 
+# Define the unbinned likelihood cost function
 unbinned_likelihood = probfit.UnbinnedLH(gauss_pdf_cython, data)
 
 # <codecell>
@@ -320,7 +324,7 @@ minuit = iminuit.Minuit(unbinned_likelihood, sigma=2, pedantic=False, print_leve
 minuit.migrad() # yes: amazingly fast
 unbinned_likelihood.show(minuit)
 minuit.print_fmin()
-minuit.print_matrix() 
+minuit.print_matrix()
 
 # <codecell>
 
@@ -336,7 +340,9 @@ minuit.draw_mnprofile('mu');
 # <codecell>
 
 # Here's how you can list them
+
 import probfit.pdf
+
 print(dir(probfit.pdf))
 print(iminuit.describe(probfit.pdf.gaussian))
 print(type(probfit.pdf.gaussian))
@@ -365,10 +371,10 @@ unbinned_likelihood.draw_residual(minuit, show_errbars=True, errbar_algo='sumw2'
 # <markdowncell>
 
 # ##But... We can't normalize everything analytically and how to generate toy sample from PDF
-# 
+#
 # When fitting distribution to a PDF, one of the common problem that we run into is normalization.
 # Not all function is analytically integrable on the range of our interest.
-# 
+#
 # Let's look at an example: the [Crystal Ball function](http://en.wikipedia.org/wiki/Crystal_Ball_function).
 # It's simply a gaussian with a power law tail ... normally found in energy deposited in crystals ...
 # impossible to normalize analytically and normalization will depend on shape parameters.
@@ -418,11 +424,11 @@ unbinned_likelihood.show(minuit)
 # <markdowncell>
 
 # ## But what if I know the analytical integral formula for my distribution?
-# 
+#
 # `probfit` checks for a method called `integrate` with the signature `integrate(bound, nint, *arg)` to
 # compute definite integrals for given `bound` and `nint` (pieces of integral this is normally ignored)
 # and the rest will be passed as positional argument.
-# 
+#
 # For some `probfit` built-in distributions analytical formulae have been implemented.
 
 # <codecell>
@@ -453,7 +459,7 @@ print(probfit.integrate1d(line, (0, 1), 10, (1., 2.)))
 # <markdowncell>
 
 # In this section we show you what happens when your distribution doesn't fit and how you can make it.
-# 
+#
 # We again use the Crystal Ball distribution as an example, which is notoriously sensitive to initial parameter values.
 
 # <codecell>
@@ -482,12 +488,12 @@ print(minuit.matrix_accurate())
 # <markdowncell>
 
 # To make MIGRAD converge we need start parameter values that are roughly correct. Remember that above the same fit converged when we used ::
-# 
+#
 #     start_pars = dict(alpha=1, n=2.1, mean=1.2, sigma=0.3)
 #     minuit = iminuit.Minuit(unbinned_likelihood, **start_pars)
-#     
+#
 # #### But how can we guess these initial values?
-# 
+#
 # This is a hard question that doesn't have one simple answer. Visualizing your data and model helps.
 
 # <codecell>
@@ -583,22 +589,22 @@ minuit.print_matrix()
 # <markdowncell>
 
 # Note the red upper left corner in the correlation matrix above?
-# 
+#
 # It shows that the three polynomial parameters `c_0`, `c_1` and `c_2` are highly correlated?
 # The reason is that we put a constraint on the polynomial to be normalized over the fit range:
-# 
+#
 #     fit_range = (0, 5)
 #     normalized_poly = probfit.Normalized(probfit.Polynomial(2), fit_range)
 #     normalized_poly = probfit.Extended(normalized_poly, extname='NBkg')
-# 
+#
 # To resolve this problem you could simply use a non-normalized and non-extended polynomial to model the background. We won't do this here, though ...
 
 # <markdowncell>
 
 # ## Custom Drawing
-# 
+#
 # The `draw()` and `show()` method we provide is intended to just give you a quick look at your fit.
-# 
+#
 # To make a custom drawing you can use the return value of `draw()` and `show()`.
 
 # <codecell>
@@ -624,9 +630,9 @@ plt.legend(loc='upper left');
 # <markdowncell>
 
 # ## Simultaneous fit to several data sets
-# 
+#
 # Sometimes, what we want to fit is the sum of likelihood /chi^2 of two PDFs for two different datasets that share some parameters.
-# 
+#
 # In this example, we will fit two Gaussian distributions where we know that the widths are the same
 # but the peaks are at different places.
 
@@ -681,15 +687,15 @@ simultaneous_likelihood.draw(minuit);
 # <markdowncell>
 
 # ## Blinding parameters
-# 
+#
 # Often, an analyst would like to avoid looking at the result of the fitted parameter(s) before he/she finalized the analysis in order to avoid biases due to the prejudice of the analyst. Probfit provids a transformation function that hides the true value(s) of the parameter(s). The transformation function requires a string to set the seed of the random number generator, and a scale to smear the parameter(s) using a Gaussian.
 
 # <codecell>
 
-from probfit import UnbinnedLH, BlindFunc, rename, AddPdfNorm
-from probfit import gaussian
 from iminuit import Minuit, describe
-from probfit import gen_toy
+
+from probfit import (AddPdfNorm, BlindFunc, UnbinnedLH, gaussian, gen_toy,
+                     rename)
 
 # <codecell>
 
@@ -739,7 +745,7 @@ print m3.values
 print m1.values
 print m2.values
 print m3.values
-print 
+print
 print m1.errors
 print m2.errors
 print m3.errors
@@ -752,5 +758,4 @@ print m3.values['m1']-m1.values['m1']
 # <codecell>
 
 # Now it's your turn ...
-# try and apply probfit / iminuit and to your modeling / fitting task! 
-
+# try and apply probfit / iminuit and to your modeling / fitting task!

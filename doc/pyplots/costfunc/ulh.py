@@ -1,37 +1,39 @@
+# -*- coding: utf-8 -*-
 from iminuit import Minuit
-from probfit import UnbinnedLH, gaussian, Extended
 from matplotlib import pyplot as plt
 from numpy.random import randn
 
-data = randn(1000)*2 + 1
+from probfit import Extended, UnbinnedLH, gaussian
+
+data = randn(1000) * 2 + 1
 
 ulh = UnbinnedLH(gaussian, data)
-m = Minuit(ulh, mean=0., sigma=0.5)
+m = Minuit(ulh, mean=0.0, sigma=0.5)
 
 plt.figure(figsize=(8, 6))
 plt.subplot(221)
 ulh.draw(m)
-plt.title('Unextended Before')
+plt.title("Unextended Before")
 
-m.migrad() # fit
+m.migrad()  # fit
 
 plt.subplot(222)
 ulh.draw(m)
-plt.title('Unextended After')
+plt.title("Unextended After")
 
-#Extended
+# Extended
 
-data = randn(2000)*2 + 1
+data = randn(2000) * 2 + 1
 egauss = Extended(gaussian)
-ulh = UnbinnedLH(egauss, data, extended=True, extended_bound=(-10.,10.))
-m = Minuit(ulh, mean=0., sigma=0.5, N=1800.)
+ulh = UnbinnedLH(egauss, data, extended=True, extended_bound=(-10.0, 10.0))
+m = Minuit(ulh, mean=0.0, sigma=0.5, N=1800.0)
 
 plt.subplot(223)
 ulh.draw(m)
-plt.title('Extended Before')
+plt.title("Extended Before")
 
-m.migrad() # fit
+m.migrad()  # fit
 
 plt.subplot(224)
 ulh.draw(m)
-plt.title('Extended After')
+plt.title("Extended After")

@@ -1,13 +1,16 @@
+# -*- coding: utf-8 -*-
 from warnings import warn
+
 import numpy as np
 import numpy.random as npr
-from ._libstat import compute_cdf, invert_cdf, _vector_apply
-from .util import describe
+
+from ._libstat import _vector_apply, compute_cdf, invert_cdf
 from .probfit_warnings import SmallIntegralWarning
+from .util import describe
 
 __all__ = [
-    'gen_toy',
-    'gen_toyn',
+    "gen_toy",
+    "gen_toyn",
 ]
 
 
@@ -22,7 +25,9 @@ def gen_toyn(f, nsample, ntoy, bound, accuracy=10000, quiet=True, **kwd):
     :param kwd:
     :return:
     """
-    return gen_toy(f, nsample * ntoy, bound, accuracy, quiet, **kwd).reshape((ntoy, nsample))
+    return gen_toy(f, nsample * ntoy, bound, accuracy, quiet, **kwd).reshape(
+        (ntoy, nsample)
+    )
 
 
 def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
@@ -51,8 +56,12 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
     pdf = _vector_apply(f, x, tuple(my_arg))
     cdf = compute_cdf(pdf, x)
     if cdf[-1] < 0.01:
-        warn(SmallIntegralWarning('Integral for given funcition is'
-                                  ' really low. Did you give it a reasonable range?'))
+        warn(
+            SmallIntegralWarning(
+                "Integral for given funcition is"
+                " really low. Did you give it a reasonable range?"
+            )
+        )
     cdfnorm = cdf[-1]
     cdf /= cdfnorm
 
@@ -62,19 +71,20 @@ def gen_toy(f, nsample, bound, accuracy=10000, quiet=True, **kwd):
     if not quiet:
         # move this to plotting
         from matplotlib import pyplot as plt
+
         plt.figure()
-        plt.title('comparison')
+        plt.title("comparison")
         numbin = 100
         h, e = np.histogram(ret, bins=numbin)
-        mp = (e[1:] + e[:-1]) / 2.
+        mp = (e[1:] + e[:-1]) / 2.0
         err = np.sqrt(h)
-        plt.errorbar(mp, h, err, fmt='.b')
+        plt.errorbar(mp, h, err, fmt=".b")
         bw = e[1] - e[0]
         y = pdf * len(ret) / cdfnorm * bw
         ylow = y + np.sqrt(y)
         yhigh = y - np.sqrt(y)
-        plt.plot(x, y, label='pdf', color='r')
-        plt.fill_between(x, yhigh, ylow, color='g', alpha=0.2)
+        plt.plot(x, y, label="pdf", color="r")
+        plt.fill_between(x, yhigh, ylow, color="g", alpha=0.2)
         plt.grid(True)
         plt.xlim(bound)
         plt.ylim(ymin=0)

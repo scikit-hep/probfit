@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import numpy as np
+
 from ._libstat import _vector_apply
 from .py23_compat import range
 
@@ -13,11 +15,11 @@ def fwhm_f(f, range, arg=None, bins=1000):
     rs = y[imax:] - ymax / 2.0
     ls = y[:imax] - ymax / 2.0
 
-    il = first_neg(ls, 'l')
+    il = first_neg(ls, "l")
     # print il,x[il],ls[il],x[il+1],ls[il+1]
     xl = xintercept(x[il], ls[il], x[il + 1], ls[il + 1])
 
-    ir = first_neg(rs, 'r')
+    ir = first_neg(rs, "r")
     # print ir,x[imax+ir],rs[ir],x[ir+1],rs[ir+1]
     xr = xintercept(x[imax + ir], rs[ir], x[imax + ir - 1], rs[ir - 1])
 
@@ -33,8 +35,8 @@ def xintercept(x0, y0, x1, y1):
     return -y0 / m + x0
 
 
-def first_neg(y, direction='r'):
-    if direction == 'l':
+def first_neg(y, direction="r"):
+    if direction == "l":
         xlist = range(len(y) - 1, -1, -1)
     else:
         xlist = range(len(y))
@@ -46,5 +48,5 @@ def first_neg(y, direction='r'):
             found = True
             break
     if not found:
-        raise ValueError('They are all positive what are you tying to find?')
+        raise ValueError("They are all positive what are you tying to find?")
     return ret

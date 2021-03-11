@@ -2,7 +2,7 @@
 
 #35 Add BlindFunc to blind the true value of parameters -- CC
 
-#33 Add draw_residual to (Un)binnedLH. BinnedLH draw show raw yield. Default 
+#33 Add draw_residual to (Un)binnedLH. BinnedLH draw show raw yield. Default
     UnbinnedLH draw shows error bars. Add HistogramPdf analytical integral.
 
 #30 AddPdf, Normalized, Extended, AddPdfNorm cascades analytical integral -- PO
@@ -15,7 +15,7 @@
 
 #23 Add Errorbar option for drawing UnbinnedLH -- CC
 
-#21 Add nint_subdiv to control how BinnedLH and 
+#21 Add nint_subdiv to control how BinnedLH and
     BinnedChi2 calculate integral -- PO
 
 #19 Fix plotting normlization(to zero) -- PO
@@ -25,4 +25,3 @@
 #14 Fix AddPdfNorm calculating wrong factor for the last part -- PO
 
 --------- 1.0.4 ---------
-

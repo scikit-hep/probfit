@@ -1,10 +1,12 @@
-import itertools as itt
+# -*- coding: utf-8 -*-
 import collections
+import itertools as itt
+
 import numpy as np
 from iminuit import Minuit
-from .py23_compat import range
-from .costfunc import UnbinnedLH, BinnedChi2, BinnedLH
+
 from ._libstat import _vector_apply
+from .costfunc import BinnedChi2, BinnedLH, UnbinnedLH
 from .nputil import minmax
 
 
@@ -24,6 +26,7 @@ def fit_uml(f, data, quiet=False, print_level=0, *arg, **kwd):
     if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
             from matplotlib import pyplot as plt
+
             plt.figure()
             uml.show()
             print(minuit.values)
@@ -50,6 +53,7 @@ def fit_binx2(f, data, bins=30, bound=None, print_level=0, quiet=False, *arg, **
     if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
             from matplotlib import pyplot as plt
+
             plt.figure()
             uml.show()
             print(minuit.values)
@@ -57,10 +61,20 @@ def fit_binx2(f, data, bins=30, bound=None, print_level=0, quiet=False, *arg, **
     return (uml, minuit)
 
 
-def fit_binlh(f, data, bins=30,
-              bound=None, quiet=False, weights=None, use_w2=False,
-              print_level=0, pedantic=True, extended=False,
-              *arg, **kwd):
+def fit_binlh(
+    f,
+    data,
+    bins=30,
+    bound=None,
+    quiet=False,
+    weights=None,
+    use_w2=False,
+    print_level=0,
+    pedantic=True,
+    extended=False,
+    *arg,
+    **kwd
+):
     """
     perform bin likelihood fit
     :param f:
@@ -77,14 +91,22 @@ def fit_binlh(f, data, bins=30,
     :param kwd:
     :return:
     """
-    uml = BinnedLH(f, data, bins=bins, bound=bound,
-                   weights=weights, use_w2=use_w2, extended=extended)
+    uml = BinnedLH(
+        f,
+        data,
+        bins=bins,
+        bound=bound,
+        weights=weights,
+        use_w2=use_w2,
+        extended=extended,
+    )
     minuit = Minuit(uml, print_level=print_level, pedantic=pedantic, **kwd)
     minuit.set_strategy(2)
     minuit.migrad()
     if not minuit.migrad_ok() or not minuit.matrix_accurate():
         if not quiet:
             from matplotlib import pyplot as plt
+
             plt.figure()
             uml.show()
             print(minuit.values)
@@ -109,26 +131,27 @@ def pprint_arg(vnames, value):
     :param value:
     :return:
     """
-    ret = ''
+    ret = ""
     for name, v in zip(vnames, value):
-        ret += '%s=%s;' % (name, str(v))
-    return ret;
+        ret += "{}={};".format(name, str(v))
+    return ret
 
 
 def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
     from matplotlib import pyplot as plt
+
     fom = UnbinnedLH(f, data)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [tuplize(kwd[name]) for name in vnames]
-    h, e, _ = plt.hist(data, bins=bins, normed=True, histtype='step')
+    h, e, _ = plt.hist(data, bins=bins, normed=True, histtype="step")
     vx = np.linspace(e[0], e[-1], fbins)
     first = True
     minfom = 0
     minarg = None
     for thisarg in itt.product(*my_arg):
         vy = _vector_apply(f, vx, thisarg)
-        plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
+        plt.plot(vx, vy, "-", label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
         if first or thisfom < minfom:
             minfom = thisfom
@@ -136,23 +159,44 @@ def try_uml(f, data, bins=40, fbins=1000, *arg, **kwd):
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = dict((k, v) for k, v in zip(vnames, minarg))
+    ret = {k: v for k, v in zip(vnames, minarg)}
     return ret
 
 
-def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=False,
-              bound=None, *arg, **kwd):
+def try_binlh(
+    f,
+    data,
+    weights=None,
+    bins=40,
+    fbins=1000,
+    show="both",
+    extended=False,
+    bound=None,
+    *arg,
+    **kwd
+):
     from matplotlib import pyplot as plt
-    if bound is None: bound = minmax(data)
+
+    if bound is None:
+        bound = minmax(data)
     fom = BinnedLH(f, data, extended=extended, bound=bound)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [tuplize(kwd[name]) for name in vnames]
     h, e = None, None
-    if show == 'both':
-        h, e, _ = plt.hist(data, bins=bins, range=bound, histtype='step', weights=weights, normed=not extended)
+    if show == "both":
+        h, e, _ = plt.hist(
+            data,
+            bins=bins,
+            range=bound,
+            histtype="step",
+            weights=weights,
+            normed=not extended,
+        )
     else:
-        h, e = np.histogram(data, bins=bins, range=bound, weights=weights, normed=not extended)
+        h, e = np.histogram(
+            data, bins=bins, range=bound, weights=weights, normed=not extended
+        )
     bw = e[1] - e[0]
 
     vx = np.linspace(e[0], e[-1], fbins)
@@ -161,8 +205,9 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=
     minarg = None
     for thisarg in itt.product(*my_arg):
         vy = _vector_apply(f, vx, thisarg)
-        if extended: vy *= bw
-        plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
+        if extended:
+            vy *= bw
+        plt.plot(vx, vy, "-", label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
         if first or thisfom < minfom:
             minfom = thisfom
@@ -170,19 +215,20 @@ def try_binlh(f, data, weights=None, bins=40, fbins=1000, show='both', extended=
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = dict((k, v) for k, v in zip(vnames, minarg))
+    ret = {k: v for k, v in zip(vnames, minarg)}
     return ret
 
 
-def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kwd):
+def try_chi2(f, data, weights=None, bins=40, fbins=1000, show="both", *arg, **kwd):
     from matplotlib import pyplot as plt
+
     fom = BinnedChi2(f, data)
     narg = f.func_code.co_argcount
     vnames = f.func_code.co_varnames[1:narg]
     my_arg = [tuplize(kwd[name]) for name in vnames]
     h, e = None, None
-    if show == 'both':
-        h, e, _ = plt.hist(data, bins=bins, histtype='step', weights=weights)
+    if show == "both":
+        h, e, _ = plt.hist(data, bins=bins, histtype="step", weights=weights)
     else:
         h, e = np.histogram(data, bins=bins, weights=weights)
     bw = e[1] - e[0]
@@ -192,7 +238,7 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
     minarg = None
     for thisarg in itt.product(*my_arg):
         vy = _vector_apply(f, vx, thisarg) * bw
-        plt.plot(vx, vy, '-', label=pprint_arg(vnames, thisarg))
+        plt.plot(vx, vy, "-", label=pprint_arg(vnames, thisarg))
         thisfom = fom(*thisarg)
         if first or thisfom < minfom:
             minfom = thisfom
@@ -200,8 +246,9 @@ def try_chi2(f, data, weights=None, bins=40, fbins=1000, show='both', *arg, **kw
             first = False
     leg = plt.legend(fancybox=True)
     leg.get_frame().set_alpha(0.5)
-    ret = dict((k, v) for k, v in zip(vnames, minarg))
+    ret = {k: v for k, v in zip(vnames, minarg)}
     return ret
+
 
 # def randfr(r):
 #     """
