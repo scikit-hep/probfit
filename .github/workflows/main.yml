@@ -24,7 +24,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-  
+
     - name: Setup python
       uses: actions/setup-python@v2
       with:
@@ -32,6 +32,6 @@ jobs:
 
     - name: Build and get requirements
       run: pip install .[dev]
-      
+
     - name: Test
       run: pytest

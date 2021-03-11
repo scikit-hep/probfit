@@ -1,7 +1,10 @@
+# -*- coding: utf-8 -*-
+from collections import OrderedDict
+
+import matplotlib.pyplot as plt
+
 from probfit.pdf import ugaussian
 from probfit.plotting import draw_pdf
-from collections import OrderedDict
-import matplotlib.pyplot as plt
 
 bound = (-10, 10)
 

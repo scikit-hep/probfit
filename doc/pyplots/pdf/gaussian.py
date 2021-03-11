@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
+import matplotlib.pyplot as plt
+
 from probfit.pdf import gaussian
 from probfit.plotting import draw_pdf
-import matplotlib.pyplot as plt
 
 bound = (-10, 10)
 

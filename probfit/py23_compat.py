@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Python 2 / 3 compatibility helpers.
 """
@@ -12,7 +13,7 @@ else:  # just in case PY4
     PY3 = True
 
 
-if PY2:
-    range = xrange  # pylint: disable=undefined-variable
+if sys.version_info < (3,):
+    range = xrange  # noqa: F821
 else:
     range = range

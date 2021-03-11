@@ -1,25 +1,35 @@
+# -*- coding: utf-8 -*-
 import numpy as np
-from numpy.testing import assert_equal, assert_almost_equal
-from probfit import (describe, rename, Convolve, Normalized,
-                     Extended, AddPdf, AddPdfNorm, BlindFunc)
-from probfit.pdf import gaussian, ugaussian
+from numpy.testing import assert_almost_equal, assert_equal
+
+from probfit import (
+    AddPdf,
+    AddPdfNorm,
+    BlindFunc,
+    Convolve,
+    Extended,
+    Normalized,
+    describe,
+    rename,
+)
 from probfit._libstat import integrate1d
 from probfit.decorator import extended, normalized
+from probfit.pdf import gaussian, ugaussian
 
 
 def test_describe_normal_function():
     def f(x, y, z):
         return x + y + z
 
-    assert describe(f) == ['x', 'y', 'z']
+    assert describe(f) == ["x", "y", "z"]
 
 
 def test_Normalized():
     f = ugaussian
     g = Normalized(f, (-1, 1))
 
-    norm = integrate1d(f, (-1., 1.), 1000, (0., 1.))
-    assert_almost_equal(g(1., 0., 1.), f(1., 0., 1.) / norm)
+    norm = integrate1d(f, (-1.0, 1.0), 1000, (0.0, 1.0))
+    assert_almost_equal(g(1.0, 0.0, 1.0), f(1.0, 0.0, 1.0) / norm)
 
 
 def test_normalized_decorator():
@@ -29,26 +39,26 @@ def test_normalized_decorator():
 
     g = Normalized(ugaussian, (-1, 1))
 
-    assert describe(f) == ['x', 'mean', 'sigma']
+    assert describe(f) == ["x", "mean", "sigma"]
     assert_almost_equal(g(1, 0, 1), f(1, 0, 1))
 
 
 def test_Normalized_cache_hit():
     def f(x, y, z):
-        return 1. * (x + y + z)
+        return 1.0 * (x + y + z)
 
     def g(x, y, z):
-        return 1. * (x + y + 2 * z)
+        return 1.0 * (x + y + 2 * z)
 
-    nf = Normalized(f, (-10., 10.))
-    ng = Normalized(g, (-10., 10.))
+    nf = Normalized(f, (-10.0, 10.0))
+    ng = Normalized(g, (-10.0, 10.0))
     assert nf.hit == 0
-    nf(1., 2., 3.)
-    ng(1., 2., 3.)
+    nf(1.0, 2.0, 3.0)
+    ng(1.0, 2.0, 3.0)
     assert nf.hit == 0
-    nf(3., 2., 3.)
+    nf(3.0, 2.0, 3.0)
     assert nf.hit == 1
-    ng(1., 2., 3.)
+    ng(1.0, 2.0, 3.0)
     assert ng.hit == 1
 
 
@@ -63,18 +73,18 @@ def test_add_pdf():
         return 3 * (x + c + a)
 
     A = AddPdf(f, g, h)
-    assert describe(A) == ['x', 'y', 'z', 'a', 'b', 'c']
+    assert describe(A) == ["x", "y", "z", "a", "b", "c"]
 
     ret = A(1, 2, 3, 4, 5, 6, 7)
     expected = f(1, 2, 3) + g(1, 4, 5) + h(1, 6, 4)
     assert_almost_equal(ret, expected)
 
     # wrong integral on purpose
-    f.integrate = lambda bound, nint, y, z: 1.  # unbound method works too
-    g.integrate = lambda bound, nint, a, b: 2.
-    h.integrate = lambda bound, nint, c, a: 3.
+    f.integrate = lambda bound, nint, y, z: 1.0  # unbound method works too
+    g.integrate = lambda bound, nint, a, b: 2.0
+    h.integrate = lambda bound, nint, c, a: 3.0
 
-    assert_equal(integrate1d(A, (-10., 10.), 100, (1., 2., 3., 4., 5.)), 6.)
+    assert_equal(integrate1d(A, (-10.0, 10.0), 100, (1.0, 2.0, 3.0, 4.0, 5.0)), 6.0)
 
 
 def test_add_pdf_factor():
@@ -90,8 +100,8 @@ def test_add_pdf_factor():
     def k2(n1, y):
         return 4 * (n1 + y)
 
-    A = AddPdf(f, g, prefix=['f', 'g'], factors=[k1, k2])
-    assert describe(A) == ['x', 'fy', 'fz', 'ga', 'gb', 'fn1', 'fn2', 'gn1', 'gy']
+    A = AddPdf(f, g, prefix=["f", "g"], factors=[k1, k2])
+    assert describe(A) == ["x", "fy", "fz", "ga", "gb", "fn1", "fn2", "gn1", "gy"]
 
     ret = A(1, 2, 3, 4, 5, 6, 7, 8, 9)
     expected = k1(6, 7) * f(1, 2, 3) + k2(8, 9) * g(1, 4, 5)
@@ -113,7 +123,7 @@ def test_add_pdf_cache():
         return 3 * (x + c + a)
 
     A = AddPdf(f, g, h)
-    assert describe(A) == ['x', 'y', 'z', 'a', 'b', 'c']
+    assert describe(A) == ["x", "y", "z", "a", "b", "c"]
 
     ret = A(1, 2, 3, 4, 5, 6, 7)
     assert_equal(A.hit, 0)
@@ -131,24 +141,26 @@ def test_extended():
         return x + 2 * y + 3 * z
 
     g = Extended(f)
-    assert describe(g) == ['x', 'y', 'z', 'N']
+    assert describe(g) == ["x", "y", "z", "N"]
     assert_equal(g(1, 2, 3, 4), 4 * (f(1, 2, 3)))
 
     # extended should use analytical when available
     def ana_int(x, y):
         return y * x ** 2
 
-    ana_int_int = lambda b, n, y: 999.  # wrong on purpose
+    ana_int_int = lambda b, n, y: 999.0  # wrong on purpose
     ana_int.integrate = ana_int_int
     g = Extended(ana_int)
-    assert_almost_equal(g.integrate((0, 1), 100, 5., 2.), 999. * 2.)
+    assert_almost_equal(g.integrate((0, 1), 100, 5.0, 2.0), 999.0 * 2.0)
 
     # and not fail when it's not available
     def no_ana_int(x, y):
         return y * x ** 2
 
     g = Extended(no_ana_int)
-    assert_almost_equal(g.integrate((0, 1), 100, 5., 2.), (1. ** 3) / 3. * 5. * 2.)
+    assert_almost_equal(
+        g.integrate((0, 1), 100, 5.0, 2.0), (1.0 ** 3) / 3.0 * 5.0 * 2.0
+    )
 
 
 def test_extended_decorator():
@@ -159,7 +171,7 @@ def test_extended_decorator():
     def g(x, y, z):
         return x + 2 * y + 3 * z
 
-    assert describe(g) == ['x', 'y', 'z', 'N']
+    assert describe(g) == ["x", "y", "z", "N"]
     assert_equal(g(1, 2, 3, 4), 4 * (f(1, 2, 3)))
 
 
@@ -174,16 +186,17 @@ def test_addpdfnorm():
         return 7 * x + 8 * y + 9 * q
 
     h = AddPdfNorm(f, g)
-    assert describe(h) == ['x', 'y', 'z', 'p', 'f_0']
+    assert describe(h) == ["x", "y", "z", "p", "f_0"]
 
     q = AddPdfNorm(f, g, p)
-    assert describe(q) == ['x', 'y', 'z', 'p', 'q', 'f_0', 'f_1']
+    assert describe(q) == ["x", "y", "z", "p", "q", "f_0", "f_1"]
 
-    assert_almost_equal(h(1, 2, 3, 4, 0.1),
-                        0.1 * f(1, 2, 3) + 0.9 * g(1, 3, 4))
+    assert_almost_equal(h(1, 2, 3, 4, 0.1), 0.1 * f(1, 2, 3) + 0.9 * g(1, 3, 4))
 
-    assert_almost_equal(q(1, 2, 3, 4, 5, 0.1, 0.2),
-                        0.1 * f(1, 2, 3) + 0.2 * g(1, 3, 4) + 0.7 * p(1, 2, 5))
+    assert_almost_equal(
+        q(1, 2, 3, 4, 5, 0.1, 0.2),
+        0.1 * f(1, 2, 3) + 0.2 * g(1, 3, 4) + 0.7 * p(1, 2, 5),
+    )
 
 
 def test_addpdfnorm_analytical_integrate():
@@ -196,15 +209,15 @@ def test_addpdfnorm_analytical_integrate():
     def p(x, y, q):
         return 7 * x + 8 * y + 9 * q
 
-    f.integrate = lambda bound, nint, y, z: 1.
-    g.integrate = lambda bound, nint, z, p: 2.
-    p.integrate = lambda bound, nint, y, q: 3.
+    f.integrate = lambda bound, nint, y, z: 1.0
+    g.integrate = lambda bound, nint, z, p: 2.0
+    p.integrate = lambda bound, nint, y, q: 3.0
 
     q = AddPdfNorm(f, g, p)
-    assert describe(q) == ['x', 'y', 'z', 'p', 'q', 'f_0', 'f_1']
+    assert describe(q) == ["x", "y", "z", "p", "q", "f_0", "f_1"]
 
-    integral = integrate1d(q, (-10., 10.), 100, (1., 2., 3., 4., 0.1, 0.2))
-    assert_almost_equal(integral, 0.1 * 1. + 0.2 * 2. + 0.7 * 3.)
+    integral = integrate1d(q, (-10.0, 10.0), 100, (1.0, 2.0, 3.0, 4.0, 0.1, 0.2))
+    assert_almost_equal(integral, 0.1 * 1.0 + 0.2 * 2.0 + 0.7 * 3.0)
 
 
 def test_convolution():
@@ -212,7 +225,7 @@ def test_convolution():
     g = lambda x, mu1, sigma1: gaussian(x, mu1, sigma1)
 
     h = Convolve(f, g, (-10, 10), nbins=10000)
-    assert describe(h) == ['x', 'mean', 'sigma', 'mu1', 'sigma1']
+    assert describe(h) == ["x", "mean", "sigma", "mu1", "sigma1"]
 
     assert_almost_equal(h(1, 0, 1, 1, 2), 0.17839457037411527)  # center
     assert_almost_equal(h(-1, 0, 1, 1, 2), 0.119581456625684)  # left
@@ -225,24 +238,24 @@ def test_rename():
     def f(x, y, z):
         return None
 
-    assert describe(f) == ['x', 'y', 'z']
-    g = rename(f, ['x', 'a', 'b'])
-    assert describe(g) == ['x', 'a', 'b']
+    assert describe(f) == ["x", "y", "z"]
+    g = rename(f, ["x", "a", "b"])
+    assert describe(g) == ["x", "a", "b"]
 
 
 def test_blindfunc():
     np.random.seed(0)
-    f = BlindFunc(gaussian, 'mean', 'abcd', width=1.5, signflip=True)
+    f = BlindFunc(gaussian, "mean", "abcd", width=1.5, signflip=True)
     arg = f.__shift_arg__((1, 1, 1))
-    totest = [1., -2.1741271445170067, 1.]
+    totest = [1.0, -2.1741271445170067, 1.0]
     assert_almost_equal(arg[0], totest[0])
     assert_almost_equal(arg[1], totest[1])
     assert_almost_equal(arg[2], totest[2])
-    assert_almost_equal(f.__call__(0.5, 1., 1.), 0.011171196819867517)
+    assert_almost_equal(f.__call__(0.5, 1.0, 1.0), 0.011171196819867517)
     np.random.seed(575345)
-    f = BlindFunc(gaussian, 'mean', 'abcd', width=1.5, signflip=True)
+    f = BlindFunc(gaussian, "mean", "abcd", width=1.5, signflip=True)
     arg = f.__shift_arg__((1, 1, 1))
     assert_almost_equal(arg[0], totest[0])
     assert_almost_equal(arg[1], totest[1])
     assert_almost_equal(arg[2], totest[2])
-    assert_almost_equal(f.__call__(0.5, 1., 1.), 0.011171196819867517)
+    assert_almost_equal(f.__call__(0.5, 1.0, 1.0), 0.011171196819867517)

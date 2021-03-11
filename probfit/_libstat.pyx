@@ -1,10 +1,13 @@
 # cython: embedsignature=True, language_level=2
 
 import numpy as np
+
 cimport numpy as np
-from libc.math cimport exp, pow, fabs, log, tgamma, lgamma, sqrt
+from libc.math cimport exp, fabs, lgamma, log, pow, sqrt, tgamma
+
 include "log1p_patch.pxi"
 from warnings import warn
+
 from .probfit_warnings import LogWarning
 
 np.import_array()
@@ -116,7 +119,7 @@ cpdef double compute_bin_lh_f(f,
 
     cdef double ret = 0.
     cdef double bw = 0.
-    
+
     cdef double factor=0.
     cdef double th=0.
     cdef double tw=0.
@@ -221,7 +224,7 @@ cpdef double compute_bin_chi2_f(f,
     cdef int usew = 1 if weights is not None else 0
     cdef int usee = 1 if error is not None else 0
     cdef int i
-    cdef int datalen = len(edges)-1 
+    cdef int datalen = len(edges)-1
     cdef double diff
     cdef double fx
     cdef double ret = 0.

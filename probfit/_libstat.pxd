@@ -1,5 +1,6 @@
 cimport numpy as np
 
+
 cpdef double csum(np.ndarray x)
 
 cpdef np.ndarray[np.double_t] _vector_apply(f,np.ndarray[np.double_t] x,tuple arg)

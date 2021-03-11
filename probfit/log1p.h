@@ -7,4 +7,3 @@
 #else
     #include <math.h>
 #endif
-
