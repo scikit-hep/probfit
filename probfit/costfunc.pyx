@@ -413,8 +413,8 @@ cdef class BinnedLH:
                     def bad_gauss(mu, sigma, x):#bad
                         pass
 
-            - **data** 1D array of data. This is raw data not histogrammed
-              data.
+            - **data** 1D array of data if raw data; otherwise, this can be a
+              tuple of contents, edges (like NumPy).
 
             - **bins** number of bins data should be histogrammed. Default 40.
 
@@ -447,29 +447,59 @@ cdef class BinnedLH:
               Default 1.
 
         """
+
         self.f = f
         self.func_code = FakeFuncCode(f, dock=True)
         self.use_w2 = use_w2
         self.extended = extended
 
-        if bound is None: bound = minmax(data)
+        if isinstance(data, tuple) and len(data) == 2:
+            h, self.edges = data
+            data_binned = True
+        else:
+            if bound is None:
+                bound = minmax(data)
+            self.mymin, self.mymax = bound
+            h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
+            data_binned = False
 
-        self.mymin, self.mymax = bound
+        if data_binned:
+            if weights is None:
+                weights = np.ones(len(h))
+            
+            # dtypes may differ
+            h = h * weights
+            self.mymin = self.edges[0]
+            self.mymax = self.edges[-1]
+            bins = len(h)
 
-        h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
+            if bins != len(self.edges)-1:
+                raise ValueError('Numbers of bin contents and edges are not correct')
 
         self.h = float2double(h)
         self.N = csum(self.h)
 
-        if weights is not None:
-            if weighterrors is None:
-                self.w2, _ = np.histogram(data, bins, range=bound,
-                                          weights=weights * weights)
+        if not data_binned:
+            if weights is not None:
+                if weighterrors is None:
+                    self.w2, _ = np.histogram(data, bins, range=bound,
+                                              weights=weights * weights)
+                else:
+                    self.w2, _ = np.histogram(data, bins, range=bound,
+                                              weights=weighterrors * weighterrors)
             else:
-                self.w2, _ = np.histogram(data, bins, range=bound,
-                                          weights=weighterrors * weighterrors)
-        else:
-            self.w2, _ = np.histogram(data, bins, range=bound, weights=None)
+                self.w2, _ = np.histogram(data, bins, range=bound, weights=None)
+
+
+        # TODO - To check before merge
+        if data_binned:
+            if weights is not None:
+                if weighterrors is None:
+                    self.w2 = self.h * weights
+                else:
+                    self.w2 = self.h / weights * weighterrors * weighterrors
+            else:
+                self.w2 = self.h
 
         self.w2 = float2double(self.w2)
         self.midpoints = mid(self.edges)
@@ -711,7 +741,8 @@ cdef class BinnedChi2:
     cdef readonly int ndof
     cdef int nint_subdiv
     def __init__(self, f, data, bins=40, weights=None, bound=None,
-                 sumw2=False, nint_subdiv=1):
+                 sumw2=False, nint_subdiv=1,
+                 data_binned=False, bin_contents=None, bin_edges=None):
         """
         Create Binned Chi2 Object. It calculates chi^2 assuming poisson
         statistics.
@@ -735,7 +766,8 @@ cdef class BinnedChi2:
                     def bad_gauss(mu, sigma, x):#bad
                         pass
 
-            - **data** 1D array data (raw not histogram)
+            - **data** 1D array of data if raw data; otherwise, this can be a
+              tuple of contents, edges (like NumPy).
 
             - **bins** Optional number of bins to histogram data. Default 40.
 
@@ -752,13 +784,32 @@ cdef class BinnedChi2:
               number of subdivisions in each bin to do simpson3/8.
               Default 1.
         """
+
         self.f = f
         self.func_code = FakeFuncCode(f, dock=True)
-        if bound is None:
-            bound = minmax(data)
-        self.mymin, self.mymax = bound
 
-        h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
+        if isinstance(data, tuple) and len(data) == 2:
+            h, self.edges = data
+            data_binned = True
+        else:
+            if bound is None:
+                bound = minmax(data)
+            self.mymin, self.mymax = bound
+            h, self.edges = np.histogram(data, bins, range=bound, weights=weights)
+            data_binned = False
+
+        if data_binned:
+            if weights is None:
+                weights = np.ones(len(h))
+            
+            # dtypes may differ
+            h = h * weights
+            self.mymin = self.edges[0]
+            self.mymax = self.edges[-1]
+            bins = len(h)
+
+            if bins != len(self.edges)-1:
+                raise ValueError('Numbers of bin contents and edges are not correct')
 
         self.h = float2double(h)
         self.midpoints = mid(self.edges)
@@ -766,9 +817,15 @@ cdef class BinnedChi2:
 
         #sumw2 if requested
         if weights is not None and sumw2:
-            w2 = weights * weights
-            sw2, _ = np.histogram(data, bins, range=bound, weights=w2)
-            self.err = np.sqrt(sw2)
+            if not data_binned:
+                w2 = weights * weights
+                sw2, _ = np.histogram(data, bins, range=bound, weights=w2)
+                self.err = np.sqrt(sw2)
+
+            if data_binned:
+                sw2 = self.h * weights
+                self.err = np.sqrt(sw2)
+                
         else:
             self.err = np.sqrt(self.h)
 
