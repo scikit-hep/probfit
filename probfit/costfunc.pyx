@@ -467,7 +467,8 @@ cdef class BinnedLH:
             if weights is None:
                 weights = np.ones(len(h))
             
-            h *= weights
+            # dtypes may differ
+            h = h * weights
             self.mymin = self.edges[0]
             self.mymax = self.edges[-1]
             bins = len(h)
@@ -798,7 +799,8 @@ cdef class BinnedChi2:
             if weights is None:
                 weights = np.ones(len(h))
             
-            h *= weights
+            # dtypes may differ
+            h = h * weights
             self.mymin = self.edges[0]
             self.mymax = self.edges[-1]
             bins = len(h)
