@@ -6,8 +6,8 @@ probfit
 .. image:: https://img.shields.io/pypi/v/probfit.svg
    :target: https://pypi.python.org/pypi/probfit
 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1477853.svg
-   :target: https://doi.org/10.5281/zenodo.1477853
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.1477852.svg
+   :target: https://doi.org/10.5281/zenodo.1477852
 
 .. image:: https://github.com/scikit-hep/probfit/actions/workflows/main.yml/badge.svg
    :target: https://github.com/scikit-hep/probfit/actions/workflows/main.yml
