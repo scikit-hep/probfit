@@ -579,10 +579,10 @@ cdef class _Exponential:
     Exponential [1]_.
 
     .. math::
-        f(x;\\tau) =
+        f(x;\\lambda) =
         \\begin{cases}
-            \\exp \\left(-\\lambda x \\right) & \\mbox{if } \\x \\geq 0 \\\\
-            0 & \\mbox{if } \\x < 0
+            \\lambda \\exp \\left(-\\lambda x \\right) & \\mbox{if } x \\geq 0 \\\\
+            0 & \\mbox{if } x < 0
         \\end{cases}
 
     References
