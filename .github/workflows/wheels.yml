@@ -8,14 +8,6 @@ on:
   pull_request:
 
 
-env:
-  CIBW_TEST_EXTRAS: test
-  CIBW_TEST_COMMAND_: "pytest {project}/tests"
-  CIBW_MANYLINUX_X86_64_IMAGE: manylinux1
-  CIBW_MANYLINUX_I686_IMAGE: manylinux1
-  CIBW_SKIP: pp* cp27-win*
-
-
 jobs:
   build_sdist:
     name: Build SDist
@@ -24,7 +16,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Build SDist
-      run: pipx run --spec build pyproject-build --sdist
+      run: pipx run build --sdist
 
     - name: Check metadata
       run: pipx run twine check dist/*
@@ -47,10 +39,6 @@ jobs:
     - uses: actions/checkout@v2
 
     - uses: pypa/cibuildwheel@v2.3.1
-
-    - name: Show files
-      run: ls -lh wheelhouse
-      shell: bash
 
     - name: Verify clean directory
       run: git diff --exit-code

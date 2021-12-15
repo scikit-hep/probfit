@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from iminuit import Minuit
 from matplotlib import pyplot as plt
 from numpy.random import randn

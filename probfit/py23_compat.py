@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Python 2 / 3 compatibility helpers.
 """
@@ -13,7 +12,4 @@ else:  # just in case PY4
     PY3 = True
 
 
-if sys.version_info < (3,):
-    range = xrange  # noqa: F821
-else:
-    range = range
+range = range

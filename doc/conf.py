@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # probfit documentation build configuration file, created by
 # sphinx-quickstart on Sat Nov 10 11:16:37 2012.
@@ -61,8 +60,8 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = u"probfit"
-copyright = u"2012-2021, Piti Ongmongkolkul"
+project = "probfit"
+copyright = "2012-2021, Piti Ongmongkolkul"
 autoclass_content = "both"
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -219,7 +218,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "probfit.tex", u"probfit Documentation", u"Piti Ongmongkolkul", "manual"),
+    ("index", "probfit.tex", "probfit Documentation", "Piti Ongmongkolkul", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -247,7 +246,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [("index", "probfit", u"probfit Documentation", [u"Piti Ongmongkolkul"], 1)]
+man_pages = [("index", "probfit", "probfit Documentation", ["Piti Ongmongkolkul"], 1)]
 
 # If true, show URL addresses after external links.
 # man_show_urls = False
@@ -262,8 +261,8 @@ texinfo_documents = [
     (
         "index",
         "probfit",
-        u"probfit Documentation",
-        u"Piti Ongmongkolkul",
+        "probfit Documentation",
+        "Piti Ongmongkolkul",
         "probfit",
         "Fitting Stuff",
         "Miscellaneous",

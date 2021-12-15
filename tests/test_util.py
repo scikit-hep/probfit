@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from probfit.util import describe, parse_arg
 
 

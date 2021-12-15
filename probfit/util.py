@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 from iminuit.util import describe
 
 
@@ -12,7 +11,7 @@ def parse_arg(f, kwd, offset=0):
 
     """
     vnames = describe(f)
-    return tuple([kwd[k] for k in vnames[offset:]])
+    return tuple(kwd[k] for k in vnames[offset:])
 
 
 def remove_prefix(s, prefix):

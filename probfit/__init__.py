@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 probfit - Cost function builder. For fitting distributions.
 

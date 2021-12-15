@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from glob import glob
 
@@ -15,7 +14,7 @@ for source_file in glob("probfit/*.pyx"):
     fname, _ = os.path.splitext(os.path.basename(source_file))
     extensions.append(
         Extension(
-            "probfit.{}".format(fname),
+            f"probfit.{fname}",
             sources=[source_file],
             include_dirs=[np.get_include()],
         )
