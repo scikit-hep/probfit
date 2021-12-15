@@ -17,9 +17,8 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-        - 2.7
-        - 3.5
-        - 3.9
+        - "3.6"
+        - "3.10"
     name: Dev ${{ matrix.python-version }}
 
     steps:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # decorators
 # @normalized_function(xmin,xmax)
 # def function_i_have_no_idea_how_to_normalize(x,y,z)

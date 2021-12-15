@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import collections
 import itertools as itt
 
@@ -73,7 +72,7 @@ def fit_binlh(
     pedantic=True,
     extended=False,
     *arg,
-    **kwd
+    **kwd,
 ):
     """
     perform bin likelihood fit
@@ -133,7 +132,7 @@ def pprint_arg(vnames, value):
     """
     ret = ""
     for name, v in zip(vnames, value):
-        ret += "{}={};".format(name, str(v))
+        ret += f"{name}={str(v)};"
     return ret
 
 
@@ -173,7 +172,7 @@ def try_binlh(
     extended=False,
     bound=None,
     *arg,
-    **kwd
+    **kwd,
 ):
     from matplotlib import pyplot as plt
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Plotting is on python since this will make it much easier to debug and adjust
 # no need to recompile everytime i change graph color....
 # needs a serious refactor
@@ -59,12 +58,12 @@ def _get_args_and_errors(self, minuit=None, args=None, errors=None):
 
 
 def _param_text(parameters, arg, error):
-    txt = u""
+    txt = ""
     for (k, v) in zip(parameters, arg):
-        txt += u"{} = {:5.4g}".format(k, v)
+        txt += f"{k} = {v:5.4g}"
         if error is not None:
-            txt += u"±%5.4g" % error[k]
-        txt += u"\n"
+            txt += "±%5.4g" % error[k]
+        txt += "\n"
     return txt
 
     # from UML
@@ -228,7 +227,7 @@ def draw_residual_ulh(
     errors=None,
     errbar_algo="normal",
     norm=False,
-    **kwargs
+    **kwargs,
 ):
     from matplotlib import pyplot as plt
 
@@ -324,9 +323,9 @@ def draw_x2(
 
     chi2 = self(*arg)
     if self.ndof > 0:
-        txt += u"chi2/ndof = %5.4g(%5.4g/%d)" % (chi2 / self.ndof, chi2, self.ndof)
+        txt += "chi2/ndof = %5.4g(%5.4g/%d)" % (chi2 / self.ndof, chi2, self.ndof)
     else:
-        txt += u"chi2/ndof = (%5.4g/%d)" % (chi2, self.ndof)
+        txt += "chi2/ndof = (%5.4g/%d)" % (chi2, self.ndof)
 
     if parts:
         f_parts = getattr(self.f, "parts", None)
@@ -422,7 +421,7 @@ def draw_bx2(
         density=False,
         scale=scale,
         no_plot=no_plot,
-        **dict(draw_arg)
+        **dict(draw_arg),
     )
 
     if parts:
@@ -448,9 +447,9 @@ def draw_bx2(
 
     chi2 = self(*arg)
     if self.ndof > 0:
-        txt += u"chi2/ndof = %5.4g(%5.4g/%d)" % (chi2 / self.ndof, chi2, self.ndof)
+        txt += "chi2/ndof = %5.4g(%5.4g/%d)" % (chi2 / self.ndof, chi2, self.ndof)
     else:
-        txt += u"chi2/ndof = (%5.4g/%d)" % (chi2, self.ndof)
+        txt += "chi2/ndof = (%5.4g/%d)" % (chi2, self.ndof)
 
     if print_par and not no_plot:
         ax.text(
@@ -516,7 +515,7 @@ def draw_blh(
         density=not self.extended,
         scale=scale,
         no_plot=no_plot,
-        **dict(draw_arg)
+        **dict(draw_arg),
     )
     if parts:
         f_parts = getattr(self.f, "parts", None)
@@ -555,7 +554,7 @@ def draw_residual_blh(
     args=None,
     errors=None,
     norm=False,
-    **kwargs
+    **kwargs,
 ):
     from matplotlib import pyplot as plt
 
@@ -683,7 +682,7 @@ def draw_pdf(
         scale=scale,
         density=density,
         normed_pdf=normed_pdf,
-        **kwds
+        **kwds,
     )
 
 

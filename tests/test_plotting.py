@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Test that output figures look sensible.
 
 These tests use pytest-mpl [1] to compare the figures created in the test_*
