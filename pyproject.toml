@@ -1,7 +1,6 @@
 [build-system]
 requires = [
     "setuptools>=42",
-    "wheel",
     "Cython<3",
     "numpy==1.13.3; python_version<'3.5'",
     "oldest-supported-numpy; python_version>='3.5'",
